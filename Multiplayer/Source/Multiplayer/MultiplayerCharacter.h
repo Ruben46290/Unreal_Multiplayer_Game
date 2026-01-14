@@ -51,14 +51,6 @@ class AMultiplayerCharacter : public ACharacter
 public:
 	AMultiplayerCharacter();
 
-protected:
-
-	// Materials to swap between
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
-	UMaterialInterface* Material_Base;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
-	UMaterialInterface* Material_Blue;
 
 private:
 	// Track current material state
@@ -73,13 +65,25 @@ protected:
 	void Look(const FInputActionValue& Value);
 	
 
-
-	// Input Event For Debug Key 2
+	// * * * Interaction * * * 
+	
+	// Input Event For Interact
 	void OnInteractPressed();
 
 	// Sends Signal To The Server
 	UFUNCTION(Server, Reliable)
 	void Server_Interact();
+
+	// Find Nearby Interactable Actor, Using Sphere Trace
+	UFUNCTION(BlueprintCallable, Category = "Interaction")
+	AActor* FindInteractableActor();
+
+	// Interaction Settings
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	float InteractionRadius = 120.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	bool bDebugInteraction = true;
 
 
 protected:

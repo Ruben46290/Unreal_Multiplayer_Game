@@ -10,6 +10,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "InteractInterface.h"
+#include "DrawDebugHelpers.h"
+
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -129,13 +132,13 @@ void AMultiplayerCharacter::Look(const FInputActionValue& Value)
 
 void AMultiplayerCharacter::OnInteractPressed()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Interact Key Pressed!"));
+	//UE_LOG(LogTemp, Warning, TEXT("Interact Key Pressed!"));
 
-	// Debugging
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("Interact Pressed!"));
-	}
+	//// Debugging
+	//if (GEngine)
+	//{
+	//	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("Interact Pressed!"));
+	//}
 
 	if (IsLocallyControlled())
 	{
@@ -143,14 +146,102 @@ void AMultiplayerCharacter::OnInteractPressed()
 	}
 }
 
+
 void AMultiplayerCharacter::Server_Interact_Implementation()
 {
-	// Debugging
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("Server Interact Called"));
+	//// Debugging
+	//if (GEngine)
+	//{
+	//	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("Server Interact Called"));
+	//}
+
+	// Find Closest Interactable Actor
+	AActor* InteractableActor = FindInteractableActor();
+
+	// If An Actor (With Interact Interface) Is Found
+	if (InteractableActor) {
+		
+		//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("Interactable Object Found"));
+
+		// Call Interact Interface On Chosen Actor
+		IInteractInterface::Execute_OnInteract(InteractableActor, this);
 	}
+
 }
 
+AActor* AMultiplayerCharacter::FindInteractableActor()
+{
+
+	// Get Player Location
+	FVector PlayerLocation = GetActorLocation();
+
+	// Setup Collision Paramaters
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this); // Ignore Self
+
+	// Make An Array To Store Hit Results
+	TArray < FHitResult> HitResults;
+
+	// Sphere Trace
+	bool bHit = GetWorld()->SweepMultiByChannel(
+		HitResults, // Array To Store Hit Results
+		PlayerLocation, // Start Location
+		PlayerLocation, // End Location
+		FQuat::Identity,
+		ECC_Visibility,
+		FCollisionShape::MakeSphere(InteractionRadius),
+		QueryParams // Apply Custom Paramters (Ingore Self)
+	);
+
+	//// Debug Visualization
+	//if (bDebugInteraction)
+	//{
+	//	DrawDebugSphere(
+	//		GetWorld(),
+	//		PlayerLocation,
+	//		InteractionRadius,
+	//		16,
+	//		bHit ? FColor::Green : FColor::Red,
+	//		false,
+	//		2.0f
+	//	);
+	//}
+
+	// Make A New Pointer For The Closest Object
+	AActor* ClosestInteractable = nullptr;
+
+	// Make A New Closest Distance Float, Set To Max Distance Possible / Max Distance Of Sight Sphere
+	float ClosestDistance = InteractionRadius;
+
+	for (const FHitResult& Hit : HitResults) {
+
+		// Get Current Actor
+		AActor* HitActor = Hit.GetActor();
+
+		// Is The Actor Valid & Does The Actor Have The Interact Interface
+		if (HitActor && HitActor->Implements<UInteractInterface>()) {
+
+			// Set Distance 
+			float Distance = FVector::Dist(PlayerLocation, HitActor->GetActorLocation());
+
+			// Is This Actor The New Closest Actor?
+			if (Distance < ClosestDistance) {
+
+				// Set Closest Distance To Distance
+				ClosestDistance = Distance;
+
+				// Set Closest Actor Refrence To Current Actor
+				ClosestInteractable = HitActor;
+
+			}
+
+		}
+
+
+
+	}
+
+	return ClosestInteractable;
+}
 
 

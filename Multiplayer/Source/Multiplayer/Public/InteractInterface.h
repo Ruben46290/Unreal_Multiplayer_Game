@@ -22,4 +22,8 @@ class MULTIPLAYER_API IInteractInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+
+	// Function that interactable objects must implement
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interaction")
+	void OnInteract(AActor* Interactor);
 };
