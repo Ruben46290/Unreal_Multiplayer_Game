@@ -8,6 +8,7 @@ AInteractableActor::AInteractableActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
+	// Create Mesh Component
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	RootComponent = MeshComponent;
 
@@ -15,11 +16,6 @@ AInteractableActor::AInteractableActor()
 	SphereCollision = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollision"));
 	SphereCollision->SetupAttachment(RootComponent);
 	SphereCollision->SetSphereRadius(SphereRadius);
-
-	//// Set collision settings
-	//SphereCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	//SphereCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
-	//SphereCollision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
 	bReplicates = true;
 
@@ -63,6 +59,8 @@ void AInteractableActor::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, 
 	ACharacter* Character = Cast<ACharacter>(OtherActor);
 
 
+	// Is LocallyControlled() makes this code run only on the machine controlling this character
+	// Server & Other clients won't run this
 	if (Character && Character->IsLocallyControlled())
 	{
 
