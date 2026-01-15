@@ -78,6 +78,8 @@ void AMultiplayerCharacter::BeginPlay()
 
 
 
+
+
 void AMultiplayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Add Input Mapping Context
@@ -102,7 +104,11 @@ void AMultiplayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMultiplayerCharacter::Look);
 
+		// Interact
 		EnhancedInputComponent->BindAction(Interact, ETriggerEvent::Started, this, &AMultiplayerCharacter::OnInteractPressed);
+
+		// Drop
+		EnhancedInputComponent->BindAction(Drop, ETriggerEvent::Started, this, &AMultiplayerCharacter::DropCurrentItem);
 	}
 }
 
@@ -273,6 +279,22 @@ void AMultiplayerCharacter::PickupItem(FItemData Item)
 
 	// Apply Item Mesh
 	ItemMeshComponent->SetStaticMesh(Item.Mesh);
+}
+
+void AMultiplayerCharacter::DropCurrentItem()
+{
+	// If The Player Currently Has An Item
+	if (HeldItem.ItemID != NAME_None) {
+
+		// Spawn Dropped Item
+		Server_SpawnItem(ItemDropLocation->GetComponentLocation(), HeldItem.ItemID);
+
+		// Clear Current Item Data
+		HeldItem = FItemData();
+
+		// Clear Held Item Mesh
+		ItemMeshComponent->SetStaticMesh(nullptr);
+	}
 }
 
 void AMultiplayerCharacter::Server_SpawnItem_Implementation(FVector Location, FName ItemID)

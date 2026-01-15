@@ -52,6 +52,10 @@ class AMultiplayerCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* Interact;
 
+	//** Drop Key */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* Drop;
+
 public:
 	AMultiplayerCharacter();
 
@@ -107,6 +111,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	TSubclassOf<AItem> ItemBlueprintClass;
 
+	void DropCurrentItem();
 	// Spawn An Item On The Server
 	// Used Dropping Items When Swapping Items
 	UFUNCTION(Server, Reliable)
