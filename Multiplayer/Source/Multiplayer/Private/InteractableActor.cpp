@@ -15,7 +15,6 @@ AInteractableActor::AInteractableActor()
 	// Create sphere collision
 	SphereCollision = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollision"));
 	SphereCollision->SetupAttachment(RootComponent);
-	SphereCollision->SetSphereRadius(SphereRadius);
 
 	bReplicates = true;
 

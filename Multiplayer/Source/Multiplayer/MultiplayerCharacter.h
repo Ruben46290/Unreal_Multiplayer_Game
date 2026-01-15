@@ -5,8 +5,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "ItemData.h"
 #include "MultiplayerCharacter.generated.h"
 
+class AItem;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -28,6 +30,8 @@ class AMultiplayerCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 	
+
+
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
@@ -80,10 +84,33 @@ protected:
 
 	// Interaction Settings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
-	float InteractionRadius = 120.0f;
+	float InteractionRadius = 140.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	bool bDebugInteraction = true;
+
+
+
+	// * * * Held Item / Throwing * * * 
+
+	// Item Mesh
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UStaticMeshComponent* ItemMeshComponent;
+
+	// Scene Actor For Where The Item Should Be Dropped When Swapping 2 Items
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	USceneComponent* ItemDropLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	FItemData HeldItem;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	TSubclassOf<AItem> ItemBlueprintClass;
+
+	// Spawn An Item On The Server
+	// Used Dropping Items When Swapping Items
+	UFUNCTION(Server, Reliable)
+	void Server_SpawnItem(FVector Location, FName ItemID);
 
 
 protected:
@@ -98,5 +125,10 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	// Called From An Item When It's Picked Up
+	// Public So It Can Be Called From Item Class
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void PickupItem(FItemData Item);
 };
 

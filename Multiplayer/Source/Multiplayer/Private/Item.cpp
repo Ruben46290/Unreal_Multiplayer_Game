@@ -2,8 +2,18 @@
 
 
 #include "Item.h"
+#include "../MultiplayerCharacter.h" // Include Player Character For Casting
 
 
+
+AItem::AItem()
+{
+	static ConstructorHelpers::FObjectFinder<UDataTable> ItemTableFinder(TEXT("/Game/DataTables/DT_Items"));
+	if (ItemTableFinder.Succeeded())
+	{
+		ItemDataTable = ItemTableFinder.Object;
+	}
+}
 
 
 void AItem::BeginPlay()
@@ -14,6 +24,13 @@ void AItem::BeginPlay()
 	// Load Item Data 
 	LoadItemData();
 
+
+	// Enable physics after spawn
+    MeshComponent->SetSimulatePhysics(true);
+    MeshComponent->SetEnableGravity(true);
+	MeshComponent->SetMassOverrideInKg(NAME_None, 100.0f, true); // Override Mass To 100kg
+
+	bReplicates = true;
 }
 
 bool AItem::LoadItemData()
@@ -55,7 +72,17 @@ bool AItem::LoadItemData()
 
 void AItem::OnInteract_Implementation(AActor* Interactor)
 {
-	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Yellow, TEXT("Item Interact")); }
+	// if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Yellow, TEXT("Item Interact")); }
+
+	// Cast To Player Class
+	AMultiplayerCharacter* Character = Cast<AMultiplayerCharacter>(Interactor);
+
+	if (Character) {
+
+		Character->PickupItem(CachedItemData);
+
+		//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Yellow, TEXT("Item Interact")); }
+	}
 
 	Destroy();
 }

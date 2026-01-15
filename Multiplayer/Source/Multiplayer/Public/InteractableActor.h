@@ -45,10 +45,6 @@ protected:
 	UPROPERTY()
 	ACharacter* OverlappingPlayer;
 
-	// Sphere Settings
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
-	float SphereRadius = 120.0f;
-
 	// Interaction Highlight Material
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	UMaterialInterface* HighlightMaterial;

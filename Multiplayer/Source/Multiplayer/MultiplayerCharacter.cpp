@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "InteractInterface.h"
+#include "Item.h"
 #include "DrawDebugHelpers.h"
 
 
@@ -53,6 +54,14 @@ AMultiplayerCharacter::AMultiplayerCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	ItemMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	ItemMeshComponent->AttachToComponent(GetMesh(),
+		FAttachmentTransformRules::KeepRelativeTransform,
+		FName("hand_r"));
+
+	ItemDropLocation = CreateDefaultSubobject<USceneComponent>(TEXT("ItemDropLocation"));
+	ItemDropLocation->SetupAttachment(Mesh);
+
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
@@ -65,6 +74,9 @@ void AMultiplayerCharacter::BeginPlay()
 
 //////////////////////////////////////////////////////////////////////////
 // Input
+
+
+
 
 void AMultiplayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -244,4 +256,45 @@ AActor* AMultiplayerCharacter::FindInteractableActor()
 	return ClosestInteractable;
 }
 
+void AMultiplayerCharacter::PickupItem(FItemData Item)
+{
+	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Yellow, TEXT("Item PickedUp")); }
 
+	// If There Is A Current Held Item
+	if (HeldItem.ItemID != NAME_None) {
+
+		// Drop Current Held Item By Spawning In A New Item
+		Server_SpawnItem(ItemDropLocation->GetComponentLocation(), HeldItem.ItemID);
+
+	}
+
+	// Set Held Item To Collected Item
+	HeldItem = Item;
+
+	// Apply Item Mesh
+	ItemMeshComponent->SetStaticMesh(Item.Mesh);
+}
+
+void AMultiplayerCharacter::Server_SpawnItem_Implementation(FVector Location, FName ItemID)
+{
+	// if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Yellow, TEXT("Drop Item")); }
+
+
+	if (HasAuthority())
+	{
+		// Spawns The Actor Without Automatically Calling Beginplay()
+		AItem* NewItem = GetWorld()->SpawnActorDeferred<AItem>(
+			ItemBlueprintClass,
+			FTransform(FRotator::ZeroRotator, Location)
+		);
+
+		if (NewItem)
+		{
+			// Set Properties BEFORE BeginPlay
+			NewItem->ItemName = ItemID;
+
+			// Finish Spawning (Calls BeginPlay)
+			NewItem->FinishSpawning(FTransform(FRotator::ZeroRotator, Location));
+		}
+	}
+}

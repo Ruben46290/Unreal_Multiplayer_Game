@@ -20,16 +20,19 @@ public:
 	// Implement & Override The Interface Function
 	virtual void OnInteract_Implementation(AActor* Interactor);
 
-protected:
-
-	virtual void BeginPlay() override;
-
-	// Load Item Data From The DataTable
-	bool LoadItemData();
 
 	// Matches With A DataTable Row
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	FName ItemName;
+
+	// Load Item Data From The DataTable
+	bool LoadItemData();
+
+protected:
+
+	AItem();
+
+	virtual void BeginPlay() override;
 
 	// Reference To The DataTable (Needs To Be Assigned In Editor)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
