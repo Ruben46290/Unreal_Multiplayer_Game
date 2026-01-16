@@ -2,7 +2,7 @@
 
 
 #include "Item.h"
-#include "../MultiplayerCharacter.h" // Include Player Character For Casting
+//#include "../MultiplayerCharacter.h" // Include Player Character For Casting
 
 
 
@@ -78,6 +78,8 @@ void AItem::OnInteract_Implementation(AActor* Interactor)
 	AMultiplayerCharacter* Character = Cast<AMultiplayerCharacter>(Interactor);
 
 	if (Character) {
+
+		//Character->RemoveNearbyInteractable(this);
 
 		Character->PickupItem(CachedItemData);
 

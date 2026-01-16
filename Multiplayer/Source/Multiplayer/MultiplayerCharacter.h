@@ -73,6 +73,33 @@ protected:
 	void Look(const FInputActionValue& Value);
 	
 
+
+	// * * * Interatable Objects Highlights * * * 
+
+	// Track Nearby Interactable Objects
+	UPROPERTY()
+	TArray<AInteractableActor*> NearbyInteractables;
+
+	// Track The Closest Interactable
+	UPROPERTY()
+	AInteractableActor* ClosestInteractable;
+
+	// Update What Interactable Is Closest, Called On Every Interatable Overlap Change
+	void UpdateClosestInteractable();
+
+	// Timer For Updating Highlights
+	FTimerHandle HighlightUpdateTimer;
+
+public:
+	// Add To NearbyInteractables Array, Called By Interactable Actor On Begin Overlap
+	UFUNCTION()
+	void AddNearbyInteractable(AInteractableActor* Interactable);
+
+	// Remove To NearbyInteractables Array, Called By Interactable Actor On End Overlap
+	UFUNCTION()
+	void RemoveNearbyInteractable(AInteractableActor* Interactable);
+
+protected:
 	// * * * Interaction * * * 
 	
 	// Input Event For Interact

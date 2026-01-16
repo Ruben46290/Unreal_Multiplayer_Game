@@ -38,6 +38,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	UDataTable* ItemDataTable;
 
+public:
+	// In Public For Debugging Only
 	// Variable To Store Item Data Loaded From The Data Table
 	UPROPERTY(BlueprintReadOnly, Category = "Item")
 	FItemData CachedItemData;

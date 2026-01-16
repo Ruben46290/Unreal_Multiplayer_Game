@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "InteractInterface.h" // Include Interact Interface
 #include "Components/SphereComponent.h"
+#include "../MultiplayerCharacter.h" // Include Player Character For Casting
 #include "GameFramework/Character.h" // Inldude So It Can Cast To Check If Overlapped Actor Is A Character
 #include "InteractableActor.generated.h"
 
@@ -45,10 +46,16 @@ protected:
 	UPROPERTY()
 	ACharacter* OverlappingPlayer;
 
-	// Interaction Highlight Material
+	// White Highlight Material
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
-	UMaterialInterface* HighlightMaterial;
+	UMaterialInterface* WhiteHighlightMaterial;
+
+	// Green Highlight Material
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	UMaterialInterface* GreenHighlightMaterial;
 
 public:	
-
+	// Set highlight with color
+	UFUNCTION()
+	void SetHighlight(bool bEnabled, bool bIsClosest = false);
 };

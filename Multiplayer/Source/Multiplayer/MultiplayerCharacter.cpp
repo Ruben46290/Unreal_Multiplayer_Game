@@ -148,6 +148,7 @@ void AMultiplayerCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+// On Interact Button Pressed, Call Server Interact
 void AMultiplayerCharacter::OnInteractPressed()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Interact Key Pressed!"));
@@ -226,7 +227,7 @@ AActor* AMultiplayerCharacter::FindInteractableActor()
 	//}
 
 	// Make A New Pointer For The Closest Object
-	AActor* ClosestInteractable = nullptr;
+	AActor* ClosestInteractableItem = nullptr;
 
 	// Make A New Closest Distance Float, Set To Max Distance Possible / Max Distance Of Sight Sphere
 	float ClosestDistance = InteractionRadius;
@@ -249,7 +250,7 @@ AActor* AMultiplayerCharacter::FindInteractableActor()
 				ClosestDistance = Distance;
 
 				// Set Closest Actor Refrence To Current Actor
-				ClosestInteractable = HitActor;
+				ClosestInteractableItem = HitActor;
 
 			}
 
@@ -259,7 +260,7 @@ AActor* AMultiplayerCharacter::FindInteractableActor()
 
 	}
 
-	return ClosestInteractable;
+	return ClosestInteractableItem;
 }
 
 void AMultiplayerCharacter::PickupItem(FItemData Item)
@@ -317,6 +318,91 @@ void AMultiplayerCharacter::Server_SpawnItem_Implementation(FVector Location, FN
 
 			// Finish Spawning (Calls BeginPlay)
 			NewItem->FinishSpawning(FTransform(FRotator::ZeroRotator, Location));
+		}
+	}
+}
+
+
+// * * * * * Interactable Objects Highlighting Functions * * * * *
+
+// * * Find The Closest Interactable Object * * 
+void AMultiplayerCharacter::UpdateClosestInteractable()
+{
+	// Setup Variables
+	AInteractableActor* NewClosest = nullptr;
+	float ClosestDistance = FLT_MAX;
+	FVector PlayerLocation = GetActorLocation();
+
+	// For Each Nearby Interactable
+	for (AInteractableActor* Interactable : NearbyInteractables) {
+
+		// If Interactable Is Valid
+		if (Interactable) {
+
+			// Get Distance Between Interactable & Player
+			float Distance = FVector::Dist(PlayerLocation, Interactable->GetActorLocation());
+
+			// If It's The New Closest Interactable
+			if (Distance < ClosestDistance)
+			{
+				// Save Refrence To Self & Update ClosestDistance
+				ClosestDistance = Distance;
+				NewClosest = Interactable;
+			}
+
+		}
+
+	}
+
+	// Update All Highlights
+	for (AInteractableActor* Interactable : NearbyInteractables)
+	{
+		if (Interactable)
+		{
+			bool bIsClosest = (Interactable == NewClosest);
+			Interactable->SetHighlight(true, bIsClosest);
+		}
+	}
+
+	ClosestInteractable = NewClosest;
+
+}
+
+void AMultiplayerCharacter::AddNearbyInteractable(AInteractableActor* Interactable)
+{
+	if (Interactable && !NearbyInteractables.Contains(Interactable))
+	{
+		NearbyInteractables.Add(Interactable);
+
+		// Start timer when first interactable is added
+		if (NearbyInteractables.Num() == 1)
+		{
+			GetWorldTimerManager().SetTimer(HighlightUpdateTimer, this,
+				&AMultiplayerCharacter::UpdateClosestInteractable, 0.1f, true);
+		}
+
+		UpdateClosestInteractable();
+	}
+}
+
+void AMultiplayerCharacter::RemoveNearbyInteractable(AInteractableActor* Interactable)
+{
+	if (NearbyInteractables.Contains(Interactable))
+	{
+
+		NearbyInteractables.Remove(Interactable);
+
+		Interactable->SetHighlight(false, false);
+
+		// Stop timer when no more interactables
+		if (NearbyInteractables.Num() == 0)
+		{
+			GetWorldTimerManager().ClearTimer(HighlightUpdateTimer);
+			ClosestInteractable = nullptr;
+		}
+		else
+		{
+			UpdateClosestInteractable();
 		}
 	}
 }

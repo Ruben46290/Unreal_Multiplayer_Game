@@ -35,18 +35,16 @@ void AInteractableActor::BeginPlay()
 void AInteractableActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	// Check if it's a character
-	ACharacter* Character = Cast<ACharacter>(OtherActor);
+	AMultiplayerCharacter* Character = Cast<AMultiplayerCharacter>(OtherActor);
 
 	// Is LocallyControlled() makes this code run only on the machine controlling this character
 	// Server & Other clients won't run this
 	if (Character && Character->IsLocallyControlled())
 	{
-
 		// Save reference to overlapping player
 		OverlappingPlayer = Character;
 
-		// Show highlight locally (no RPC needed since we check IsLocallyControlled)
-		MeshComponent->SetOverlayMaterial(HighlightMaterial);;
+		Character->AddNearbyInteractable(this);
 	}
 }
 
@@ -54,8 +52,9 @@ void AInteractableActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent
 
 void AInteractableActor::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+
 	// Check if it's a character
-	ACharacter* Character = Cast<ACharacter>(OtherActor);
+	AMultiplayerCharacter* Character = Cast<AMultiplayerCharacter>(OtherActor);
 
 
 	// Is LocallyControlled() makes this code run only on the machine controlling this character
@@ -66,8 +65,8 @@ void AInteractableActor::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, 
 		// Only remove highlight if this is the overlapping player
 		if (Character == OverlappingPlayer)
 		{
-			// Remove highlight locally
-			MeshComponent->SetOverlayMaterial(nullptr);
+			// Remove From Nearby Interacables
+			Character->RemoveNearbyInteractable(this);
 
 			// Clear reference
 			OverlappingPlayer = nullptr;
@@ -76,6 +75,30 @@ void AInteractableActor::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, 
 
 }
 
+void AInteractableActor::SetHighlight(bool bEnabled, bool bIsClosest)
+{
+
+
+
+	// If Mesh Is Valid
+	if (MeshComponent)
+	{
+		// Is Highlight Enabled
+		if (bEnabled)
+		{
+			// Green For Closest, White For Others
+			MeshComponent->SetOverlayMaterial(bIsClosest ? GreenHighlightMaterial : WhiteHighlightMaterial);
+		}
+		else
+		{
+			MeshComponent->SetOverlayMaterial(nullptr);
+		}
+	}
+}
+
+
+
+// Gets Overriden For Child Classes
 void AInteractableActor::OnInteract_Implementation(AActor* Interactor)
 {
 	Destroy();
