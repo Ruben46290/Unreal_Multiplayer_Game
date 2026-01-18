@@ -13,7 +13,7 @@
 #include "InteractInterface.h"
 #include "Item.h"
 #include "DrawDebugHelpers.h"
-
+#include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -74,6 +74,8 @@ void AMultiplayerCharacter::BeginPlay()
 
 //////////////////////////////////////////////////////////////////////////
 // Input
+
+
 
 
 
@@ -263,37 +265,65 @@ AActor* AMultiplayerCharacter::FindInteractableActor()
 	return ClosestInteractableItem;
 }
 
+
+// * * * * * * * * * * Item Picking Up & Dropping * * * * * * * * * *
 void AMultiplayerCharacter::PickupItem(FItemData Item)
 {
 	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Yellow, TEXT("Item PickedUp")); }
 
-	// If There Is A Current Held Item
+	// Call server RPC instead of handling locally
+	Server_PickupItem(Item);
+}
+
+void AMultiplayerCharacter::Server_PickupItem_Implementation(FItemData Item)
+{
+	// If there's a current held item, drop it first
 	if (HeldItem.ItemID != NAME_None) {
-
-		// Drop Current Held Item By Spawning In A New Item
 		Server_SpawnItem(ItemDropLocation->GetComponentLocation(), HeldItem.ItemID);
-
 	}
 
-	// Set Held Item To Collected Item
+	// Set held item (will replicate to all clients)
 	HeldItem = Item;
 
-	// Apply Item Mesh
+	// Update mesh on server
 	ItemMeshComponent->SetStaticMesh(Item.Mesh);
 }
 
 void AMultiplayerCharacter::DropCurrentItem()
 {
-	// If The Player Currently Has An Item
+	// Call server RPC
+	Server_DropCurrentItem();
+}
+
+void AMultiplayerCharacter::Server_DropCurrentItem_Implementation()
+{
 	if (HeldItem.ItemID != NAME_None) {
 
-		// Spawn Dropped Item
+		//if (GEngine)
+		//{
+		//	GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Red,
+		//		FString::Printf(TEXT("Dropping ItemID: %s"), *HeldItem.ItemID.ToString()));
+		//}
+
+		// Spawn dropped item
 		Server_SpawnItem(ItemDropLocation->GetComponentLocation(), HeldItem.ItemID);
 
-		// Clear Current Item Data
+		// Clear item data (will replicate to all clients)
 		HeldItem = FItemData();
 
-		// Clear Held Item Mesh
+		// Clear mesh on server
+		ItemMeshComponent->SetStaticMesh(nullptr);
+	}
+}
+
+// This function runs on clients when HeldItem replicates
+void AMultiplayerCharacter::OnRep_HeldItem()
+{
+	// Update the mesh on clients when HeldItem changes
+	if (HeldItem.ItemID != NAME_None) {
+		ItemMeshComponent->SetStaticMesh(HeldItem.Mesh);
+	}
+	else {
 		ItemMeshComponent->SetStaticMesh(nullptr);
 	}
 }
@@ -302,28 +332,33 @@ void AMultiplayerCharacter::Server_SpawnItem_Implementation(FVector Location, FN
 {
 	// if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Yellow, TEXT("Drop Item")); }
 
+		// Debug: Check what ItemID we received
+	//if (GEngine)
+	//{
+	//	GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Yellow,
+	//		FString::Printf(TEXT("Server spawning ItemID: %s"), *ItemID.ToString()));
+	//}
 
-	if (HasAuthority())
+	// Spawns the actor
+	AItem* NewItem = GetWorld()->SpawnActorDeferred<AItem>(
+		ItemBlueprintClass,
+		FTransform(FRotator::ZeroRotator, Location)
+	);
+	if (NewItem)
 	{
-		// Spawns The Actor Without Automatically Calling Beginplay()
-		AItem* NewItem = GetWorld()->SpawnActorDeferred<AItem>(
-			ItemBlueprintClass,
-			FTransform(FRotator::ZeroRotator, Location)
-		);
-
-		if (NewItem)
-		{
-			// Set Properties BEFORE BeginPlay
-			NewItem->ItemName = ItemID;
-
-			// Finish Spawning (Calls BeginPlay)
-			NewItem->FinishSpawning(FTransform(FRotator::ZeroRotator, Location));
-		}
+		NewItem->ItemName = ItemID;
+		NewItem->FinishSpawning(FTransform(FRotator::ZeroRotator, Location));
 	}
 }
 
+void AMultiplayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-// * * * * * Interactable Objects Highlighting Functions * * * * *
+	DOREPLIFETIME(AMultiplayerCharacter, HeldItem);
+}
+
+// * * *  * * * * * * * Interactable Objects Highlighting Functions * * * * * * * * * *
 
 // * * Find The Closest Interactable Object * * 
 void AMultiplayerCharacter::UpdateClosestInteractable()

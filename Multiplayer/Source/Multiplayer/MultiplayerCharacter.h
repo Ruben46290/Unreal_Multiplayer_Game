@@ -125,25 +125,60 @@ protected:
 	// * * * Held Item / Throwing * * * 
 
 	// Item Mesh
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	//UStaticMeshComponent* ItemMeshComponent;
+
+	//// Scene Actor For Where The Item Should Be Dropped When Swapping 2 Items
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	//USceneComponent* ItemDropLocation;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	//FItemData HeldItem;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	//TSubclassOf<AItem> ItemBlueprintClass;
+
+	//void DropCurrentItem();
+	//// Spawn An Item On The Server
+	//// Used Dropping Items When Swapping Items
+	//UFUNCTION(Server, Reliable)
+	//void Server_SpawnItem(FVector Location, FName ItemID);
+
+protected:
+
+	// Item Mesh
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* ItemMeshComponent;
 
-	// Scene Actor For Where The Item Should Be Dropped When Swapping 2 Items
+	// Item Drop Location
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USceneComponent* ItemDropLocation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	FItemData HeldItem;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	TSubclassOf<AItem> ItemBlueprintClass;
 
+	// Replicate this variable and call OnRep_HeldItem when it changes
+	UPROPERTY(ReplicatedUsing = OnRep_HeldItem)
+	FItemData HeldItem;
+
+	UFUNCTION()
+	void OnRep_HeldItem();
+
+	// Server RPC for pickup
+	UFUNCTION(Server, Reliable)
+	void Server_PickupItem(FItemData Item);
+
+	// Server RPC for drop
+	UFUNCTION(Server, Reliable)
+	void Server_DropCurrentItem();
+
 	void DropCurrentItem();
-	// Spawn An Item On The Server
-	// Used Dropping Items When Swapping Items
+
 	UFUNCTION(Server, Reliable)
 	void Server_SpawnItem(FVector Location, FName ItemID);
 
+	// Add to GetLifetimeReplicatedProps
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 	// APawn interface

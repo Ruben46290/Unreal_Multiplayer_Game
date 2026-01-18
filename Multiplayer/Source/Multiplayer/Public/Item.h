@@ -22,8 +22,14 @@ public:
 
 
 	// Matches With A DataTable Row
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	// ReplicatedUsing Makes The Variable Replicatable For Clients
+	// When The Value Is Changed OnRep_ItemName Function Is Called On All Clients To Match With Server
+	UPROPERTY(ReplicatedUsing = OnRep_ItemName, EditAnywhere, BlueprintReadWrite, Category = "Item")
 	FName ItemName;
+
+	// Replication Event For ItemName
+	UFUNCTION()
+	void OnRep_ItemName();
 
 	// Load Item Data From The DataTable
 	bool LoadItemData();

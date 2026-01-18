@@ -2,12 +2,19 @@
 
 
 #include "Item.h"
-//#include "../MultiplayerCharacter.h" // Include Player Character For Casting
+#include "Net/UnrealNetwork.h"
 
+void AItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(AItem, ItemName);
+}
 
 AItem::AItem()
 {
+	bReplicates = true;
+
 	static ConstructorHelpers::FObjectFinder<UDataTable> ItemTableFinder(TEXT("/Game/DataTables/DT_Items"));
 	if (ItemTableFinder.Succeeded())
 	{
@@ -21,9 +28,11 @@ void AItem::BeginPlay()
 	// Call Parent Class Begin Play (InteractableActor, Bind Sphere Overlap Events)
 	Super::BeginPlay();
 
-	// Load Item Data 
-	LoadItemData();
-
+	// If Item Name Is Valid
+	// Item Name Is Set While The Actor Is Being Spawned
+	if (ItemName != NAME_None) {
+		LoadItemData();
+	}
 
 	// Enable physics after spawn
     MeshComponent->SetSimulatePhysics(true);
@@ -31,6 +40,15 @@ void AItem::BeginPlay()
 	MeshComponent->SetMassOverrideInKg(NAME_None, 100.0f, true); // Override Mass To 100kg
 
 	bReplicates = true;
+}
+
+
+
+void AItem::OnRep_ItemName()
+{
+	// This runs on clients when ItemName replicates
+	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Red, TEXT("On Rep Called")); }
+	LoadItemData	();
 }
 
 bool AItem::LoadItemData()
