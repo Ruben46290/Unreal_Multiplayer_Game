@@ -15,6 +15,9 @@ AItem::AItem()
 {
 	bReplicates = true;
 
+	// Replicate Movement For Throwing Logic
+	SetReplicateMovement(true);
+
 	static ConstructorHelpers::FObjectFinder<UDataTable> ItemTableFinder(TEXT("/Game/DataTables/DT_Items"));
 	if (ItemTableFinder.Succeeded())
 	{
@@ -47,7 +50,7 @@ void AItem::BeginPlay()
 void AItem::OnRep_ItemName()
 {
 	// This runs on clients when ItemName replicates
-	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Red, TEXT("On Rep Called")); }
+	//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Red, TEXT("On Rep Called")); }
 	LoadItemData	();
 }
 

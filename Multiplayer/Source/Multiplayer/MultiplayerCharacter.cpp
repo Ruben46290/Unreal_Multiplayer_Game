@@ -14,11 +14,11 @@
 #include "Item.h"
 #include "DrawDebugHelpers.h"
 #include "Net/UnrealNetwork.h"
+#include "Components/SplineComponent.h"
+#include "Components/SplineMeshComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
-//////////////////////////////////////////////////////////////////////////
-// AMultiplayerCharacter
 
 AMultiplayerCharacter::AMultiplayerCharacter()
 {
@@ -54,13 +54,22 @@ AMultiplayerCharacter::AMultiplayerCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	// Held Item Mesh
 	ItemMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	ItemMeshComponent->AttachToComponent(GetMesh(),
 		FAttachmentTransformRules::KeepRelativeTransform,
 		FName("hand_r"));
 
+	// Item Drop Location
 	ItemDropLocation = CreateDefaultSubobject<USceneComponent>(TEXT("ItemDropLocation"));
 	ItemDropLocation->SetupAttachment(Mesh);
+
+
+	// Trajectory Spline
+	TrajectorySpline = CreateDefaultSubobject<USplineComponent>(TEXT("TrajectorySpline"));
+	TrajectorySpline->SetupAttachment(RootComponent);
+	TrajectorySpline->SetVisibility(false);
+
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -72,15 +81,19 @@ void AMultiplayerCharacter::BeginPlay()
 	Super::BeginPlay();
 }
 
-//////////////////////////////////////////////////////////////////////////
-// Input
+void AMultiplayerCharacter::Tick(float DeltaTime)
+{
+	// If A Throw Is Currently Being Charged
+	if (bIsChargingThrow) {
 
+		// Add Delta Time To Current Charge
+		CurrentThrowCharge = FMath::Min(CurrentThrowCharge + (ChargeRate * DeltaTime), MaxThrowCharge);
 
+		UpdateTrajectoryVisualization();
+	}
+}
 
-
-
-
-
+// * * * * * * * * * * Input * * * * * * * * * *
 
 void AMultiplayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -111,6 +124,10 @@ void AMultiplayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 		// Drop
 		EnhancedInputComponent->BindAction(Drop, ETriggerEvent::Started, this, &AMultiplayerCharacter::DropCurrentItem);
+
+		// Throwing
+		EnhancedInputComponent->BindAction(Throw, ETriggerEvent::Started, this, &AMultiplayerCharacter::StartThrowingHeldItem);
+		EnhancedInputComponent->BindAction(Throw, ETriggerEvent::Completed, this, &AMultiplayerCharacter::StopThrowingHeldItem);
 	}
 }
 
@@ -150,6 +167,10 @@ void AMultiplayerCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////
+
+// * * * * * * * * * * Interaction * * * * * * * * * *
+ 
 // On Interact Button Pressed, Call Server Interact
 void AMultiplayerCharacter::OnInteractPressed()
 {
@@ -214,19 +235,9 @@ AActor* AMultiplayerCharacter::FindInteractableActor()
 		QueryParams // Apply Custom Paramters (Ingore Self)
 	);
 
-	//// Debug Visualization
-	//if (bDebugInteraction)
-	//{
-	//	DrawDebugSphere(
-	//		GetWorld(),
-	//		PlayerLocation,
-	//		InteractionRadius,
-	//		16,
-	//		bHit ? FColor::Green : FColor::Red,
-	//		false,
-	//		2.0f
-	//	);
-	//}
+	// Draw Debug Sphere
+	//DrawDebugSphere(GetWorld(),PlayerLocation,InteractionRadius,16,bHit ? FColor::Green : FColor::Red,false,2.0f);
+
 
 	// Make A New Pointer For The Closest Object
 	AActor* ClosestInteractableItem = nullptr;
@@ -234,6 +245,7 @@ AActor* AMultiplayerCharacter::FindInteractableActor()
 	// Make A New Closest Distance Float, Set To Max Distance Possible / Max Distance Of Sight Sphere
 	float ClosestDistance = InteractionRadius;
 
+	// For Each Hit Actor
 	for (const FHitResult& Hit : HitResults) {
 
 		// Get Current Actor
@@ -269,7 +281,7 @@ AActor* AMultiplayerCharacter::FindInteractableActor()
 // * * * * * * * * * * Item Picking Up & Dropping * * * * * * * * * *
 void AMultiplayerCharacter::PickupItem(FItemData Item)
 {
-	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Yellow, TEXT("Item PickedUp")); }
+	//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Yellow, TEXT("Item PickedUp")); }
 
 	// Call server RPC instead of handling locally
 	Server_PickupItem(Item);
@@ -331,13 +343,6 @@ void AMultiplayerCharacter::OnRep_HeldItem()
 void AMultiplayerCharacter::Server_SpawnItem_Implementation(FVector Location, FName ItemID)
 {
 	// if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Yellow, TEXT("Drop Item")); }
-
-		// Debug: Check what ItemID we received
-	//if (GEngine)
-	//{
-	//	GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Yellow,
-	//		FString::Printf(TEXT("Server spawning ItemID: %s"), *ItemID.ToString()));
-	//}
 
 	// Spawns the actor
 	AItem* NewItem = GetWorld()->SpawnActorDeferred<AItem>(
@@ -438,6 +443,234 @@ void AMultiplayerCharacter::RemoveNearbyInteractable(AInteractableActor* Interac
 		else
 		{
 			UpdateClosestInteractable();
+		}
+	}
+}
+
+
+// * * * * * * * * * * Throwing * * * * * * * * * *
+
+void AMultiplayerCharacter::StartThrowingHeldItem()
+{
+	// if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Yellow, TEXT("Throw Item Key Pressed")); }
+
+	// If Theres A Current Held Item
+	if (HeldItem.ItemID != NAME_None) {
+
+		// Reset Charging Variables
+		bIsChargingThrow = true;
+		CurrentThrowCharge = 0.0f;
+
+		// Show Trajectory Spline
+		if (TrajectorySpline)
+		{
+			TrajectorySpline->SetVisibility(true);
+		}
+	}
+}
+
+
+void AMultiplayerCharacter::StopThrowingHeldItem()
+{
+	//if (GEngine) {GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Yellow,FString::Printf(TEXT("Throw Item Key Released - Charge: %.2f"), CurrentThrowCharge));}
+
+	if (HeldItem.ItemID != NAME_None && bIsChargingThrow)
+	{
+		// Calculate Throw Direction
+		FVector ThrowDirection = ItemDropLocation->GetForwardVector();
+
+		// Calculate Throw Strength Based On Charge (0.0 to 1.0)
+		float ThrowStrength = CurrentThrowCharge;
+
+		// Send To Server
+		Server_ThrowItem(ThrowDirection, ThrowStrength);
+
+		// Reset Throw State
+		bIsChargingThrow = false;
+		CurrentThrowCharge = 0.0f;
+
+		// Hide Trajectory
+		if (TrajectorySpline)
+		{
+			TrajectorySpline->SetVisibility(false);
+
+			// Destroy Trajectory Mesh Componenets
+			for (USplineMeshComponent* MeshComp : SplineMeshComponents)
+			{
+				if (MeshComp)
+				{
+					MeshComp->DestroyComponent();
+				}
+			}
+		}
+	}
+}
+
+void AMultiplayerCharacter::Server_ThrowItem_Implementation(FVector ThrowDirection, float ThrowStrength)
+{
+	if (HeldItem.ItemID == NAME_None)
+	{
+		return; // No item to throw
+	}
+
+	// Calculate throw force based on charge
+	float ThrowForce = FMath::Lerp(MinThrowForce, MaxThrowForce, ThrowStrength);
+
+	// Spawn the item
+	FVector SpawnLocation = ItemDropLocation->GetComponentLocation();
+
+	AItem* ThrownItem = GetWorld()->SpawnActorDeferred<AItem>(
+		ItemBlueprintClass,
+		FTransform(FRotator::ZeroRotator, SpawnLocation)
+	);
+
+	if (ThrownItem)
+	{
+		// Set item properties
+		ThrownItem->ItemName = HeldItem.ItemID;
+
+		// Finish spawning
+		ThrownItem->FinishSpawning(FTransform(FRotator::ZeroRotator, SpawnLocation));
+
+		// Apply throw force
+		if (ThrownItem->MeshComponent)
+		{
+			// Make sure physics is enabled
+			ThrownItem->MeshComponent->SetSimulatePhysics(true);
+
+			// Apply impulse in the throw direction
+			FVector ThrowImpulse = ThrowDirection * ThrowForce;
+			ThrownItem->MeshComponent->AddImpulse(ThrowImpulse, NAME_None, true);
+
+			//// Optional: Add some random spin for realism
+			//FVector RandomTorque = FVector(
+			//	FMath::RandRange(-100.0f, 100.0f),
+			//	FMath::RandRange(-100.0f, 100.0f),
+			//	FMath::RandRange(-100.0f, 100.0f)
+			//) * ThrowStrength;
+			//ThrownItem->MeshComponent->AddTorqueInRadians(RandomTorque, NAME_None, true);
+		}
+	}
+
+	// Clear held item
+	HeldItem = FItemData();
+
+	if (ItemMeshComponent)
+	{
+		ItemMeshComponent->SetStaticMesh(nullptr);
+		ItemMeshComponent->MarkRenderStateDirty();
+	}
+}
+
+
+
+// * * * * * * * * * * Throwing Trajectoy Visualization * * * * * * * * * *
+
+void AMultiplayerCharacter::UpdateTrajectoryVisualization()
+{
+	if (!ItemMeshComponent || HeldItem.ItemID == NAME_None || !TrajectorySpline)
+	{
+		return;
+	}
+
+	FVector StartLocation = ItemDropLocation->GetComponentLocation();
+	FVector ThrowDirection = ItemDropLocation->GetForwardVector();
+	float ThrowForce = FMath::Lerp(MinThrowForce, MaxThrowForce, CurrentThrowCharge);
+	float ItemMass = 1.0f;
+	FVector InitialVelocity = ThrowDirection * (ThrowForce / ItemMass);
+
+	FVector CurrentPosition = StartLocation;
+	FVector CurrentVelocity = InitialVelocity;
+	FVector Gravity = FVector(0, 0, GetWorld()->GetGravityZ());
+
+	// Clear existing spline points
+	TrajectorySpline->ClearSplinePoints();
+
+	bool bHitGround = false;
+
+	for (int32 i = 0; i < TrajectorySteps; i++)
+	{
+		// Add current position to spline
+		TrajectorySpline->AddSplinePoint(CurrentPosition, ESplineCoordinateSpace::World, false);
+
+		FVector NextPosition = CurrentPosition + (CurrentVelocity * TrajectoryTimeStep);
+
+		// Check for ground hit
+		FHitResult HitResult;
+		if (GetWorld()->LineTraceSingleByChannel(HitResult, CurrentPosition, NextPosition, ECC_Visibility))
+		{
+			// Add the hit point as final spline point
+			TrajectorySpline->AddSplinePoint(HitResult.Location, ESplineCoordinateSpace::World, false);
+
+			// Draw landing marker
+			if (bShowLandingMarker)
+			{
+				DrawDebugSphere(GetWorld(), HitResult.Location, 20.0f, 12, FColor::Red, false, -1.0f, 0, 2.0f);
+			}
+
+			bHitGround = true;
+			break;
+		}
+
+		CurrentVelocity += Gravity * TrajectoryTimeStep;
+		CurrentPosition = NextPosition;
+	}
+
+	// If we didn't hit anything, add the final position
+	if (!bHitGround)
+	{
+		TrajectorySpline->AddSplinePoint(CurrentPosition, ESplineCoordinateSpace::World, false);
+	}
+
+	// Update the spline to recalculate curves
+	TrajectorySpline->UpdateSpline();
+
+	// Make sure spline is visible
+	TrajectorySpline->SetVisibility(true);
+
+	if (TrajectoryMesh)
+	{
+		UpdateSplineMeshes();
+	}
+}
+
+
+void AMultiplayerCharacter::UpdateSplineMeshes()
+{
+	// Clear old mesh components
+	for (USplineMeshComponent* MeshComp : SplineMeshComponents)
+	{
+		if (MeshComp)
+		{
+			MeshComp->DestroyComponent();
+		}
+	}
+	SplineMeshComponents.Empty();
+
+	int32 NumSegments = TrajectorySpline->GetNumberOfSplinePoints() - 1;
+
+	for (int32 i = 0; i < NumSegments; i++)
+	{
+
+
+		USplineMeshComponent* SplineMesh = NewObject<USplineMeshComponent>(this);
+		SplineMesh->SetStaticMesh(TrajectoryMesh);
+		SplineMesh->SetMobility(EComponentMobility::Movable);
+		SplineMesh->RegisterComponent();
+		SplineMesh->AttachToComponent(TrajectorySpline, FAttachmentTransformRules::KeepRelativeTransform);
+
+		FVector StartPos, StartTangent, EndPos, EndTangent;
+		TrajectorySpline->GetLocationAndTangentAtSplinePoint(i, StartPos, StartTangent, ESplineCoordinateSpace::Local);
+		TrajectorySpline->GetLocationAndTangentAtSplinePoint(i + 1, EndPos, EndTangent, ESplineCoordinateSpace::Local);
+
+		SplineMesh->SetStartAndEnd(StartPos, StartTangent, EndPos, EndTangent);
+
+		SplineMeshComponents.Add(SplineMesh);
+
+		// Apply Material
+		if (TrajectoryMaterial)
+		{
+			SplineMesh->SetMaterial(0, TrajectoryMaterial);
 		}
 	}
 }

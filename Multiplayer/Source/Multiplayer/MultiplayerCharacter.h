@@ -56,13 +56,13 @@ class AMultiplayerCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* Drop;
 
+	//** Throw Key */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* Throw;
+
+
 public:
 	AMultiplayerCharacter();
-
-
-private:
-	// Track current material state
-	bool bIsUsingBlueMaterial = true;
 
 protected:
 
@@ -74,8 +74,8 @@ protected:
 	
 
 
-	// * * * Interatable Objects Highlights * * * 
-
+	// * * * * * * * * * * Interatable Objects Highlights * * * * * * * * * *
+protected:
 	// Track Nearby Interactable Objects
 	UPROPERTY()
 	TArray<AInteractableActor*> NearbyInteractables;
@@ -99,9 +99,9 @@ public:
 	UFUNCTION()
 	void RemoveNearbyInteractable(AInteractableActor* Interactable);
 
+
+// * * * * * * * * * * Interaction * * * * * * * * * * 
 protected:
-	// * * * Interaction * * * 
-	
 	// Input Event For Interact
 	void OnInteractPressed();
 
@@ -113,37 +113,11 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
 	AActor* FindInteractableActor();
 
-	// Interaction Settings
+	// Interaction Sphere Radius
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	float InteractionRadius = 140.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
-	bool bDebugInteraction = true;
-
-
-
-	// * * * Held Item / Throwing * * * 
-
-	// Item Mesh
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	//UStaticMeshComponent* ItemMeshComponent;
-
-	//// Scene Actor For Where The Item Should Be Dropped When Swapping 2 Items
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	//USceneComponent* ItemDropLocation;
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	//FItemData HeldItem;
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	//TSubclassOf<AItem> ItemBlueprintClass;
-
-	//void DropCurrentItem();
-	//// Spawn An Item On The Server
-	//// Used Dropping Items When Swapping Items
-	//UFUNCTION(Server, Reliable)
-	//void Server_SpawnItem(FVector Location, FName ItemID);
-
+	// * * * * * * * * * * Held Item / Dropping * * * * * * * * * *  
 protected:
 
 	// Item Mesh
@@ -180,12 +154,84 @@ protected:
 	// Add to GetLifetimeReplicatedProps
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+
+// * * * * * * * * * * Item Throwing * * * * * * * * * *  
+protected:
+
+	// * * * * * Functions * * * * *
+
+	// Throwing Input Started
+	void StartThrowingHeldItem();
+
+	// Throwing Input Finished
+	void StopThrowingHeldItem();
+
+	UFUNCTION(Server, Reliable)
+	void Server_ThrowItem(FVector ThrowDirection, float ThrowStrength);
+
+	// * * * * * Variables * * * * *
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Throwing")
+	float MaxThrowCharge = 1.0f;
+
+	// How Fast The Throw Charges
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Throwing")
+	float ChargeRate = 0.5f;
+
+	// Minumum Throwing Force
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Throwing")
+	float MinThrowForce = 250.0f;
+
+	// Maximum Throwing Force
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Throwing")
+	float MaxThrowForce = 1500.0f;
+
+
+	UPROPERTY(BlueprintReadOnly, Category = "Throwing")
+	float CurrentThrowCharge = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Throwing")
+	bool bIsChargingThrow = false;
+
+
+	// * * * * * * * * * * Throwing Trajectory Visualization * * * * * * * * * *
+protected:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Throwing")
+	class USplineComponent* TrajectorySpline;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Throwing")
+	int32 TrajectorySteps = 20; // Number of points to simulate
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Throwing")
+	float TrajectoryTimeStep = 0.05f; // Time between each simulation step
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Throwing")
+	bool bShowLandingMarker = true;
+
+	void UpdateTrajectoryVisualization();
+
+	UPROPERTY(EditAnywhere, Category = "Item|Throwing")
+	UStaticMesh* TrajectoryMesh;
+
+	UPROPERTY()
+	TArray<class USplineMeshComponent*> SplineMeshComponents;
+
+	void UpdateSplineMeshes();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Throwing")
+	UMaterialInterface* TrajectoryMaterial;
+
+
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 	// To add mapping context
 	virtual void BeginPlay();
+
+	virtual void Tick(float DeltaTime) override;
 
 public:
 	/** Returns CameraBoom subobject **/
