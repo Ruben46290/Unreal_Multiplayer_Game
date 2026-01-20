@@ -154,6 +154,12 @@ protected:
 	// Add to GetLifetimeReplicatedProps
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+public:
+
+	FName GetHeldItemName();
+
+	UFUNCTION(Server, Reliable)
+	void ClearHeldItem();
 
 // * * * * * * * * * * Item Throwing * * * * * * * * * *  
 protected:

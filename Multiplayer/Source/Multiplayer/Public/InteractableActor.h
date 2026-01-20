@@ -60,6 +60,5 @@ protected:
 
 public:	
 	// Set highlight with color
-	UFUNCTION()
-	void SetHighlight(bool bEnabled, bool bIsClosest = false);
+	virtual void SetHighlight(bool bEnabled, bool bIsClosest = false);
 };

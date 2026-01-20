@@ -200,6 +200,10 @@ void AMultiplayerCharacter::Server_Interact_Implementation()
 	// Find Closest Interactable Actor
 	AActor* InteractableActor = FindInteractableActor();
 
+	// Get The Current Closest Interactable (From UpdateCloestInteracble())
+	// Uses Highlighting System Instead Of A Sphere Trace, Good For Interacting With Larger Objects, But Groups Of Small Ones Feel A Bit Worse
+	//AActor* InteractableActor = ClosestInteractable;
+
 	// If An Actor (With Interact Interface) Is Found
 	if (InteractableActor) {
 		
@@ -363,6 +367,7 @@ void AMultiplayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	DOREPLIFETIME(AMultiplayerCharacter, HeldItem);
 }
 
+
 // * * *  * * * * * * * Interactable Objects Highlighting Functions * * * * * * * * * *
 
 // * * Find The Closest Interactable Object * * 
@@ -371,7 +376,9 @@ void AMultiplayerCharacter::UpdateClosestInteractable()
 	// Setup Variables
 	AInteractableActor* NewClosest = nullptr;
 	float ClosestDistance = FLT_MAX;
-	FVector PlayerLocation = GetActorLocation();
+	//FVector PlayerLocation = GetActorLocation();
+	FVector PlayerLocation = Mesh->GetComponentLocation();
+
 
 	// For Each Nearby Interactable
 	for (AInteractableActor* Interactable : NearbyInteractables) {
@@ -672,5 +679,39 @@ void AMultiplayerCharacter::UpdateSplineMeshes()
 		{
 			SplineMesh->SetMaterial(0, TrajectoryMaterial);
 		}
+	}
+}
+
+
+// * * * * * * * * * * Helper Functions * * * * * * * * * *
+FName AMultiplayerCharacter::GetHeldItemName()
+{
+	// If HeldItem Is Valid
+	if (HeldItem.ItemID != NAME_None) {
+
+		// Return Held Item Name
+		return HeldItem.ItemID;
+	}
+
+	// Return As Blank
+	return FName();
+}
+
+void AMultiplayerCharacter::ClearHeldItem_Implementation()
+{
+	// Skip If No Held Item
+	if (HeldItem.ItemID == NAME_None)
+	{
+		return;
+	}
+
+	// Clear Held Item
+	HeldItem = FItemData();
+
+	// Clear Item Mesh
+	if (ItemMeshComponent)
+	{
+		ItemMeshComponent->SetStaticMesh(nullptr);
+		ItemMeshComponent->MarkRenderStateDirty();
 	}
 }
