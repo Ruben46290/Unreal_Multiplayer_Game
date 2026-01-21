@@ -15,4 +15,11 @@ struct FItemData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	UStaticMesh* Mesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	bool bCanBeJuiced;
+
+	// Colour For Juice
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FLinearColor ItemColor;
 };

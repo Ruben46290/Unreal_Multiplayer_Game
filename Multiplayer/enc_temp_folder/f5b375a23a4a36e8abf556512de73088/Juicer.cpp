@@ -155,7 +155,6 @@ void AJuicer::OnJuiceComplete()
 		// Finish Spawning
 		JuiceItem->FinishSpawning(FTransform(FRotator::ZeroRotator, SpawnLocation));
 
-		// Apply Juice Color
 		JuiceItem->ApplyJuiceColor(StoredItemData.ItemColor);
 	}
 

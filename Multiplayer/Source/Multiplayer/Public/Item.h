@@ -34,6 +34,11 @@ public:
 	// Load Item Data From The DataTable
 	bool LoadItemData();
 
+	// Apply Color To Juice
+	// Called From Juicer When Spawning In A New Juice
+	UFUNCTION(BlueprintImplementableEvent, Category = "Juice")
+	void ApplyJuiceColor(FLinearColor JuiceColor);
+
 protected:
 
 	AItem();

@@ -107,11 +107,7 @@ protected:
 
 	// Sends Signal To The Server
 	UFUNCTION(Server, Reliable)
-	void Server_Interact();
-
-	// Find Nearby Interactable Actor, Using Sphere Trace
-	UFUNCTION(BlueprintCallable, Category = "Interaction")
-	AActor* FindInteractableActor();
+	void Server_Interact(AActor* ActorToInteract);
 
 	// Interaction Sphere Radius
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
