@@ -87,6 +87,24 @@ bool AItem::LoadItemData()
 		MeshComponent->SetStaticMesh(CachedItemData.Mesh);
 	}
 
+	// If this is a juice item, apply the color
+	if (CachedItemData.bIsJuice) {
+		// Create dynamic material instance from the existing material
+		UMaterialInstanceDynamic* DynamicMat = MeshComponent->CreateDynamicMaterialInstance(1);
+
+		if (DynamicMat) {
+			// Set the color parameter - must match your material parameter name
+			DynamicMat->SetVectorParameterValue(FName("Color"), CachedItemData.ItemColor);
+
+			if (GEngine) {
+				GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Green, TEXT("Juice Color Applied"));
+			}
+		}
+	}
+
+
+
+
 	// Return True
 	return true;
 }

@@ -19,6 +19,9 @@ struct FItemData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	bool bCanBeJuiced;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	bool bIsJuice;
+
 	// Colour For Juice
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FLinearColor ItemColor;

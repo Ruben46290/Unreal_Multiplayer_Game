@@ -291,9 +291,15 @@ void AMultiplayerCharacter::Server_PickupItem_Implementation(FItemData Item)
 	// Update mesh on server
 	ItemMeshComponent->SetStaticMesh(Item.Mesh);
 
-	if (HeldItem.ItemID == "Juice") {
-		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Start Holding Juice")); }
+
+	if (Item.bIsJuice) {
+		// Create dynamic material instance
+		UMaterialInstanceDynamic* DynamicMat = ItemMeshComponent->CreateDynamicMaterialInstance(1);
+
+		DynamicMat->SetVectorParameterValue(FName("Color"), Item.ItemColor);
+
 	}
+
 }
 
 void AMultiplayerCharacter::DropCurrentItem()
@@ -329,6 +335,15 @@ void AMultiplayerCharacter::OnRep_HeldItem()
 	// Update the mesh on clients when HeldItem changes
 	if (HeldItem.ItemID != NAME_None) {
 		ItemMeshComponent->SetStaticMesh(HeldItem.Mesh);
+
+		if (HeldItem.bIsJuice) {
+			// Create dynamic material instance
+			UMaterialInstanceDynamic* DynamicMat = ItemMeshComponent->CreateDynamicMaterialInstance(1);
+
+			DynamicMat->SetVectorParameterValue(FName("Color"), HeldItem.ItemColor);
+
+		}
+
 	}
 	else {
 		ItemMeshComponent->SetStaticMesh(nullptr);
@@ -344,6 +359,7 @@ void AMultiplayerCharacter::Server_SpawnItem_Implementation(FVector Location, FN
 		ItemBlueprintClass,
 		FTransform(FRotator::ZeroRotator, Location)
 	);
+
 	if (NewItem)
 	{
 		NewItem->ItemName = ItemID;
