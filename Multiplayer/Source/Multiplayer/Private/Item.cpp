@@ -96,9 +96,6 @@ bool AItem::LoadItemData()
 			// Set the color parameter - must match your material parameter name
 			DynamicMat->SetVectorParameterValue(FName("Color"), CachedItemData.ItemColor);
 
-			if (GEngine) {
-				GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Green, TEXT("Juice Color Applied"));
-			}
 		}
 	}
 

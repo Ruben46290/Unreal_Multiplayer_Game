@@ -125,9 +125,12 @@ void AMultiplayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		// Drop
 		EnhancedInputComponent->BindAction(Drop, ETriggerEvent::Started, this, &AMultiplayerCharacter::DropCurrentItem);
 
-		// Throwing
-		EnhancedInputComponent->BindAction(Throw, ETriggerEvent::Started, this, &AMultiplayerCharacter::StartThrowingHeldItem);
-		EnhancedInputComponent->BindAction(Throw, ETriggerEvent::Completed, this, &AMultiplayerCharacter::StopThrowingHeldItem);
+		// Left Click
+		EnhancedInputComponent->BindAction(LeftClick, ETriggerEvent::Started, this, &AMultiplayerCharacter::StartLeftClick);
+		EnhancedInputComponent->BindAction(LeftClick, ETriggerEvent::Completed, this, &AMultiplayerCharacter::StopLeftClick);
+
+		// Right Click
+		EnhancedInputComponent->BindAction(RightClick, ETriggerEvent::Started, this, &AMultiplayerCharacter::StartRightClick);
 	}
 }
 
@@ -164,6 +167,47 @@ void AMultiplayerCharacter::Look(const FInputActionValue& Value)
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void AMultiplayerCharacter::StartLeftClick()
+{
+	if (HeldItem.ItemID != NAME_None) {
+		StartThrowingHeldItem();
+	}
+}
+
+void AMultiplayerCharacter::StopLeftClick()
+{
+	if (bIsChargingThrow) {
+		StopThrowingHeldItem();
+	}
+}
+
+void AMultiplayerCharacter::StartRightClick()
+{
+	if (bIsChargingThrow) {
+
+		// Reset Throw State
+		bIsChargingThrow = false;
+		CurrentThrowCharge = 0.0f;
+
+		// Hide Trajectory
+		if (TrajectorySpline)
+		{
+			TrajectorySpline->SetVisibility(false);
+
+			// Destroy Trajectory Mesh Componenets
+			for (USplineMeshComponent* MeshComp : SplineMeshComponents)
+			{
+				if (MeshComp)
+				{
+					MeshComp->DestroyComponent();
+				}
+			}
+		}
+
+
 	}
 }
 

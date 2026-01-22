@@ -56,10 +56,13 @@ class AMultiplayerCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* Drop;
 
-	//** Throw Key */
+	//** Left Click Key */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* Throw;
+	UInputAction* LeftClick;
 
+	//** Right Click Key */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* RightClick;
 
 public:
 	AMultiplayerCharacter();
@@ -161,6 +164,10 @@ public:
 protected:
 
 	// * * * * * Functions * * * * *
+
+	void StartLeftClick();
+	void StopLeftClick();
+	void StartRightClick();
 
 	// Throwing Input Started
 	void StartThrowingHeldItem();

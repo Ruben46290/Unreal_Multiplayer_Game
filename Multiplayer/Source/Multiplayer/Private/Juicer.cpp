@@ -64,7 +64,7 @@ void AJuicer::OnInteract_Implementation(AActor* Interactor)
 			// If The Player Is Holding A Bucket
 			if (PlayerItem == "Bucket") {
 
-				if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Bucket Placed")); }
+				//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Bucket Placed")); }
 
 				// Clear Held Item
 				Character->ClearHeldItem();
@@ -92,7 +92,7 @@ void AJuicer::OnInteract_Implementation(AActor* Interactor)
 				// If Held Item Can Be Juiced
 				if (ItemData->bCanBeJuiced) {
 
-					if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Item Placed In Juicer")); }
+					//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Item Placed In Juicer")); }
 
 					// Clear Held Item
 					Character->ClearHeldItem();
@@ -126,7 +126,7 @@ void AJuicer::Multicast_OnJuiceStart_Implementation(FLinearColor JuiceColor)
 void AJuicer::OnJuiceComplete()
 {
 	// Called From Blueprint Animation Event When Animation Is Finished
-	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("OnJuiceComplete()")); }
+	//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("OnJuiceComplete()")); }
 	// Reset Variables
 	bHasBucket = false;
 	bIsJuicing = false;
@@ -150,13 +150,13 @@ void AJuicer::OnJuiceComplete()
 	if (JuiceItem) {
 
 		// Apply Item Name
-		JuiceItem->ItemName = "Juice";
+		JuiceItem->ItemName = FName(*(StoredItemData.ItemID.ToString() + TEXT("Juice")));
 
 		// Finish Spawning
 		JuiceItem->FinishSpawning(FTransform(FRotator::ZeroRotator, SpawnLocation));
 
 		// Apply Juice Color
-		JuiceItem->ApplyJuiceColor(StoredItemData.ItemColor);
+		//JuiceItem->ApplyJuiceColor(StoredItemData.ItemColor);
 	}
 
 	StoredItemData = FItemData();
