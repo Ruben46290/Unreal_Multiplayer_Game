@@ -20,6 +20,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* CropMeshComponent;
 
+	// Item Drop Location
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	USceneComponent* ItemDropLocation;
 	// * * * * * * * * * * Variables * * * * * * * * * * 
 	
 	// Keep Track Of Planted Crop
@@ -44,9 +47,24 @@ protected:
 	UPROPERTY(ReplicatedUsing = OnRep_CurrentCropMesh, BlueprintReadOnly, Category = "Crop")
 	UStaticMesh* CurrentCropMesh = nullptr;
 
-	// Replication Event For Current Crop Mesh
-	UFUNCTION()
-	void OnRep_CurrentCropMesh();
+
+	// Timer For Growing
+	FTimerHandle GrowingTimer;
+
+	// How Many Seconds Has The Plant Been Growing
+	float GrowingProgress;
+
+	// What Stage Is The Crop ( 1,2,3 )
+	int GrowingStage;
+
+	// How Long Before Growing Between Phases, Total Growing Time = StageGrowingTime * 3
+	float StageGrowingTime = 3.0f;
+
+	// What Is The Next Second Milestone To Go To Next Growth Phase
+	float NextGrowingGoal;
+
+
+	bool bCanBeHarvested = false;
 
 	// * * * * * * * * * * Functions * * * * * * * * * * 
 
@@ -58,10 +76,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Crop")
 	void PlantCrop(FName CropID);
 
+	void GrowingTick();
+
 	// Harvest The Crop
 	UFUNCTION(BlueprintCallable, Category = "Crop")
-	void HarvestCrop(AActor* Harvester);
+	void HarvestCrop();
+
+	UFUNCTION(Server, Reliable)
+	void Server_SpawnItem(FName ItemID, int32 Index);
 
 	// Implement & Override The Interface Function
 	virtual void OnInteract_Implementation(AActor* Interactor);
+
+	// Replication Event For Current Crop Mesh
+	UFUNCTION()
+	void OnRep_CurrentCropMesh();
 };

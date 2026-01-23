@@ -410,7 +410,6 @@ void AMultiplayerCharacter::Server_SpawnItem_Implementation(FVector Location, FN
 		NewItem->FinishSpawning(FTransform(FRotator::ZeroRotator, Location));
 
 		if (NewItem->ItemName == "Juice") {
-			//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Throw Juice")); }
 			NewItem->ApplyJuiceColor(HeldItem.ItemColor);
 		}
 
