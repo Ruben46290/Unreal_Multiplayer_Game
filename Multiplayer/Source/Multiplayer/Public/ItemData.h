@@ -2,13 +2,13 @@
 
 #pragma once
 #include "CoreMinimal.h"
-//#include "GameFramework/Actor.h"
+#include "Engine/DataTable.h"
 #include "ItemData.generated.h"
 
 USTRUCT(BlueprintType)
 struct FItemData : public FTableRowBase
 {
-	GENERATED_BODY();
+	GENERATED_BODY()
 		
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	FName ItemID;
@@ -25,4 +25,7 @@ struct FItemData : public FTableRowBase
 	// Colour For Juice
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Juice")
 	FLinearColor ItemColor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Planting")
+	bool bCanBePlanted;
 };
