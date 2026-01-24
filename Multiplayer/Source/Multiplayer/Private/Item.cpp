@@ -3,6 +3,7 @@
 
 #include "Item.h"
 #include "Net/UnrealNetwork.h"
+#include "ItemIconWidget.h"
 
 void AItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -17,6 +18,12 @@ AItem::AItem()
 
 	// Replicate Movement For Throwing Logic
 	SetReplicateMovement(true);
+
+	PrimaryActorTick.bCanEverTick = true;
+
+	IconWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("IconWidget"));
+	IconWidgetComponent->SetupAttachment(MeshComponent);
+	IconWidgetComponent->SetVisibility(false);
 
 	static ConstructorHelpers::FObjectFinder<UDataTable> ItemTableFinder(TEXT("/Game/DataTables/DT_Items"));
 	if (ItemTableFinder.Succeeded())
@@ -34,8 +41,16 @@ void AItem::BeginPlay()
 	// If Item Name Is Valid
 	// Item Name Is Set While The Actor Is Being Spawned
 	if (ItemName != NAME_None) {
+
+		// Load Item Data 
 		LoadItemData();
+
+		// Update Icon Image
+		UpdateIconWidget();
 	}
+
+	SetActorTickEnabled(false);
+
 
 	// Enable physics after spawn
     MeshComponent->SetSimulatePhysics(true);
@@ -43,6 +58,21 @@ void AItem::BeginPlay()
 	MeshComponent->SetMassOverrideInKg(NAME_None, 100.0f, true); // Override Mass To 100kg
 
 	bReplicates = true;
+}
+
+void AItem::Tick(float DeltaTime)
+{
+
+	Super::Tick(DeltaTime);
+
+	// Keep icon above the mesh even when rolling
+	if (IconWidgetComponent && IconWidgetComponent->IsVisible())
+	{
+
+		// Update icon position to stay above the mesh
+		FVector MeshLocation = MeshComponent->GetComponentLocation();
+		IconWidgetComponent->SetWorldLocation(MeshLocation + FVector(0, 0, 50));
+	}
 }
 
 
@@ -123,4 +153,57 @@ void AItem::OnInteract_Implementation(AActor* Interactor)
 	}
 
 	Destroy();
+}
+
+void AItem::SetHighlight(bool bEnabled, bool bIsClosest)
+{
+	// If Mesh Is Valid
+	if (MeshComponent)
+	{
+		// Is Highlight Enabled
+		if (bEnabled)
+		{
+			// Green For Closest, White For Others
+			MeshComponent->SetOverlayMaterial(bIsClosest ? GreenHighlightMaterial : WhiteHighlightMaterial);
+
+			// If The Item Has An Icon, Show It
+			if (CachedItemData.bShowIcon) {
+				IconWidgetComponent->SetVisibility(true);
+				SetActorTickEnabled(true);
+			}
+		}
+		else
+		{
+			MeshComponent->SetOverlayMaterial(nullptr);
+
+			// If The Item Has An Icon, Hide It
+			if (CachedItemData.bShowIcon) {
+				IconWidgetComponent->SetVisibility(false);
+				SetActorTickEnabled(false);
+			}
+		}
+	}
+}
+
+void AItem::UpdateIconWidget()
+{
+	if (CachedItemData.ItemID == NAME_None) {
+		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Red, TEXT("No Item Data For UpdateIconWidget()")); }
+		return;
+	}
+	
+	if (CachedItemData.bShowIcon && CachedItemData.IconTexture) {
+
+		// Cast To Item Icon Widget
+		UItemIconWidget* IconWidget = Cast<UItemIconWidget>(IconWidgetComponent->GetUserWidgetObject());
+
+		if (IconWidget) {
+			IconWidget->SetIcon(CachedItemData.IconTexture);
+		}
+		else {
+			if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Red, TEXT("UpdateIconWidget() Cast Failed")); }
+		}
+	}
+
+	//Update Image
 }

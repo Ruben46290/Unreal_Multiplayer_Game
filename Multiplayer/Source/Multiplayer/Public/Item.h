@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "InteractableActor.h"
 #include "ItemData.h"
+#include "Components/WidgetComponent.h"
 #include "Item.generated.h"
 
 /**
@@ -27,6 +28,12 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_ItemName, EditAnywhere, BlueprintReadWrite, Category = "Item")
 	FName ItemName;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	UWidgetComponent* IconWidgetComponent;
+
+	// Update Icon UI
+	void UpdateIconWidget();
+
 	// Replication Event For ItemName
 	UFUNCTION()
 	void OnRep_ItemName();
@@ -45,13 +52,22 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	virtual void Tick(float DeltaTime) override;
+
 	// Reference To The DataTable (Needs To Be Assigned In Editor)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	UDataTable* ItemDataTable;
+
+	// Keep Track Of If Currently Highlighted
+	bool bIsHighlighted;
+
 
 public:
 	// In Public For Debugging Only
 	// Variable To Store Item Data Loaded From The Data Table
 	UPROPERTY(BlueprintReadOnly, Category = "Item")
 	FItemData CachedItemData;
+
+
+	virtual void SetHighlight(bool bEnabled, bool bIsClosest = false) override;
 };

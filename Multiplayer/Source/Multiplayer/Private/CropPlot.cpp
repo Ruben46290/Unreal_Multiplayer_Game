@@ -8,7 +8,7 @@
 ACropPlot::ACropPlot()
 {
 	CropMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CropMesh"));
-	CropMeshComponent->SetupAttachment(MeshComponent);
+	//CropMeshComponent->SetupAttachment(MeshComponent);
 
 	// Item Drop Location
 	ItemDropLocation = CreateDefaultSubobject<USceneComponent>(TEXT("ItemDropLocation"));
@@ -63,6 +63,12 @@ void ACropPlot::PlantCrop(FName CropID)
 
 	// Store Crop Data
 	StoredCropData = CropDataTable->FindRow<FCropData>(CropID, TEXT("Crop Interaction"));
+
+	// If No Crop Data Was Found
+	if (!StoredCropData) {
+		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 4, FColor::Red, TEXT("No Crop Data Found")); }
+		return;
+	}
 
 	// Store Current Crop Mesh
 	// Used For Replicating The Mesh
@@ -153,6 +159,7 @@ void ACropPlot::HarvestCrop()
 	CropMeshComponent->SetStaticMesh(nullptr);
 	CurrentCropMesh = nullptr;
 
+	// Reset State Variables
 	bCanBeHarvested = false;
 	bHasSeed = false;
 }

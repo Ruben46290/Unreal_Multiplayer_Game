@@ -16,6 +16,14 @@ struct FItemData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	UStaticMesh* Mesh;
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Icon")
+	bool bShowIcon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Icon")
+	UTexture2D* IconTexture = nullptr;
+
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Juice")
 	bool bCanBeJuiced;
 
@@ -25,6 +33,7 @@ struct FItemData : public FTableRowBase
 	// Colour For Juice
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Juice")
 	FLinearColor ItemColor;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Planting")
 	bool bCanBePlanted;

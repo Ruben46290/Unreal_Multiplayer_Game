@@ -58,7 +58,7 @@ protected:
 	int GrowingStage;
 
 	// How Long Before Growing Between Phases, Total Growing Time = StageGrowingTime * 3
-	float StageGrowingTime = 3.0f;
+	float StageGrowingTime = 1.0f;
 
 	// What Is The Next Second Milestone To Go To Next Growth Phase
 	float NextGrowingGoal;
