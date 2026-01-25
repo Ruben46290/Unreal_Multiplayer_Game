@@ -29,6 +29,7 @@ void ACropPlot::OnInteract_Implementation(AActor* Interactor)
 	// Cast To Player Class
 	AMultiplayerCharacter* Character = Cast<AMultiplayerCharacter>(Interactor);
 
+	// Get Item Name
 	FName PlayerItem = Character->GetHeldItemName();
 
 	if (PlayerItem == "WateringCan") {
@@ -167,10 +168,11 @@ void ACropPlot::HarvestCrop()
 
 void ACropPlot::Server_SpawnItem_Implementation(FName ItemID, int32 Index)
 {
-
 	FVector SpawnPos = ItemDropLocation->GetComponentLocation();
 
-	AItem* NewItem = GetWorld()->SpawnActorDeferred<AItem>(ItemBlueprintClass, FTransform(FRotator::ZeroRotator, FVector(SpawnPos.X, SpawnPos.Y, SpawnPos.Z + (Index * 50))));
+	SpawnPos.Z += Index * 50;
+
+	AItem* NewItem = GetWorld()->SpawnActorDeferred<AItem>(ItemBlueprintClass, FTransform(FRotator::ZeroRotator, SpawnPos));
 
 	if (NewItem) {
 		
