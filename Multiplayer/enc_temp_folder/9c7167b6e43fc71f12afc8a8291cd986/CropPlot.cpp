@@ -191,7 +191,8 @@ void ACropPlot::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 // Replication Event For Current Crop Mesh
 void ACropPlot::OnRep_CurrentCropMesh()
 {
-	// Don't Check If Mesh Is Valid So It Can Update On nullptr Aswell
-	CropMeshComponent->SetStaticMesh(CurrentCropMesh);
-
+	if (CurrentCropMesh)
+	{
+		CropMeshComponent->SetStaticMesh(CurrentCropMesh);
+	}
 }
