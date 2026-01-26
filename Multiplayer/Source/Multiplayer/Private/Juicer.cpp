@@ -22,7 +22,7 @@ AJuicer::AJuicer()
 	BucketMeshComponent->SetIsReplicated(false);
 }
 
-void AJuicer::SetHighlight(bool bEnabled, bool bIsClosest)
+void AJuicer::SetHighlight(bool bEnabled, bool bIsClosest, AActor* Player)
 {
 	// If Mesh Is Valid
 	if (MeshComponent)

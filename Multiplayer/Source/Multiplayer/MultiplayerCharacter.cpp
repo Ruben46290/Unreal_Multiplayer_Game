@@ -463,7 +463,7 @@ void AMultiplayerCharacter::UpdateClosestInteractable()
 		if (Interactable)
 		{
 			bool bIsClosest = (Interactable == NewClosest);
-			Interactable->SetHighlight(true, bIsClosest);
+			Interactable->SetHighlight(true, bIsClosest, this);
 		}
 	}
 

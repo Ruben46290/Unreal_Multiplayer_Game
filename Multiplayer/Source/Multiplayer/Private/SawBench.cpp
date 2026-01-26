@@ -67,6 +67,109 @@ void ASawBench::OnInteract_Implementation(AActor* Interactor)
 	}
 }
 
+void ASawBench::SetHighlight(bool bEnabled, bool bIsClosest, AActor* Player)
+{
+	// If Mesh Is Valid
+	if (MeshComponent)
+	{
+		// Is Highlight Enabled
+		if (bEnabled)
+		{
+			// If There Is Currently A Bucket Waiting On The Table
+			if (ItemMeshComponent && CurrentState == "HasBucket") {
+
+				// If Table Isn't The Closest Interactable
+				if (!bIsClosest) {
+
+					// Show Bucket Outline
+					ItemMeshComponent->SetOverlayMaterial(WhiteHighlightMaterial);
+
+				}
+				// If Table Is The Closest Interactable
+				else {
+
+					// Cast To Player Class
+					// Casting Is Surpisingly Cheap On Performance So Casting Every 0.1 Seconds Shouldn't Be An Issue
+					AMultiplayerCharacter* Character = Cast<AMultiplayerCharacter>(Player);
+
+					// Get Item Name
+					FName PlayerItem = Character->GetHeldItemName();
+
+					// If The Player Has Empty Hands Show Green Highlight, If Not Show White Highlight
+					ItemMeshComponent->SetOverlayMaterial(PlayerItem == NAME_None ? GreenHighlightMaterial : WhiteHighlightMaterial);
+
+
+				}
+
+				// If The Body is Highlighted
+				if (MeshComponent->GetOverlayMaterial() != nullptr) {
+
+					// Disable The Highlight On The Body
+					MeshComponent->SetOverlayMaterial(nullptr);
+				}
+
+			}
+
+			// If There Isn't A Bucket On The Table
+			else {
+
+				// If The Animation Is Currently Playing
+				if (CurrentState == "PlayingAnimation") {
+
+					// Hide Body Highlight
+					MeshComponent->SetOverlayMaterial(nullptr);
+
+					// If The Item Is Visible
+					if (ItemMeshComponent) {
+
+						// Hide Highlight Around The Item
+						ItemMeshComponent->SetOverlayMaterial(nullptr);
+					}
+
+					return;
+
+				}
+
+				// If The Table Isn't The Closest Interactable
+				if (!bIsClosest) {
+					// Set Highlight As White
+					MeshComponent->SetOverlayMaterial(WhiteHighlightMaterial);
+
+				}
+
+				// The Table Is The Closest Interactable
+				else {
+
+					// Cast To Player Class
+					// Casting Is Surpisingly Cheap On Performance So Casting Every 0.1 Seconds Shouldn't Be An Issue
+					AMultiplayerCharacter* Character = Cast<AMultiplayerCharacter>(Player);
+
+					// Get Item Name
+					FName PlayerItem = Character->GetHeldItemName();
+
+					// If The Player Is Holding A Log Show Green Highlight, If Not Show White Highlight
+					MeshComponent->SetOverlayMaterial(PlayerItem == "Log" ? GreenHighlightMaterial : WhiteHighlightMaterial);
+				}
+			}
+		}
+
+		// Highlight Is Not Enabled
+		else
+		{
+			// Hide Body Highlight
+			MeshComponent->SetOverlayMaterial(nullptr);
+
+			// If The Item Is Visible
+			if (ItemMeshComponent) {
+
+				// Hide Highlight Around The Item
+				ItemMeshComponent->SetOverlayMaterial(nullptr);
+			}
+		}
+	}
+}
+
+
 void ASawBench::Multicast_OnAnimationStart_Implementation()
 {
 	// This Runs On All Clients & Server, Plays Animation Only

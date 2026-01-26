@@ -75,7 +75,7 @@ void AInteractableActor::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, 
 
 }
 
-void AInteractableActor::SetHighlight(bool bEnabled, bool bIsClosest)
+void AInteractableActor::SetHighlight(bool bEnabled, bool bIsClosest, AActor* Player)
 {
 	// If Mesh Is Valid
 	if (MeshComponent)

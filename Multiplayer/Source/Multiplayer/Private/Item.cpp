@@ -155,7 +155,7 @@ void AItem::OnInteract_Implementation(AActor* Interactor)
 	Destroy();
 }
 
-void AItem::SetHighlight(bool bEnabled, bool bIsClosest)
+void AItem::SetHighlight(bool bEnabled, bool bIsClosest, AActor* Player)
 {
 	// If Mesh Is Valid
 	if (MeshComponent)

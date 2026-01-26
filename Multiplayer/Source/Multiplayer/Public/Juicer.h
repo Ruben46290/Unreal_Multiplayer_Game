@@ -23,7 +23,7 @@ public:
 	virtual void OnInteract_Implementation(AActor* Interactor);
 
 	// Set highlight with color
-	virtual void SetHighlight(bool bEnabled, bool bIsClosest = false) override;
+	virtual void SetHighlight(bool bEnabled, bool bIsClosest = false, AActor* Player = nullptr) override;
 
 protected:
 

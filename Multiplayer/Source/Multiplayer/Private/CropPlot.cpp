@@ -47,9 +47,6 @@ void ACropPlot::OnInteract_Implementation(AActor* Interactor)
 	// If The Players Item Can Be Planted
 	if (ItemData && ItemData->bCanBePlanted) {
 
-		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Plant Item")); }
-
-
 		// Plant Crop
 		PlantCrop(PlayerItem);
 
@@ -146,9 +143,6 @@ void ACropPlot::GrowingTick()
 
 void ACropPlot::HarvestCrop()
 {
-	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Harvest Crop")); }
-
-
 	// Loop Through All Items To Drop
 	for (int32 i = 0; i < StoredCropData->DroppedItems.Num(); i++) {
 
@@ -168,15 +162,23 @@ void ACropPlot::HarvestCrop()
 
 void ACropPlot::Server_SpawnItem_Implementation(FName ItemID, int32 Index)
 {
+	// Get Spawn Pos
 	FVector SpawnPos = ItemDropLocation->GetComponentLocation();
 
+	// Spawn Each Item Slightly Higher & Forward
+	SpawnPos.X += Index * 25;
 	SpawnPos.Z += Index * 50;
 
+	// Start Spawning Item
 	AItem* NewItem = GetWorld()->SpawnActorDeferred<AItem>(ItemBlueprintClass, FTransform(FRotator::ZeroRotator, SpawnPos));
 
+	// If An Item Was Spawned
 	if (NewItem) {
 		
+		// Set ItemID
 		NewItem->ItemName = ItemID;
+
+		// Finish Spawning Item
 		NewItem->FinishSpawning(FTransform(FRotator::ZeroRotator, SpawnPos));
 	}
 }

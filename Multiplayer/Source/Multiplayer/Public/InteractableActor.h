@@ -60,5 +60,5 @@ protected:
 
 public:	
 	// Set highlight with color
-	virtual void SetHighlight(bool bEnabled, bool bIsClosest = false);
+	virtual void SetHighlight(bool bEnabled, bool bIsClosest = false, AActor* Player = nullptr);
 };

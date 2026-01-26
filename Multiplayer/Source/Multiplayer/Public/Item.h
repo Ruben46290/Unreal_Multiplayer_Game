@@ -69,5 +69,5 @@ public:
 	FItemData CachedItemData;
 
 
-	virtual void SetHighlight(bool bEnabled, bool bIsClosest = false) override;
+	virtual void SetHighlight(bool bEnabled, bool bIsClosest = false, AActor* Player = nullptr) override;
 };

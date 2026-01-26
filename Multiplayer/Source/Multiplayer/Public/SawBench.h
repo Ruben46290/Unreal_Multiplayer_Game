@@ -54,6 +54,9 @@ protected:
 	// Implement & Override The Interface Function
 	virtual void OnInteract_Implementation(AActor* Interactor);
 
+	// Override Set Highlight Function
+	virtual void SetHighlight(bool bEnabled, bool bIsClosest = false, AActor* Player = nullptr) override;
+
 
 	// Multicast RPC to play animations on all clients
 	UFUNCTION(NetMulticast, Reliable)
