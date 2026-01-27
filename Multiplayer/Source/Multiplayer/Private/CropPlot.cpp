@@ -15,6 +15,18 @@ ACropPlot::ACropPlot()
 	ItemDropLocation->SetupAttachment(MeshComponent);
 }
 
+void ACropPlot::BeginPlay()
+{
+	
+	Super::BeginPlay();
+
+	// Is Auto Regrowing Enabled?
+	if (bAutoRegrowEnabled) {
+
+		// Plant Chosen Crop Type
+		PlantCrop(AutoRegrowPlantName);
+	}
+}
 
 void ACropPlot::OnInteract_Implementation(AActor* Interactor)
 {
@@ -143,6 +155,9 @@ void ACropPlot::GrowingTick()
 
 void ACropPlot::HarvestCrop()
 {
+
+	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 4, FColor::Green, TEXT("Crop HarvestCrop()")); }
+
 	// Loop Through All Items To Drop
 	for (int32 i = 0; i < StoredCropData->DroppedItems.Num(); i++) {
 
@@ -157,6 +172,13 @@ void ACropPlot::HarvestCrop()
 	// Reset State Variables
 	bCanBeHarvested = false;
 	bHasSeed = false;
+
+	// Is Auto Regrowing Enabled?
+	if (bAutoRegrowEnabled) {
+
+		// Plant Chosen Crop Type
+		PlantCrop(AutoRegrowPlantName);
+	}
 }
 
 

@@ -63,14 +63,24 @@ protected:
 	// What Is The Next Second Milestone To Go To Next Growth Phase
 	float NextGrowingGoal;
 
-
+	// Is The Crop Ready To Be Harvested
 	bool bCanBeHarvested = false;
+
+	// Should The Crop Automatically Regrow After Being Harvested
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	bool bAutoRegrowEnabled = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	FName AutoRegrowPlantName;
+
 
 	// * * * * * * * * * * Functions * * * * * * * * * * 
 
 public:
 
 	ACropPlot();
+
+	virtual void BeginPlay() override;
 
 	// Plant A Crop
 	UFUNCTION(BlueprintCallable, Category = "Crop")
