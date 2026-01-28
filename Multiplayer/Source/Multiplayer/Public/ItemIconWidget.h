@@ -20,6 +20,9 @@ public:
 	// Basically A Construct Function
 	virtual void NativeConstruct() override;
 
+	// "meta = (BindWidget)" Makes It So It Connects To A Widget With The Same Name
+	// e.g There Needs To Be An Image Named IconImage, That This Variable Will Connect To
+	// The Widget Component (Image) Needs To Be Made In The Blueprint With A Matching Name
 	UPROPERTY(meta = (BindWidget))
 	UImage* IconImage;
 

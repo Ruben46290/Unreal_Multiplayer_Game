@@ -5,6 +5,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Item.h"
 
+
 ACropPlot::ACropPlot()
 {
 	CropMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CropMesh"));
@@ -13,6 +14,10 @@ ACropPlot::ACropPlot()
 	// Item Drop Location
 	ItemDropLocation = CreateDefaultSubobject<USceneComponent>(TEXT("ItemDropLocation"));
 	ItemDropLocation->SetupAttachment(MeshComponent);
+
+	IconWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("IconWidget"));
+	IconWidgetComponent->SetupAttachment(MeshComponent);
+	IconWidgetComponent->SetVisibility(false);
 }
 
 void ACropPlot::BeginPlay()
@@ -26,6 +31,14 @@ void ACropPlot::BeginPlay()
 		// Plant Chosen Crop Type
 		PlantCrop(AutoRegrowPlantName);
 	}
+
+	// Get The Crop UI
+	CropUI = Cast<UCropPlotWidget>(IconWidgetComponent->GetUserWidgetObject());
+	
+	if (!CropUI) {
+		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 100, FColor::Red, TEXT("CROP UI NOT LOADED!!!")); }
+	}
+
 }
 
 void ACropPlot::OnInteract_Implementation(AActor* Interactor)
@@ -47,6 +60,13 @@ void ACropPlot::OnInteract_Implementation(AActor* Interactor)
 	if (PlayerItem == "WateringCan") {
 
 		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Use Watering Can")); }
+
+		// Set Current Water To Max Water
+		CurrentWaterLevel = MaxWaterLevel;
+
+		// Update Water UI
+		CropUI->UpdateCropUI(CurrentWaterLevel / MaxWaterLevel);
+
 		return;
 	}
 
@@ -107,9 +127,32 @@ void ACropPlot::GrowingTick()
 
 	//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 0.1, FColor::Green, TEXT("Crop Growth Tick")); }
 
-	// Add 0.1 To Current Progress
-	// Function Is Called On A 0.1 Second Timer So 1 Growing Progress = 1 Second
-	GrowingProgress += 0.1f;
+
+	// Tick Down Water
+	// If Theres No Water At The Crop
+	if (CurrentWaterLevel == 0) {
+		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 0.1, FColor::Green, TEXT("Growing Tick No Water")); }
+		// Apply Growing Penalty
+		GrowingProgress += 0.1f / NoWaterPenalty;
+
+
+	}
+	// If There Is Water
+	else {
+		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 0.1, FColor::Green, TEXT("Growing Tick With Water")); }
+		// Dont Apply Growing Penalty
+		GrowingProgress += 0.1f;
+
+		// Remove Some Water
+		CurrentWaterLevel -= WaterDecayRate;
+
+		// If Water Level Is Below 0
+		if (CurrentWaterLevel < 0) {
+
+			// Round Current Water Level To 0
+			CurrentWaterLevel = 0;
+		}
+	}
 
 	// If Growing Progress Hit The Next Growing Goal
 	if (GrowingProgress >= NextGrowingGoal) {
@@ -151,12 +194,14 @@ void ACropPlot::GrowingTick()
 		}
 
 	}
+
+	CropUI->UpdateCropUI(CurrentWaterLevel / MaxWaterLevel);
 }
 
 void ACropPlot::HarvestCrop()
 {
 
-	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 4, FColor::Green, TEXT("Crop HarvestCrop()")); }
+	//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 4, FColor::Green, TEXT("Crop HarvestCrop()")); }
 
 	// Loop Through All Items To Drop
 	for (int32 i = 0; i < StoredCropData->DroppedItems.Num(); i++) {
@@ -188,7 +233,7 @@ void ACropPlot::Server_SpawnItem_Implementation(FName ItemID, int32 Index)
 	FVector SpawnPos = ItemDropLocation->GetComponentLocation();
 
 	// Spawn Each Item Slightly Higher & Forward
-	SpawnPos.X += Index * 25;
+	SpawnPos.X += Index * 75;
 	SpawnPos.Z += Index * 50;
 
 	// Start Spawning Item

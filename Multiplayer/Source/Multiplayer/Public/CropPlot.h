@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "InteractableActor.h"
 #include <CropData.h>
+#include "Components/WidgetComponent.h"
+#include "Widgets/CropPlotWidget.h"
 #include "CropPlot.generated.h"
 
 
@@ -23,6 +25,10 @@ protected:
 	// Item Drop Location
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USceneComponent* ItemDropLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	UWidgetComponent* IconWidgetComponent;
+
 	// * * * * * * * * * * Variables * * * * * * * * * * 
 	
 	// Keep Track Of Planted Crop
@@ -47,6 +53,9 @@ protected:
 	UPROPERTY(ReplicatedUsing = OnRep_CurrentCropMesh, BlueprintReadOnly, Category = "Crop")
 	UStaticMesh* CurrentCropMesh = nullptr;
 
+	// Refrence To CropUI
+	// Set On BeginPlay, From Reading The Class Set In IconWidgetComponent
+	UCropPlotWidget* CropUI;
 
 	// Timer For Growing
 	FTimerHandle GrowingTimer;
@@ -65,6 +74,26 @@ protected:
 
 	// Is The Crop Ready To Be Harvested
 	bool bCanBeHarvested = false;
+
+	// * * * * * Water * * * * *
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Water")
+	float MaxWaterLevel = 10.0f;
+
+	// How Much Water Is Currently In The Crop
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Water")
+	float CurrentWaterLevel;
+
+	// How Fast Does Water Get Used
+	// Editable To Be Diffrent For Diffrent Level Diffilcuties
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Water")
+	float WaterDecayRate = 0.1f;
+
+	// Growing Rate
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Water")
+	float NoWaterPenalty = 4.0f;
+
+	// * * * * * Auto Regrow * * * * *
 
 	// Should The Crop Automatically Regrow After Being Harvested
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
