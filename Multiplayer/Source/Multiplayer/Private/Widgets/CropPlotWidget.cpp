@@ -9,7 +9,7 @@ void UCropPlotWidget::NativeConstruct()
 }
 
 
-void UCropPlotWidget::UpdateCropUI(float WaterPercent)
+void UCropPlotWidget::UpdateWaterUI(float WaterPercent)
 {
     WaterProgressBar->SetPercent(WaterPercent);
 }

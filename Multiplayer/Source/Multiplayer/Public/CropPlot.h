@@ -60,6 +60,9 @@ protected:
 	// Timer For Growing
 	FTimerHandle GrowingTimer;
 
+	// Water Timer
+	FTimerHandle WaterTimer;
+
 	// How Many Seconds Has The Plant Been Growing
 	float GrowingProgress;
 
@@ -115,7 +118,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Crop")
 	void PlantCrop(FName CropID);
 
+	// Timer Tick That Calls Growing Tick & Water Tick
+	void TimerTick();
+
 	void GrowingTick();
+
+	void WaterTick();
 
 	// Harvest The Crop
 	UFUNCTION(BlueprintCallable, Category = "Crop")

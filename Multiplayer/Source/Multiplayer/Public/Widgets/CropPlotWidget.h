@@ -24,5 +24,5 @@ public:
 	virtual void NativeConstruct() override;
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
-	void UpdateCropUI(float WaterPercent);
+	void UpdateWaterUI(float WaterPercent);
 };

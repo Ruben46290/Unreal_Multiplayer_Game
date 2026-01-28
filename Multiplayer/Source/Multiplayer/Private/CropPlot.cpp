@@ -64,9 +64,18 @@ void ACropPlot::OnInteract_Implementation(AActor* Interactor)
 		// Set Current Water To Max Water
 		CurrentWaterLevel = MaxWaterLevel;
 
-		// Update Water UI
-		CropUI->UpdateCropUI(CurrentWaterLevel / MaxWaterLevel);
+		// Update Water UI, 1 = Full Bar
+		CropUI->UpdateWaterUI(1);
 
+		// If Timer Isn't Active
+		if (!GetWorld()->GetTimerManager().IsTimerActive(GrowingTimer)) {
+
+			// Start Growing Timer
+			GetWorldTimerManager().SetTimer(GrowingTimer, this,
+				&ACropPlot::TimerTick, 0.1f, true);
+		}
+
+		// Stop Function To Skip Other Planting Logic
 		return;
 	}
 
@@ -116,42 +125,51 @@ void ACropPlot::PlantCrop(FName CropID)
 	NextGrowingGoal = StageGrowingTime;
 	bCanBeHarvested = false;
 
-	// Start Growing Timer
-	GetWorldTimerManager().SetTimer(GrowingTimer, this,
-		&ACropPlot::GrowingTick, 0.1f, true);
+	// If Timer Isn't Active
+	if (!GetWorld()->GetTimerManager().IsTimerActive(GrowingTimer)) {
 
+		// Start Growing Timer
+		GetWorldTimerManager().SetTimer(GrowingTimer, this,
+			&ACropPlot::TimerTick, 0.1f, true);
+	}
+}
+
+void ACropPlot::TimerTick()
+{
+	bool bTickCalled = false;
+
+	if (bHasSeed && !bCanBeHarvested) {
+		GrowingTick();
+		bTickCalled = true;
+	}
+
+	if (CurrentWaterLevel > 0) {
+		WaterTick();
+		bTickCalled = true;
+	}
+
+	if (!bTickCalled) {
+		// If Neither Of The Ticks Called -< Stop Timer
+		GetWorldTimerManager().ClearTimer(GrowingTimer);
+		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 4, FColor::Red, TEXT("Stop Growth Tick")); }
+	}
 }
 
 void ACropPlot::GrowingTick()
 {
 
-	//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 0.1, FColor::Green, TEXT("Crop Growth Tick")); }
+	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 0.1, FColor::Green, TEXT("Crop Growth Tick")); }
 
+	// Is There Any Water?
+	if (CurrentWaterLevel > 0) {
 
-	// Tick Down Water
-	// If Theres No Water At The Crop
-	if (CurrentWaterLevel == 0) {
-		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 0.1, FColor::Green, TEXT("Growing Tick No Water")); }
-		// Apply Growing Penalty
-		GrowingProgress += 0.1f / NoWaterPenalty;
-
-
-	}
-	// If There Is Water
-	else {
-		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 0.1, FColor::Green, TEXT("Growing Tick With Water")); }
-		// Dont Apply Growing Penalty
+		// Yes - Don't Apply Growing Penalty
 		GrowingProgress += 0.1f;
+	}
+	else {
 
-		// Remove Some Water
-		CurrentWaterLevel -= WaterDecayRate;
-
-		// If Water Level Is Below 0
-		if (CurrentWaterLevel < 0) {
-
-			// Round Current Water Level To 0
-			CurrentWaterLevel = 0;
-		}
+		// No - Apply Growing Penalty
+		GrowingProgress += 0.1f / NoWaterPenalty;
 	}
 
 	// If Growing Progress Hit The Next Growing Goal
@@ -185,17 +203,23 @@ void ACropPlot::GrowingTick()
 			CurrentCropMesh = StoredCropData->Stage3Mesh;
 
 			// Stop Timer
-			GetWorldTimerManager().ClearTimer(GrowingTimer);
+			//GetWorldTimerManager().ClearTimer(GrowingTimer);
 
 			// Set Can Be Harvested To True
 			bCanBeHarvested = true;
 
 			//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Crop Grow To Stage 3")); }
 		}
-
 	}
+}
 
-	CropUI->UpdateCropUI(CurrentWaterLevel / MaxWaterLevel);
+void ACropPlot::WaterTick()
+{
+	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 0.1, FColor::Green, TEXT("Water Tick")); }
+
+	CurrentWaterLevel -= WaterDecayRate;
+
+	CropUI->UpdateWaterUI(CurrentWaterLevel/MaxWaterLevel);
 }
 
 void ACropPlot::HarvestCrop()
