@@ -356,6 +356,9 @@ void ACropPlot::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ACropPlot, CurrentCropMesh);
+	DOREPLIFETIME(ACropPlot, CurrentWaterLevel);
+	DOREPLIFETIME(ACropPlot, SeedType);
+	DOREPLIFETIME(ACropPlot, SeedCount);
 }
 
 // Replication Event For Current Crop Mesh
@@ -364,4 +367,30 @@ void ACropPlot::OnRep_CurrentCropMesh()
 	// Don't Check If Mesh Is Valid So It Can Update On nullptr Aswell
 	CropMeshComponent->SetStaticMesh(CurrentCropMesh);
 
+}
+
+void ACropPlot::OnRep_CurrentWaterLevel()
+{
+	// If CropUI Is Valid
+	if (CropUI) {
+
+		// Update Water Level
+		CropUI->UpdateWaterUI(CurrentWaterLevel / MaxWaterLevel);
+	}
+}
+
+void ACropPlot::OnRep_SeedType()
+{
+	if (CropUI && SeedType != NAME_None) {
+		FCropData* CropData = CropDataTable->FindRow<FCropData>(SeedType, TEXT(""));
+		if (CropData) {
+			CropUI->UpdateSeedUI(CropData->IconTexture);
+		}
+	}
+}
+
+void ACropPlot::OnRep_SeedCount()
+{
+	// Update Seed Count UI
+	CropUI->UpdateSeedCount(SeedCount);
 }

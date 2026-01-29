@@ -66,8 +66,10 @@ protected:
 
 	// * * * * * Planting * * * * *
 
+	UPROPERTY(ReplicatedUsing = OnRep_SeedCount)
 	int32 SeedCount = 0;
 
+	UPROPERTY(ReplicatedUsing = OnRep_SeedType)
 	FName SeedType = "Null";
 
 	// * * * * * Growing * * * * *
@@ -93,7 +95,7 @@ protected:
 	float MaxWaterLevel = 10.0f;
 
 	// How Much Water Is Currently In The Crop
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Water")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Water", ReplicatedUsing = OnRep_CurrentWaterLevel)
 	float CurrentWaterLevel;
 
 	// How Fast Does Water Get Used
@@ -144,7 +146,21 @@ public:
 	// Implement & Override The Interface Function
 	virtual void OnInteract_Implementation(AActor* Interactor);
 
+
+
+	// * * * * * Replication * * * * *
+
 	// Replication Event For Current Crop Mesh
 	UFUNCTION()
 	void OnRep_CurrentCropMesh();
+
+	UFUNCTION()
+	void OnRep_CurrentWaterLevel();
+
+	UFUNCTION()
+	void OnRep_SeedType();
+
+	UFUNCTION()
+	void OnRep_SeedCount();
+
 };
