@@ -63,6 +63,13 @@ protected:
 	// Water Timer
 	FTimerHandle WaterTimer;
 
+
+	// * * * * * Planting * * * * *
+
+	int32 SeedCount = 0;
+
+	FName SeedType = "Null";
+
 	// * * * * * Growing * * * * *
 
 	// How Many Seconds Has The Plant Been Growing

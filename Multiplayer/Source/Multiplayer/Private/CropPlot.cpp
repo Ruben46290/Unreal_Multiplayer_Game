@@ -78,29 +78,56 @@ void ACropPlot::OnInteract_Implementation(AActor* Interactor)
 		return;
 	}
 
-	// Return If A Seed Is Already Growing
-	if (bHasSeed) { return; }
-
 	// Get DataTable Row, (Text Is For Debugging)
 	FItemData* ItemData = ItemDataTable->FindRow<FItemData>(PlayerItem, TEXT("Crop Interaction"));
 
 	// If The Players Item Can Be Planted
 	if (ItemData && ItemData->bCanBePlanted) {
 
-		// Plant Crop
-		PlantCrop(PlayerItem);
+		// Return If A Seed Is Already Growing
+		if (bHasSeed) {
 
-		// Clear Players Item
-		Character->ClearHeldItem();
+			// Plyaer Is Placing The Same Seed That Is Planted
+			if (PlayerItem == SeedType ) {
+
+				// Add 1 To The Seed Count
+				SeedCount += 1;
+
+				// Clear Players Item
+				Character->ClearHeldItem();
+
+				// Update Seed Count UI
+				CropUI->UpdateSeedCount(SeedCount);
+			}
+
+			// Player Is Hold A Diffrent Type Of Seed
+			else {
+				return;
+			}
+
+		}
+
+		// There Isn't A Seed Already Planted
+		else {
+
+			// Plant Crop
+			PlantCrop(PlayerItem);
+
+			// Clear Players Item
+			Character->ClearHeldItem();
+		}
+
+
 	}
 }
+
 
 
 void ACropPlot::PlantCrop(FName CropID)
 {
 
 	// Store Crop Data
-	StoredCropData = CropDataTable->FindRow<FCropData>(CropID, TEXT("Crop Interaction"));
+	StoredCropData = CropDataTable->FindRow<FCropData>(CropID, TEXT("Crop Plant"));
 
 	// If No Crop Data Was Found
 	if (!StoredCropData) {
@@ -118,6 +145,9 @@ void ACropPlot::PlantCrop(FName CropID)
 	// Set Has Seed To True
 	bHasSeed = true;
 
+	// Set Seed Type
+	SeedType = CropID;
+
 	// Set Growing Variables
 	GrowingProgress = 0;
 	GrowingStage = 1;
@@ -132,7 +162,11 @@ void ACropPlot::PlantCrop(FName CropID)
 			&ACropPlot::TimerTick, 0.1f, true);
 	}
 
+	// Update Seed Image
 	CropUI->UpdateSeedUI(StoredCropData->IconTexture);
+
+	// Update Seed Count UI
+	CropUI->UpdateSeedCount(SeedCount);
 }
 
 void ACropPlot::TimerTick()
@@ -250,14 +284,45 @@ void ACropPlot::HarvestCrop()
 
 	// Reset State Variables
 	bCanBeHarvested = false;
-	bHasSeed = false;
+	//bHasSeed = false;
 
-	// Is Auto Regrowing Enabled?
+	// Auto Regrowing Is Enabled
 	if (bAutoRegrowEnabled) {
 
 		// Plant Chosen Crop Type
 		PlantCrop(AutoRegrowPlantName);
 	}
+
+	// Auto Regrow Is Disabled
+	else {
+
+		// Is There A Queued Seed To Plant
+		if (SeedCount > 0) {
+
+			// Decrease Seed Count By 1
+			SeedCount -= 1;
+
+			// Replant Crop
+			PlantCrop(SeedType);
+
+		}
+
+		// No More Seeds To Plant
+		else {
+
+			// Clear Variables
+			bHasSeed = false;
+			SeedType = "Null";
+
+			CropUI->UpdateSeedUI(nullptr);
+
+		}
+
+		// Update Seed Count UI
+		CropUI->UpdateSeedCount(SeedCount);
+	}
+
+
 }
 
 

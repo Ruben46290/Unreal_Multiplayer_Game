@@ -24,7 +24,7 @@ class MULTIPLAYER_API UCropPlotWidget : public UUserWidget
 	UImage* CropTypeImage;
 
 	UPROPERTY(meta = (BindWidget));
-	UTextBlock* SeedCount;
+	UTextBlock* SeedCountText;
 
 public:
 
@@ -33,8 +33,12 @@ public:
 	// Basically A Construct Function
 	virtual void NativeConstruct() override;
 
+	// Update Image For Crop Type
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void UpdateSeedUI(UTexture2D* IconTexture);
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void UpdateSeedCount(int32 Seeds);
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void UpdateWaterUI(float WaterPercent);
