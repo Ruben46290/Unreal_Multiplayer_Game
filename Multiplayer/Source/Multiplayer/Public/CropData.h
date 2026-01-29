@@ -17,7 +17,7 @@ struct FCropData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crop")
 	TArray<FName> DroppedItems;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	UStaticMesh* Stage1Mesh;
 
@@ -26,5 +26,8 @@ struct FCropData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	UStaticMesh* Stage3Mesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	UTexture2D* IconTexture;
 
 };

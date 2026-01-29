@@ -63,8 +63,6 @@ protected:
 	// Water Timer
 	FTimerHandle WaterTimer;
 
-	// * * * * * Growing * * * * *
-
 	// How Many Seconds Has The Plant Been Growing
 	float GrowingProgress;
 

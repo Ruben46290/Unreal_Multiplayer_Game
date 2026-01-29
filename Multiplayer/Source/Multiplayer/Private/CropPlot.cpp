@@ -36,9 +36,8 @@ void ACropPlot::BeginPlay()
 	CropUI = Cast<UCropPlotWidget>(IconWidgetComponent->GetUserWidgetObject());
 	
 	if (!CropUI) {
-		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 100, FColor::Red, TEXT("CROP UI NOT LOADED!!!")); }
+		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 100, FColor::Red, TEXT("CROP UI NOT LOADED!!!")); return; }
 	}
-
 }
 
 void ACropPlot::OnInteract_Implementation(AActor* Interactor)
@@ -132,24 +131,35 @@ void ACropPlot::PlantCrop(FName CropID)
 		GetWorldTimerManager().SetTimer(GrowingTimer, this,
 			&ACropPlot::TimerTick, 0.1f, true);
 	}
+
+	CropUI->UpdateSeedUI(StoredCropData->IconTexture);
 }
 
 void ACropPlot::TimerTick()
 {
+	// Set bTickCalled As False
 	bool bTickCalled = false;
 
+	// If There Is A Seed That Isn't Done Growing
 	if (bHasSeed && !bCanBeHarvested) {
+
+		// Call Growing Tick 
 		GrowingTick();
 		bTickCalled = true;
 	}
 
+	// If There Is Water At The Plot
 	if (CurrentWaterLevel > 0) {
+
+		// Call Water Tick
 		WaterTick();
 		bTickCalled = true;
 	}
 
+	// If Neither Of The Ticks Were Called
 	if (!bTickCalled) {
-		// If Neither Of The Ticks Called -< Stop Timer
+
+		//Stop Timer
 		GetWorldTimerManager().ClearTimer(GrowingTimer);
 		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 4, FColor::Red, TEXT("Stop Growth Tick")); }
 	}
@@ -158,7 +168,7 @@ void ACropPlot::TimerTick()
 void ACropPlot::GrowingTick()
 {
 
-	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 0.1, FColor::Green, TEXT("Crop Growth Tick")); }
+	//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 0.1, FColor::Green, TEXT("Crop Growth Tick")); }
 
 	// Is There Any Water?
 	if (CurrentWaterLevel > 0) {
@@ -215,7 +225,7 @@ void ACropPlot::GrowingTick()
 
 void ACropPlot::WaterTick()
 {
-	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 0.1, FColor::Green, TEXT("Water Tick")); }
+	//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 0.1, FColor::Green, TEXT("Water Tick")); }
 
 	CurrentWaterLevel -= WaterDecayRate;
 
