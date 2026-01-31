@@ -13,6 +13,9 @@ void UCropPlotWidget::NativeConstruct()
 
 void UCropPlotWidget::UpdateSeedUI(UTexture2D* IconTexture)
 {
+
+    if (!IconTexture) { return; }
+
     // Set Crop Type Image
     CropTypeImage->SetBrushFromTexture(IconTexture);
 

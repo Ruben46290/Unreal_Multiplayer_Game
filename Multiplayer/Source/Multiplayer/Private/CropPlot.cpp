@@ -25,18 +25,18 @@ void ACropPlot::BeginPlay()
 	
 	Super::BeginPlay();
 
-	// Is Auto Regrowing Enabled?
-	if (bAutoRegrowEnabled) {
-
-		// Plant Chosen Crop Type
-		PlantCrop(AutoRegrowPlantName);
-	}
-
 	// Get The Crop UI
 	CropUI = Cast<UCropPlotWidget>(IconWidgetComponent->GetUserWidgetObject());
 	
 	if (!CropUI) {
 		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 100, FColor::Red, TEXT("CROP UI NOT LOADED!!!")); return; }
+	}
+
+	// Is Auto Regrowing Enabled?
+	if (bAutoRegrowEnabled) {
+
+		// Plant Chosen Crop Type
+		PlantCrop(AutoRegrowPlantName);
 	}
 }
 
@@ -57,8 +57,6 @@ void ACropPlot::OnInteract_Implementation(AActor* Interactor)
 	FName PlayerItem = Character->GetHeldItemName();
 
 	if (PlayerItem == "WateringCan") {
-
-		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Use Watering Can")); }
 
 		// Set Current Water To Max Water
 		CurrentWaterLevel = MaxWaterLevel;
