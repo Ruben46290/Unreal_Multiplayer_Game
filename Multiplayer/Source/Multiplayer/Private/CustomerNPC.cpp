@@ -26,26 +26,22 @@ void ACustomerNPC::Tick(float DeltaTime)
     if (bIsMoving)
     {
         FVector CurrentLocation = GetActorLocation();
-        FVector Direction = TargetPosition - CurrentLocation;
+        FVector Direction = CurrentTargetPosition - CurrentLocation;
 
         // Ignore Z difference (only move horizontally)
         Direction.Z = 0;
         float Distance = Direction.Size();
 
         // Check if we've reached the target
-        if (Distance < 10.0f) // Within 10 units
+        if (Distance < 2.5f)
         {
             // Snap to exact position
             FVector FinalPosition = CurrentLocation;
-            FinalPosition.X = TargetPosition.X;
-            FinalPosition.Y = TargetPosition.Y;
+            FinalPosition.X = CurrentTargetPosition.X;
+            FinalPosition.Y = CurrentTargetPosition.Y;
             SetActorLocation(FinalPosition);
 
-            bIsMoving = false;
-
-            if (GEngine) {
-                GEngine->AddOnScreenDebugMessage(-1, 1.0, FColor::Green, TEXT("Reached queue position"));
-            }
+            MoveToNextWaypoint();
         }
         else
         {
@@ -57,14 +53,44 @@ void ACustomerNPC::Tick(float DeltaTime)
     }
 }
 
-void ACustomerNPC::MoveToPosition(FVector NewPosition)
+
+void ACustomerNPC::MoveAlongPath(TArray<FVector> Path)
 {
-    TargetPosition = NewPosition;
+    // If Theres No Path Set - Print & Return
+    if (Path.Num() == 0) if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Red, TEXT("Empty path!"));return; }
+
+    // Store Path
+    WaypointPath = Path;
+    CurrentWaypointIndex = 0;
+
+    // Start Moving
+    CurrentTargetPosition = WaypointPath[0];
     bIsMoving = true;
 
-    if (GEngine) {
-        GEngine->AddOnScreenDebugMessage(-1, 1.0, FColor::Yellow,
-            FString::Printf(TEXT("Walking to: %s"), *NewPosition.ToString()));
+}
+
+
+
+
+
+void ACustomerNPC::MoveToNextWaypoint()
+{
+    // Get Next Waypoint Index
+    CurrentWaypointIndex++;
+
+    // Is The Path Finished
+    if (CurrentWaypointIndex >= WaypointPath.Num()) {
+
+        // Reset Variables
+        bIsMoving = false;
+        WaypointPath.Empty();
+        CurrentWaypointIndex = 0;
+
+        return;
     }
+
+    CurrentTargetPosition = WaypointPath[CurrentWaypointIndex];
+
+
 }
 

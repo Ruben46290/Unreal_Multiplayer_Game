@@ -26,9 +26,6 @@ public:
 
     virtual void Tick(float DeltaTime) override;
 
-    UPROPERTY(BlueprintReadOnly, Category = "Movement")
-    FVector TargetPosition;
-
     
     UPROPERTY(BlueprintReadOnly, Category = "Movement")
     bool bIsMoving = false;
@@ -36,10 +33,23 @@ public:
     
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float WalkSpeed = 200.0f;
-    
+
+    // Array of waypoints to follow (path through queue)
+    UPROPERTY(BlueprintReadOnly, Category = "Movement")
+    TArray<FVector> WaypointPath;
+
+    // Current waypoint index
+    UPROPERTY(BlueprintReadOnly, Category = "Movement")
+    int32 CurrentWaypointIndex = 0;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Movement")
+    FVector CurrentTargetPosition;
+
 
     UFUNCTION(BlueprintCallable, Category = "Movement")
-    void MoveToPosition(FVector NewPosition);
+    void MoveAlongPath(TArray<FVector> Path);
 
+    UFUNCTION()
+    void MoveToNextWaypoint();
 
 };

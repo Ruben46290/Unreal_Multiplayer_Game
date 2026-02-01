@@ -44,7 +44,7 @@ void AOrderStation::SpawnCustomer(FOrder Order)
 
 		if (NewCustomer) {
 
-			if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Spawn Customer")); }
+			//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Spawn Customer")); }
 
 			// Add New Customer To Customer Array
 			Customers.Add(NewCustomer);
@@ -52,6 +52,8 @@ void AOrderStation::SpawnCustomer(FOrder Order)
 			CustomersInQueue++;
 
 			MoveCustomersToPositions();
+
+
 		}
 
 	}
@@ -74,21 +76,69 @@ void AOrderStation::MoveCustomersToPositions()
 	// Loop through all customers and assign them positions
 	for (int32 i = 0; i < Customers.Num(); i++)
 	{
+		// Get Customer
 		ACustomerNPC* Customer = Customers[i];
 		if (!Customer) continue;
 
+		// Get Customers Current Pos In The Queue
+		int32 CurrentPos = FindCustomerPosition(Customer);
 
-		if (!QueuePositions.IsValidIndex(i)) continue;
+		// Where The Customer Needs To Go 
+		// Uses Array So Customer[x] Goes To QueuePos[x]
+		int32 TargetPos = i;
 
-		FVector TargetPosition = QueuePositions[i]->GetActorLocation();
+		// Make An Empty Path
+		TArray<FVector> Path;
 
-		
-		Customer->MoveToPosition(TargetPosition);
 
-		if (GEngine) {
-			GEngine->AddOnScreenDebugMessage(-1, 1.0, FColor::Cyan,
-				FString::Printf(TEXT("Customer %d moving to position %d"), i, i));
+		if (CurrentPos > TargetPos) {
+
+			// For Each Path Index Below Current Pos
+			for (int32 PathIndex = CurrentPos - 1; PathIndex >= TargetPos; PathIndex--)
+			{
+				if (QueuePositions.IsValidIndex(PathIndex))
+				{
+					// Add To Path Array
+					Path.Add(QueuePositions[PathIndex]->GetActorLocation());
+				}
+			}
+		}
+
+		if (Path.Num() > 0)
+		{
+			Customer->MoveAlongPath(Path);
+
+		}
+	}
+}
+
+int32 AOrderStation::FindCustomerPosition(ACustomerNPC* Customer)
+{
+	if (!Customer) return -1;
+
+	FVector CustomerLocation = Customer->GetActorLocation();
+	float ClosestDistance = MAX_FLT;
+	int32 ClosestPosition = -1;
+
+	// Find which queue position they're closest to
+	for (int32 i = 0; i < QueuePositions.Num(); i++)
+	{
+		if (!QueuePositions[i]) continue;
+
+		FVector PosLocation = QueuePositions[i]->GetActorLocation();
+		float Distance = FVector::Dist2D(CustomerLocation, PosLocation);
+
+		if (Distance < ClosestDistance)
+		{
+			ClosestDistance = Distance;
+			ClosestPosition = i;
 		}
 	}
 
+	return ClosestPosition;
 }
+
+
+//void OnInteract_Implementation(AActor* Interactor) {
+//
+//}

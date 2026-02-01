@@ -44,6 +44,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Queue")
 	void MoveCustomersToPositions();
 
+	int32 FindCustomerPosition(ACustomerNPC* Customer);
+
+	// * * * * * * * * * * Interaction * * * * * * * * * * 
+	
+
+	// Implement & Override The Interface Function
+	//virtual void OnInteract_Implementation(AActor* Interactor);
+
 	// * * * * * * * * * * Helper Functions * * * * * * * * * * 
 
 };
