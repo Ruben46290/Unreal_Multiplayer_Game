@@ -4,8 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "InteractableActor.h"
+#include "OrderManager.h"
+#include "Engine/TargetPoint.h"
+#include "CustomerNPC.h"
 #include "OrderStation.generated.h"
 
+struct FOrder;
 
 UCLASS()
 class MULTIPLAYER_API AOrderStation : public AInteractableActor
@@ -22,10 +26,24 @@ public:
 
 	// Markers For Where NPC'S Can Walk
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Queue")
-	TArray<USceneComponent*> QueuePositions;
+	TArray<ATargetPoint*> QueuePositions;
 
 
-	// * * * * * * * * * * Make Order * * * * * * * * * * 
+	// * * * * * * * * * * Spawn Customer * * * * * * * * * * 
 
+	void SpawnCustomer(FOrder Order);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Customer")
+	TSubclassOf<ACustomerNPC> CustomerBlueprintClass;
+		
+	int32 CustomersInQueue = 0;
+
+	TArray<ACustomerNPC*> Customers;
+
+
+	UFUNCTION(BlueprintCallable, Category = "Queue")
+	void MoveCustomersToPositions();
+
+	// * * * * * * * * * * Helper Functions * * * * * * * * * * 
 
 };

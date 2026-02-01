@@ -91,7 +91,7 @@ public:
 
 	// Request Next Order (Called by stations)
 	UFUNCTION(BlueprintCallable, Category = "Orders")
-	bool RequestNextOrder(AOrderStation* RequestingStation);
+	void SpawnCustomer(int32 StationIndex, int32 OrderIndex);
 
 	
 

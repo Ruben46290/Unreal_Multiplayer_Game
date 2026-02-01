@@ -3,6 +3,7 @@
 
 #include "OrderManager.h"
 #include "Net/UnrealNetwork.h"
+#include "OrderStation.h"
 
 // Sets default values
 AOrderManager::AOrderManager()
@@ -32,43 +33,56 @@ void AOrderManager::BeginPlay()
 
 void AOrderManager::Tick(float DeltaTime)
 {
-	if (!bIsSpawningEnabled) { return; }
+    Super::Tick(DeltaTime);
 
-	// Add Delta Time To Game Time
-	GameTime += DeltaTime;
+    if (!bIsSpawningEnabled) { return; }
 
-	// If GameTime Is Equal To NextSpawnTime
-	if (GameTime >= NextSpawnTime) {
+    // Add Delta Time To Game Time
+    GameTime += DeltaTime;
 
-		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Spawn Customer")); }
+    // If GameTime Is Equal To NextSpawnTime
+    if (GameTime >= NextSpawnTime) {
 
-		// Change To Next Spawn Index
-		CurrentSpawnIndex += 1;
+        // Spawn Customer
+        SpawnCustomer(CustomerSequence[CurrentSpawnIndex].StationIndex, CustomerSequence[CurrentSpawnIndex].OrderIndex);
 
-		// If All Customers Have Been Spawned
-		if (CurrentSpawnIndex == CustomerSequence.Num()) {
+        // Increment Spawn Index
+        CurrentSpawnIndex += 1;
 
-			if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("All Customers Spawned")); }
+        // If All The Customers Been Spawned
+        if (!CustomerSequence.IsValidIndex(CurrentSpawnIndex)) {
 
-			// Disable Tick & Return
-			bIsSpawningEnabled = false;
-			return;
-		}
+            if (GEngine) {GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green,TEXT("All Customers Spawned")); }
 
-		// Get & Store Next Spawn Time
-		NextSpawnTime = CustomerSequence[CurrentSpawnIndex].SpawnTime;
+            // Disable Spawning
+            bIsSpawningEnabled = false;
+            return;
+        }
 
-	}
-
+        // Get Next Spawn Time
+        NextSpawnTime = CustomerSequence[CurrentSpawnIndex].SpawnTime;
+    }
 }
 
 
 
-bool AOrderManager::RequestNextOrder(AOrderStation* RequestingStation)
+void AOrderManager::SpawnCustomer(int32 StationIndex, int32 OrderIndex)
 {
-	return false;
-}
+	// Get Chosen Station
+	AOrderStation* Station = RegisteredStations[StationIndex];
 
+	// If Theres No Station -> Print & Return
+	if (!Station) { if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 10.0, FColor::Red, TEXT("SpawnCustomer() Station Invalid")); } return; }
+
+	// Get Chosen Order
+	FOrder Order = LevelOrderSequence[OrderIndex];
+
+	// If Theres No Station -> Print & Return
+	if (Order.RequiredItems[0] == NAME_None) { if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 10.0, FColor::Red, TEXT("SpawnCustomer() Order Invalid")); } return; }
+
+	// Spawn Customer At The Station
+	Station->SpawnCustomer(Order);
+}
 
 
 
