@@ -37,13 +37,10 @@ void AInteractableActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent
 	// Check if it's a character
 	AMultiplayerCharacter* Character = Cast<AMultiplayerCharacter>(OtherActor);
 
-	// Is LocallyControlled() makes this code run only on the machine controlling this character
-	// Server & Other clients won't run this
 	if (Character && Character->IsLocallyControlled())
 	{
 		// Save reference to overlapping player
 		OverlappingPlayer = Character;
-
 		Character->AddNearbyInteractable(this);
 	}
 }
@@ -70,6 +67,7 @@ void AInteractableActor::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, 
 
 			// Clear reference
 			OverlappingPlayer = nullptr;
+
 		}
 	}
 

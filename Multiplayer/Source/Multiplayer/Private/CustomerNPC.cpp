@@ -86,6 +86,16 @@ void ACustomerNPC::MoveToNextWaypoint()
         WaypointPath.Empty();
         CurrentWaypointIndex = 0;
 
+        if (bIsFirstInLine) {
+
+            if (GEngine) {
+                GEngine->AddOnScreenDebugMessage(-1, 1.0, FColor::Green, TEXT("Finished path - Reached station!"));
+            }
+
+            // Broadcast Event Dispatcher
+            OnReachedStation.Broadcast(this);
+
+        }
         return;
     }
 

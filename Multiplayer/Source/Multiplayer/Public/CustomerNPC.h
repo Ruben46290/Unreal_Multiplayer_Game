@@ -2,19 +2,29 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
-#include "CustomerNPC.generated.h"
+    #include "CoreMinimal.h"
+    #include "GameFramework/Actor.h"
+    #include "CustomerNPC.generated.h"
 
-UCLASS()
-class MULTIPLAYER_API ACustomerNPC : public AActor
-{
-	GENERATED_BODY()
+    // Tells Event Distapher Below That ACustomerNPC Class Exists
+    class ACustomerNPC; 
+
+    // Event Dispatcher F
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReachedStation, ACustomerNPC*, Customer);
+
+
+    UCLASS()
+    class MULTIPLAYER_API ACustomerNPC : public AActor
+    {
+	    GENERATED_BODY()
 	
-public:	
-	// Sets default values for this actor's properties
-	ACustomerNPC();
+    public:	
+	    // Sets default values for this actor's properties
+	    ACustomerNPC();
 
+        // Event Dispatcher Function
+        UPROPERTY(BlueprintAssignable, Category = "Events")
+        FOnReachedStation OnReachedStation;
 
 protected:
 	// Called when the game starts or when spawned
@@ -52,4 +62,7 @@ public:
     UFUNCTION()
     void MoveToNextWaypoint();
 
+    // Is This Custom The First One In The Line?
+    UPROPERTY(BlueprintReadOnly, Category = "Order")
+    bool bIsFirstInLine = false;
 };

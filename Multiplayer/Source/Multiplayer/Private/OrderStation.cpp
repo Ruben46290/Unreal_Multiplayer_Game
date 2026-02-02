@@ -11,6 +11,7 @@ AOrderStation::AOrderStation()
 
 void AOrderStation::BeginPlay()
 {
+	Super::BeginPlay();
 }
 
 
@@ -45,6 +46,9 @@ void AOrderStation::SpawnCustomer(FOrder Order)
 		if (NewCustomer) {
 
 			//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Spawn Customer")); }
+
+			// Bind Customers Event Dispatcher To OnCustomerReachedStation()
+			NewCustomer->OnReachedStation.AddDynamic(this, &AOrderStation::OnCustomerReachedStation);
 
 			// Add New Customer To Customer Array
 			Customers.Add(NewCustomer);
@@ -82,6 +86,9 @@ void AOrderStation::MoveCustomersToPositions()
 
 		// Get Customers Current Pos In The Queue
 		int32 CurrentPos = FindCustomerPosition(Customer);
+
+		// If Customer Is First In Line Set As True
+		Customer->bIsFirstInLine = (i == 0);
 
 		// Where The Customer Needs To Go 
 		// Uses Array So Customer[x] Goes To QueuePos[x]
@@ -139,6 +146,56 @@ int32 AOrderStation::FindCustomerPosition(ACustomerNPC* Customer)
 }
 
 
-//void OnInteract_Implementation(AActor* Interactor) {
-//
-//}
+void AOrderStation::OnCustomerReachedStation(ACustomerNPC* Customer)
+{
+	// If Customer Isn't Valid -> Return
+	if (!Customer) { return; }
+
+
+	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Customer Reached Station")); }
+
+}
+
+
+void AOrderStation::OnInteract_Implementation(AActor* Interactor)
+{
+	// Check if there's a customer to serve
+	if (Customers.Num() == 0) {
+		if (GEngine) {
+			GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Orange,
+				TEXT("No customers to serve!"));
+		}
+		return;
+	}
+
+	// Serve the first customer
+	ServeFirstCustomer();
+}
+
+void AOrderStation::ServeFirstCustomer()
+{
+	// Only Run On Server
+	if (!HasAuthority()) return;
+
+	if (Customers.Num() == 0) return;
+
+	// Get the first customer
+	ACustomerNPC* FirstCustomer = Customers[0];
+
+	if (GEngine) {
+		GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green,
+			TEXT("Serving customer!"));
+	}
+
+	// Remove from array
+	Customers.RemoveAt(0);
+	CustomersInQueue--;
+
+	// Destroy the customer actor
+	if (FirstCustomer) {
+		FirstCustomer->Destroy();
+	}
+
+	// Move remaining customers forward
+	MoveCustomersToPositions();
+}

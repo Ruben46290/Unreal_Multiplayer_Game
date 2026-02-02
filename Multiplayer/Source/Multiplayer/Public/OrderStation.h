@@ -46,11 +46,17 @@ public:
 
 	int32 FindCustomerPosition(ACustomerNPC* Customer);
 
+	// Called From Event Dispatcher
+	UFUNCTION()
+	void OnCustomerReachedStation(ACustomerNPC* Customer);
+
 	// * * * * * * * * * * Interaction * * * * * * * * * * 
 	
 
 	// Implement & Override The Interface Function
-	//virtual void OnInteract_Implementation(AActor* Interactor);
+	virtual void OnInteract_Implementation(AActor* Interactor);
+
+	void ServeFirstCustomer();
 
 	// * * * * * * * * * * Helper Functions * * * * * * * * * * 
 
