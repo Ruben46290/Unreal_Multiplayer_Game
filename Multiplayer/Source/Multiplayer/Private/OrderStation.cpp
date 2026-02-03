@@ -50,16 +50,16 @@ void AOrderStation::SpawnCustomer(FOrder Order)
 			// Bind Customers Event Dispatcher To OnCustomerReachedStation()
 			NewCustomer->OnReachedStation.AddDynamic(this, &AOrderStation::OnCustomerReachedStation);
 
+			// Store The Order On The Customer
+			NewCustomer->StoredOrder = Order;
+
 			// Add New Customer To Customer Array
 			Customers.Add(NewCustomer);
-
 			CustomersInQueue++;
 
+			// Move All Customers Up In Line
 			MoveCustomersToPositions();
-
-
 		}
-
 	}
 
 	// Theres No Space In The Queue
@@ -151,8 +151,10 @@ void AOrderStation::OnCustomerReachedStation(ACustomerNPC* Customer)
 	// If Customer Isn't Valid -> Return
 	if (!Customer) { return; }
 
-
 	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Customer Reached Station")); }
+
+	// Load & Store Customers Order
+	CurrentOrder = Customer->StoredOrder;
 
 }
 
@@ -168,10 +170,45 @@ void AOrderStation::OnInteract_Implementation(AActor* Interactor)
 		return;
 	}
 
-	// Serve the first customer
-	ServeFirstCustomer();
+	// Cast To Player Class
+	AMultiplayerCharacter* Character = Cast<AMultiplayerCharacter>(Interactor);
+
+	// If Character Is Invalid -> Print & Return
+	if (!Character) { if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 10.0, FColor::Red, TEXT("Order Station Interact Player Cast Invalid!!!")); } return; }
+
+	// Get Item Name
+	FName PlayerItem = Character->GetHeldItemName();
+
+	// If Players Hands Are Empty
+	if (PlayerItem == NAME_None) {
+		return;
+	}
+
+	// If The Player Has An Item That Is In The Order
+	if (CurrentOrder.RequiredItems.Contains(PlayerItem)) {
+		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Player Fills Out Order")); }
+
+		// Remove Item From Order
+		CurrentOrder.RequiredItems.Remove(PlayerItem);
+
+		// Clear Players Hands
+		//Character->ClearHeldItem();
+
+		// If The Order Is Now Empty
+		if (CurrentOrder.RequiredItems.Num() == 0) {
+
+			// Clear The First Customer
+			ServeFirstCustomer();
+		}
+
+	}
+
+	else {
+		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Wrong Item")); }
+	}
 }
 
+// Clear The First Customer And Move The Rest Up
 void AOrderStation::ServeFirstCustomer()
 {
 	// Only Run On Server
@@ -181,11 +218,6 @@ void AOrderStation::ServeFirstCustomer()
 
 	// Get the first customer
 	ACustomerNPC* FirstCustomer = Customers[0];
-
-	if (GEngine) {
-		GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green,
-			TEXT("Serving customer!"));
-	}
 
 	// Remove from array
 	Customers.RemoveAt(0);

@@ -4,10 +4,12 @@
 
     #include "CoreMinimal.h"
     #include "GameFramework/Actor.h"
+    #include "OrderManager.h" // Include For FOrder
     #include "CustomerNPC.generated.h"
 
     // Tells Event Distapher Below That ACustomerNPC Class Exists
     class ACustomerNPC; 
+    
 
     // Event Dispatcher F
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReachedStation, ACustomerNPC*, Customer);
@@ -25,6 +27,8 @@
         // Event Dispatcher Function
         UPROPERTY(BlueprintAssignable, Category = "Events")
         FOnReachedStation OnReachedStation;
+
+        FOrder StoredOrder;
 
 protected:
 	// Called when the game starts or when spawned

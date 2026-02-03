@@ -9,7 +9,7 @@
 #include "CustomerNPC.h"
 #include "OrderStation.generated.h"
 
-struct FOrder;
+//struct FOrder;
 
 UCLASS()
 class MULTIPLAYER_API AOrderStation : public AInteractableActor
@@ -50,12 +50,17 @@ public:
 	UFUNCTION()
 	void OnCustomerReachedStation(ACustomerNPC* Customer);
 
+
+
 	// * * * * * * * * * * Interaction * * * * * * * * * * 
 	
-
 	// Implement & Override The Interface Function
 	virtual void OnInteract_Implementation(AActor* Interactor);
 
+	//
+	FOrder CurrentOrder;
+
+	// Clear The First Customer And Move The Rest Up
 	void ServeFirstCustomer();
 
 	// * * * * * * * * * * Helper Functions * * * * * * * * * * 

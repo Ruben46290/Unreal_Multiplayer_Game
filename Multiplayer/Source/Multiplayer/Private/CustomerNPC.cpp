@@ -88,9 +88,9 @@ void ACustomerNPC::MoveToNextWaypoint()
 
         if (bIsFirstInLine) {
 
-            if (GEngine) {
-                GEngine->AddOnScreenDebugMessage(-1, 1.0, FColor::Green, TEXT("Finished path - Reached station!"));
-            }
+            //if (GEngine) {
+            //    GEngine->AddOnScreenDebugMessage(-1, 1.0, FColor::Green, TEXT("Finished path - Reached station!"));
+            //}
 
             // Broadcast Event Dispatcher
             OnReachedStation.Broadcast(this);

@@ -68,6 +68,7 @@ void AOrderManager::Tick(float DeltaTime)
 
 void AOrderManager::SpawnCustomer(int32 StationIndex, int32 OrderIndex)
 {
+
 	// Get Chosen Station
 	AOrderStation* Station = RegisteredStations[StationIndex];
 
