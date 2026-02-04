@@ -7,6 +7,8 @@
 #include "OrderManager.h"
 #include "Engine/TargetPoint.h"
 #include "CustomerNPC.h"
+#include "Components/WidgetComponent.h"
+#include "OrderWidget.h"
 #include "OrderStation.generated.h"
 
 //struct FOrder;
@@ -28,6 +30,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Queue")
 	TArray<ATargetPoint*> QueuePositions;
 
+	// Widget Component
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	UWidgetComponent* IconWidgetComponent;
+
+	UOrderWidget* OrderWidget;
 
 	// * * * * * * * * * * Spawn Customer * * * * * * * * * * 
 

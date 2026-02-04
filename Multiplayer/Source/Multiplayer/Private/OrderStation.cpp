@@ -7,11 +7,24 @@
 
 AOrderStation::AOrderStation()
 {
+	// Setup Icon Widget
+	IconWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("OrderWidget"));
+	IconWidgetComponent->SetupAttachment(MeshComponent);
+	IconWidgetComponent->SetVisibility(false);
 }
 
 void AOrderStation::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Get Order Widget From Widget Component
+	OrderWidget = Cast<UOrderWidget>(IconWidgetComponent->GetUserWidgetObject());
+
+	if (!OrderWidget) {
+		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 100, FColor::Red, TEXT("Order UI NOT LOADED!!!")); return; }
+	}
+
+	// CropUI = Cast<UCropPlotWidget>(IconWidgetComponent->GetUserWidgetObject());
 }
 
 
@@ -156,6 +169,19 @@ void AOrderStation::OnCustomerReachedStation(ACustomerNPC* Customer)
 	// Load & Store Customers Order
 	CurrentOrder = Customer->StoredOrder;
 
+	// If Widget Is Valid
+	if (OrderWidget) {
+
+		// Show UI
+		OrderWidget->SetVisibility(ESlateVisibility::Visible);
+
+		// Update UI
+		OrderWidget->MakeOrder(CurrentOrder);
+
+	}
+
+
+
 }
 
 
@@ -230,4 +256,12 @@ void AOrderStation::ServeFirstCustomer()
 
 	// Move remaining customers forward
 	MoveCustomersToPositions();
+
+	// If Widget Is Valid
+	if (OrderWidget) {
+
+		// Show UI
+		OrderWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	}
 }
