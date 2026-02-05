@@ -32,17 +32,12 @@ void UOrderWidget::MakeOrder(FOrder NewOrder)
             FItemData* ItemData = ItemDataTable->FindRow<FItemData>(ItemName, TEXT("Load From Order Widget"));
 
             // Apply Image
-            ItemWidget->SetItemIcon(ItemData->IconTexture);
+            ItemWidget->SetItemIcon(ItemData->OrderTexture);
 
             // And New Widget To The Wrap Box
             OrderWrapBox->AddChildToWrapBox(ItemWidget);
-
-
-
         }
     }
-
-
 }
 
 

@@ -37,4 +37,8 @@ struct FItemData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Planting")
 	bool bCanBePlanted;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Order")
+	UTexture2D* OrderTexture = nullptr;
 };

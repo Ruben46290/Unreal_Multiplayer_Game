@@ -215,7 +215,12 @@ void AOrderStation::OnInteract_Implementation(AActor* Interactor)
 		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Player Fills Out Order")); }
 
 		// Remove Item From Order
-		CurrentOrder.RequiredItems.Remove(PlayerItem);
+		// RemoveSingle Removes The First Instance Found
+		CurrentOrder.RequiredItems.RemoveSingle(PlayerItem);
+
+		// Remake UI
+		// Should Be Cheap To Remake 10 Widgets Max 
+		OrderWidget->MakeOrder(CurrentOrder);
 
 		// Clear Players Hands
 		//Character->ClearHeldItem();
@@ -261,7 +266,7 @@ void AOrderStation::ServeFirstCustomer()
 	if (OrderWidget) {
 
 		// Show UI
-		OrderWidget->SetVisibility(ESlateVisibility::Hidden);
+		//OrderWidget->SetVisibility(ESlateVisibility::Hidden);
 
 	}
 }
