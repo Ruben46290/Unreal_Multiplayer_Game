@@ -5,5 +5,7 @@
 
 void UOrderIconSlot::SetItemIcon(UTexture2D* IconTexture)
 {
+	if (!IconTexture) { return; }
+
 	OrderIconImage->SetBrushFromTexture(IconTexture);
 }

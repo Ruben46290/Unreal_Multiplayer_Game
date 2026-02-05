@@ -8,30 +8,19 @@
 
 class AOrderStation;
 
-// Order Recipe Structure
-USTRUCT(BlueprintType)
-struct FOrder : public FTableRowBase
+// ENUM For Types Of Items That Can Be Ordered
+// Needs To Match With DataTable Row Names
+UENUM(BlueprintType)
+enum class EItemType : uint8
 {
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FName> RequiredItems;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float PatienceTime = 60.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 BasePoints = 100;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UTexture2D* OrderIcon;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString OrderName;
+	Apple,
+	AppleJuice,
+	Banana,
+	BananaJuice
 };
 
 USTRUCT(BlueprintType)
-struct FCustomers : public FTableRowBase
+struct FCustomer : public FTableRowBase
 {
 	GENERATED_BODY()
 
@@ -43,6 +32,9 @@ struct FCustomers : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 OrderIndex = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<EItemType> RequiredItems;
 };
 
 UCLASS()
@@ -67,11 +59,11 @@ public:
 	// * * * * * * * * * * Order Sequence * * * * * * * * * *
 
 	// Array Of All Orders That Will Be Made In The Level
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Orders")
-	TArray<FOrder> LevelOrderSequence;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Orders")
+	//TArray<FOrder> LevelOrderSequence;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Orders")
-	TArray<FCustomers> CustomerSequence;
+	TArray<FCustomer> CustomerSequence;
 
 	// Current Order Pos In Sequence
 	UPROPERTY(BlueprintReadOnly, Category = "Orders")
@@ -91,7 +83,7 @@ public:
 
 	// Request Next Order (Called by stations)
 	UFUNCTION(BlueprintCallable, Category = "Orders")
-	void SpawnCustomer(int32 StationIndex, int32 OrderIndex);
+	void SpawnCustomer(FCustomer CustomerData);
 
 	
 

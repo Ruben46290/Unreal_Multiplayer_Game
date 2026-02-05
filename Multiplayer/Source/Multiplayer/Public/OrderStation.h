@@ -38,7 +38,7 @@ public:
 
 	// * * * * * * * * * * Spawn Customer * * * * * * * * * * 
 
-	void SpawnCustomer(FOrder Order);
+	void SpawnCustomer(FCustomer CustomerData);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Customer")
 	TSubclassOf<ACustomerNPC> CustomerBlueprintClass;
@@ -47,6 +47,7 @@ public:
 
 	TArray<ACustomerNPC*> Customers;
 
+	FCustomer CurrentCustomer;
 
 	UFUNCTION(BlueprintCallable, Category = "Queue")
 	void MoveCustomersToPositions();
@@ -64,8 +65,6 @@ public:
 	// Implement & Override The Interface Function
 	virtual void OnInteract_Implementation(AActor* Interactor);
 
-	//
-	FOrder CurrentOrder;
 
 	// Clear The First Customer And Move The Rest Up
 	void ServeFirstCustomer();

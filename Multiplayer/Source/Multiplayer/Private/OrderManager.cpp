@@ -44,7 +44,7 @@ void AOrderManager::Tick(float DeltaTime)
     if (GameTime >= NextSpawnTime) {
 
         // Spawn Customer
-        SpawnCustomer(CustomerSequence[CurrentSpawnIndex].StationIndex, CustomerSequence[CurrentSpawnIndex].OrderIndex);
+        SpawnCustomer(CustomerSequence[CurrentSpawnIndex]);
 
         // Increment Spawn Index
         CurrentSpawnIndex += 1;
@@ -66,23 +66,17 @@ void AOrderManager::Tick(float DeltaTime)
 
 
 
-void AOrderManager::SpawnCustomer(int32 StationIndex, int32 OrderIndex)
+void AOrderManager::SpawnCustomer(FCustomer CustomerData)
 {
 
 	// Get Chosen Station
-	AOrderStation* Station = RegisteredStations[StationIndex];
+	AOrderStation* Station = RegisteredStations[CustomerData.StationIndex];
 
 	// If Theres No Station -> Print & Return
 	if (!Station) { if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 10.0, FColor::Red, TEXT("SpawnCustomer() Station Invalid")); } return; }
 
-	// Get Chosen Order
-	FOrder Order = LevelOrderSequence[OrderIndex];
-
-	// If Theres No Station -> Print & Return
-	if (Order.RequiredItems[0] == NAME_None) { if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 10.0, FColor::Red, TEXT("SpawnCustomer() Order Invalid")); } return; }
-
 	// Spawn Customer At The Station
-	Station->SpawnCustomer(Order);
+	Station->SpawnCustomer(CustomerData);
 }
 
 

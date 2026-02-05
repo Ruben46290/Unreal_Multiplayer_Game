@@ -28,7 +28,7 @@ class MULTIPLAYER_API UOrderWidget : public UUserWidget
 
 public:
 
-	void MakeOrder(FOrder NewOrder);
+	void MakeOrder(TArray<FName> OrderItems);
 
 
 

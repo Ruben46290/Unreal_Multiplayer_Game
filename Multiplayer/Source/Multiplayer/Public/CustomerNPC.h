@@ -28,7 +28,7 @@
         UPROPERTY(BlueprintAssignable, Category = "Events")
         FOnReachedStation OnReachedStation;
 
-        FOrder StoredOrder;
+        FCustomer StoredCustomerData;
 
 protected:
 	// Called when the game starts or when spawned

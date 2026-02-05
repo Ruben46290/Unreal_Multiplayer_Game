@@ -30,7 +30,7 @@ void AOrderStation::BeginPlay()
 
 
 
-void AOrderStation::SpawnCustomer(FOrder Order)
+void AOrderStation::SpawnCustomer(FCustomer CustomerData)
 {
 
 	// Only Run On Server
@@ -64,7 +64,7 @@ void AOrderStation::SpawnCustomer(FOrder Order)
 			NewCustomer->OnReachedStation.AddDynamic(this, &AOrderStation::OnCustomerReachedStation);
 
 			// Store The Order On The Customer
-			NewCustomer->StoredOrder = Order;
+			NewCustomer->StoredCustomerData = CustomerData;
 
 			// Add New Customer To Customer Array
 			Customers.Add(NewCustomer);
@@ -167,7 +167,7 @@ void AOrderStation::OnCustomerReachedStation(ACustomerNPC* Customer)
 	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Customer Reached Station")); }
 
 	// Load & Store Customers Order
-	CurrentOrder = Customer->StoredOrder;
+	CurrentCustomer = Customer->StoredCustomerData;
 
 	// If Widget Is Valid
 	if (OrderWidget) {
@@ -175,15 +175,22 @@ void AOrderStation::OnCustomerReachedStation(ACustomerNPC* Customer)
 		// Show UI
 		OrderWidget->SetVisibility(ESlateVisibility::Visible);
 
+		// Convert Enums To FNames
+		TArray<FName> ItemNames;
+		for (EItemType ItemType : CurrentCustomer.RequiredItems)
+		{
+			FName ItemName = FName(*UEnum::GetValueAsString(ItemType));
+			ItemNames.Add(ItemName);
+		}
+
 		// Update UI
-		OrderWidget->MakeOrder(CurrentOrder);
+		OrderWidget->MakeOrder(ItemNames);
 
 	}
 
 
 
 }
-
 
 void AOrderStation::OnInteract_Implementation(AActor* Interactor)
 {
@@ -210,30 +217,55 @@ void AOrderStation::OnInteract_Implementation(AActor* Interactor)
 		return;
 	}
 
+	// Check if player item matches any required item
+	bool bItemFound = false;
+	int32 FoundIndex = -1;
+
+	FString PlayerItemString = PlayerItem.ToString();
+	for (int32 i = 0; i < CurrentCustomer.RequiredItems.Num(); i++)
+	{
+		FString EnumString = UEnum::GetValueAsString(CurrentCustomer.RequiredItems[i]);
+		FString EnumValueName;
+		EnumString.Split(TEXT("::"), nullptr, &EnumValueName);
+
+		if (EnumValueName.Equals(PlayerItemString))
+		{
+			bItemFound = true;
+			FoundIndex = i;
+			break;
+		}
+	}
+
 	// If The Player Has An Item That Is In The Order
-	if (CurrentOrder.RequiredItems.Contains(PlayerItem)) {
+	if (bItemFound) {
 		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Player Fills Out Order")); }
 
-		// Remove Item From Order
-		// RemoveSingle Removes The First Instance Found
-		CurrentOrder.RequiredItems.RemoveSingle(PlayerItem);
+		// Remove the item by index
+		CurrentCustomer.RequiredItems.RemoveAt(FoundIndex);
 
 		// Remake UI
 		// Should Be Cheap To Remake 10 Widgets Max 
-		OrderWidget->MakeOrder(CurrentOrder);
+		// Convert Enums To FNames
+		TArray<FName> ItemNames;
+		for (EItemType ItemType : CurrentCustomer.RequiredItems)
+		{
+			FString EnumString = UEnum::GetValueAsString(ItemType);
+			FString EnumValueName;
+			EnumString.Split(TEXT("::"), nullptr, &EnumValueName);
+			ItemNames.Add(FName(*EnumValueName));
+		}
+		// Update UI
+		OrderWidget->MakeOrder(ItemNames);
 
 		// Clear Players Hands
 		//Character->ClearHeldItem();
-
+		// 
 		// If The Order Is Now Empty
-		if (CurrentOrder.RequiredItems.Num() == 0) {
-
+		if (CurrentCustomer.RequiredItems.Num() == 0) {
 			// Clear The First Customer
 			ServeFirstCustomer();
 		}
-
 	}
-
 	else {
 		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Wrong Item")); }
 	}
