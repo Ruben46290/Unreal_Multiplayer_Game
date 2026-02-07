@@ -245,7 +245,8 @@ void AOrderStation::OnInteract_Implementation(AActor* Interactor)
 
 	// If The Player Has An Item That Is In The Order
 	if (bItemFound) {
-		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Player Fills Out Order")); }
+		
+		Character->ClearHeldItem();
 
 		// Remove the item by index
 		CurrentCustomerData.RequiredItems.RemoveAt(FoundIndex);

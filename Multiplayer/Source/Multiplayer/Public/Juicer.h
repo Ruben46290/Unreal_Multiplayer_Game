@@ -54,6 +54,7 @@ protected:
 	UPROPERTY(ReplicatedUsing = OnRep_IsJuicing, BlueprintReadOnly, Category = "Juicer")
 	bool bIsJuicing = false;
 
+	UPROPERTY(Replicated)
 	bool bHasJuice = false;
 
 	// Store Item Data

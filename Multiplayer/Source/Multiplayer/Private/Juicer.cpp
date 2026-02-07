@@ -307,5 +307,6 @@ void AJuicer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AJuicer, bHasBucket);
+	DOREPLIFETIME(AJuicer, bHasJuice);
 	DOREPLIFETIME(AJuicer, bIsJuicing);
 }
