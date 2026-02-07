@@ -208,6 +208,26 @@ void ASawBench::OnRep_CurrentItemMesh()
 {
 	// Don't Check If Mesh Is Valid So It Can Update On nullptr Aswell
 	ItemMeshComponent->SetStaticMesh(CurrentItemMesh);
+
+	// If There Is A Mesh 
+	if (CurrentItemMesh) {
+
+		// If The Logs On The Table
+		if (CurrentItemMesh == LogMesh) {
+
+			// Move & Rotate Log Mesh To Fit On Table
+			ItemMeshComponent->SetRelativeRotation(FRotator(-90.0f, 0.0f, 0.0f));
+			ItemMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 65.0f));
+		}
+		
+		// Else - Bucket Is Placed On Table
+		else {
+
+			// Move & Rotate Bucket Mesh To Fit On Table
+			ItemMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+			ItemMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 55.0f));
+		}
+	}
 }
 
 
@@ -217,4 +237,5 @@ void ASawBench::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ASawBench, CurrentItemMesh);
+	DOREPLIFETIME(ASawBench, CurrentState);
 }

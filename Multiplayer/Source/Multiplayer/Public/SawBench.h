@@ -42,6 +42,7 @@ protected:
 	UDataTable* ItemDataTable;
 
 	// 'Empty', 'PlayingAnimation', 'HasBucket;
+	UPROPERTY(Replicated)
 	FName CurrentState = "Empty";
 
 
