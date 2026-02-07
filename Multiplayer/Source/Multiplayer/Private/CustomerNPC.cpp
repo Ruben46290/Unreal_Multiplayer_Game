@@ -2,13 +2,16 @@
 
 
 #include "CustomerNPC.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ACustomerNPC::ACustomerNPC()
 {
+    bReplicates = true;
+    bAlwaysRelevant = true;
+
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 // Called when the game starts or when spawned
@@ -104,3 +107,9 @@ void ACustomerNPC::MoveToNextWaypoint()
 
 }
 
+void ACustomerNPC::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(ACustomerNPC, StoredCustomerData);
+}

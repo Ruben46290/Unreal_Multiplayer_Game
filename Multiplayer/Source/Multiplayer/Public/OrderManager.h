@@ -58,19 +58,8 @@ public:
 
 	// * * * * * * * * * * Order Sequence * * * * * * * * * *
 
-	// Array Of All Orders That Will Be Made In The Level
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Orders")
-	//TArray<FOrder> LevelOrderSequence;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Orders")
 	TArray<FCustomer> CustomerSequence;
-
-	// Current Order Pos In Sequence
-	UPROPERTY(BlueprintReadOnly, Category = "Orders")
-	int32 CurrentSpawnIndex = 0;
-
-	//UFUNCTION()
-	//void OnRep_CurrentOrderIndex();
 
 	// * * * * * * * * * * Stations * * * * * * * * * *
 
@@ -85,15 +74,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Orders")
 	void SpawnCustomer(FCustomer CustomerData);
 
-	
-
-
-//	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Orders")
-//	void ServerCompleteOrder();
 
 	float GameTime = 0.0f;
 
 	float NextSpawnTime = 0.0f;
+
+	int32 CurrentSpawnIndex = 0;
 
 	bool bIsSpawningEnabled = true;
 };

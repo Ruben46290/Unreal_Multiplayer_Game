@@ -28,6 +28,7 @@
         UPROPERTY(BlueprintAssignable, Category = "Events")
         FOnReachedStation OnReachedStation;
 
+        UPROPERTY(Replicated)
         FCustomer StoredCustomerData;
 
 protected:
@@ -65,6 +66,8 @@ public:
 
     UFUNCTION()
     void MoveToNextWaypoint();
+
+    void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 
     // Is This Custom The First One In The Line?
     UPROPERTY(BlueprintReadOnly, Category = "Order")

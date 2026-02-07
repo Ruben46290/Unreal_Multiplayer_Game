@@ -8,6 +8,8 @@
 // Sets default values
 AOrderManager::AOrderManager()
 {
+    bReplicates = true;
+
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -35,6 +37,9 @@ void AOrderManager::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
+    // Only Spawn On Server
+    if (!HasAuthority()) { return; }
+
     if (!bIsSpawningEnabled) { return; }
 
     // Add Delta Time To Game Time
@@ -52,7 +57,7 @@ void AOrderManager::Tick(float DeltaTime)
         // If All The Customers Been Spawned
         if (!CustomerSequence.IsValidIndex(CurrentSpawnIndex)) {
 
-            if (GEngine) {GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green,TEXT("All Customers Spawned")); }
+            //if (GEngine) {GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green,TEXT("All Customers Spawned")); }
 
             // Disable Spawning
             bIsSpawningEnabled = false;

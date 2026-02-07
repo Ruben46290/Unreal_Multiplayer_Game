@@ -2,11 +2,14 @@
 
 
 #include "OrderStation.h"
+#include "Net/UnrealNetwork.h"
 
 ;
 
 AOrderStation::AOrderStation()
 {
+	bReplicates = true;
+
 	// Setup Icon Widget
 	IconWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("OrderWidget"));
 	IconWidgetComponent->SetupAttachment(MeshComponent);
@@ -161,14 +164,21 @@ int32 AOrderStation::FindCustomerPosition(ACustomerNPC* Customer)
 
 void AOrderStation::OnCustomerReachedStation(ACustomerNPC* Customer)
 {
+	// Only Run On Server
+	if (!HasAuthority()) { return; }
+	
 	// If Customer Isn't Valid -> Return
 	if (!Customer) { return; }
 
-	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Customer Reached Station")); }
-
 	// Load & Store Customers Order
-	CurrentCustomer = Customer->StoredCustomerData;
+	CurrentCustomerData = Customer->StoredCustomerData;
 
+	// Update UI
+	UpdateOrderUI();
+}
+
+void AOrderStation::UpdateOrderUI()
+{
 	// If Widget Is Valid
 	if (OrderWidget) {
 
@@ -177,7 +187,7 @@ void AOrderStation::OnCustomerReachedStation(ACustomerNPC* Customer)
 
 		// Convert Enums To FNames
 		TArray<FName> ItemNames;
-		for (EItemType ItemType : CurrentCustomer.RequiredItems)
+		for (EItemType ItemType : CurrentCustomerData.RequiredItems)
 		{
 			FName ItemName = FName(*UEnum::GetValueAsString(ItemType));
 			ItemNames.Add(ItemName);
@@ -187,9 +197,6 @@ void AOrderStation::OnCustomerReachedStation(ACustomerNPC* Customer)
 		OrderWidget->MakeOrder(ItemNames);
 
 	}
-
-
-
 }
 
 void AOrderStation::OnInteract_Implementation(AActor* Interactor)
@@ -222,9 +229,9 @@ void AOrderStation::OnInteract_Implementation(AActor* Interactor)
 	int32 FoundIndex = -1;
 
 	FString PlayerItemString = PlayerItem.ToString();
-	for (int32 i = 0; i < CurrentCustomer.RequiredItems.Num(); i++)
+	for (int32 i = 0; i < CurrentCustomerData.RequiredItems.Num(); i++)
 	{
-		FString EnumString = UEnum::GetValueAsString(CurrentCustomer.RequiredItems[i]);
+		FString EnumString = UEnum::GetValueAsString(CurrentCustomerData.RequiredItems[i]);
 		FString EnumValueName;
 		EnumString.Split(TEXT("::"), nullptr, &EnumValueName);
 
@@ -241,13 +248,13 @@ void AOrderStation::OnInteract_Implementation(AActor* Interactor)
 		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Player Fills Out Order")); }
 
 		// Remove the item by index
-		CurrentCustomer.RequiredItems.RemoveAt(FoundIndex);
+		CurrentCustomerData.RequiredItems.RemoveAt(FoundIndex);
 
 		// Remake UI
 		// Should Be Cheap To Remake 10 Widgets Max 
 		// Convert Enums To FNames
 		TArray<FName> ItemNames;
-		for (EItemType ItemType : CurrentCustomer.RequiredItems)
+		for (EItemType ItemType : CurrentCustomerData.RequiredItems)
 		{
 			FString EnumString = UEnum::GetValueAsString(ItemType);
 			FString EnumValueName;
@@ -261,7 +268,7 @@ void AOrderStation::OnInteract_Implementation(AActor* Interactor)
 		//Character->ClearHeldItem();
 		// 
 		// If The Order Is Now Empty
-		if (CurrentCustomer.RequiredItems.Num() == 0) {
+		if (CurrentCustomerData.RequiredItems.Num() == 0) {
 			// Clear The First Customer
 			ServeFirstCustomer();
 		}
@@ -301,4 +308,21 @@ void AOrderStation::ServeFirstCustomer()
 		//OrderWidget->SetVisibility(ESlateVisibility::Hidden);
 
 	}
+}
+
+
+// * * * * * * * * * * Replication * * * * * * * * * * 
+
+void AOrderStation::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AOrderStation, CurrentCustomerData);
+}
+
+// When CurrentCustomerData Is Updated On Server
+void AOrderStation::OnRep_CurrentCustomerData()
+{
+	// Update Order Widget On Clients
+	UpdateOrderUI();
 }

@@ -47,7 +47,13 @@ public:
 
 	TArray<ACustomerNPC*> Customers;
 
-	FCustomer CurrentCustomer;
+
+	
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentCustomerData)
+	FCustomer CurrentCustomerData;
+
+	void UpdateOrderUI();
+
 
 	UFUNCTION(BlueprintCallable, Category = "Queue")
 	void MoveCustomersToPositions();
@@ -69,6 +75,10 @@ public:
 	// Clear The First Customer And Move The Rest Up
 	void ServeFirstCustomer();
 
-	// * * * * * * * * * * Helper Functions * * * * * * * * * * 
+	// * * * * * * * * * * Replication * * * * * * * * * * 
 
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
+	UFUNCTION()
+	void OnRep_CurrentCustomerData();
 };
