@@ -31,9 +31,6 @@ struct FCustomer : public FTableRowBase
 	int32 StationIndex = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 OrderIndex = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<EItemType> RequiredItems;
 };
 

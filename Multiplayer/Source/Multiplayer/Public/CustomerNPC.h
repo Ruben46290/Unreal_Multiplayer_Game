@@ -35,6 +35,30 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh")
+    USceneComponent* RootSceneComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh")
+    USkeletalMeshComponent* SkeletalMeshComponent;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mesh")
+    TArray<USkeletalMesh*> MeshOptions;
+
+    UPROPERTY(ReplicatedUsing = OnRep_ChosenMesh)
+    USkeletalMesh* ChosenMesh;
+
+    UFUNCTION()
+    void OnRep_ChosenMesh();
+
+    // Blueprint Events For Animations
+    UFUNCTION(BlueprintImplementableEvent, Category = "Animation")
+    void PlayWalkAnimation();
+
+    UFUNCTION(BlueprintImplementableEvent, Category = "Animation")
+    void PlayIdleAnimation();
+
+    bool bWalkingAnimationPlaying = false;
+
 public:
 
 	// * * * * * * * * * * Movement * * * * * * * * * 

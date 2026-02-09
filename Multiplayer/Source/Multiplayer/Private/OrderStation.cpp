@@ -254,13 +254,12 @@ void AOrderStation::OnInteract_Implementation(AActor* Interactor)
 		// Remake UI
 		// Should Be Cheap To Remake 10 Widgets Max 
 		// Convert Enums To FNames
+		// Convert Enums To FNames
 		TArray<FName> ItemNames;
 		for (EItemType ItemType : CurrentCustomerData.RequiredItems)
 		{
-			FString EnumString = UEnum::GetValueAsString(ItemType);
-			FString EnumValueName;
-			EnumString.Split(TEXT("::"), nullptr, &EnumValueName);
-			ItemNames.Add(FName(*EnumValueName));
+			FName ItemName = FName(*UEnum::GetValueAsString(ItemType));
+			ItemNames.Add(ItemName);
 		}
 		// Update UI
 		OrderWidget->MakeOrder(ItemNames);

@@ -10,6 +10,13 @@ ACustomerNPC::ACustomerNPC()
     bReplicates = true;
     bAlwaysRelevant = true;
 
+    RootSceneComponent = CreateDefaultSubobject<USceneComponent>("RootComponent");
+    RootComponent = RootSceneComponent;
+
+    // Create Skeletal Mesh
+    SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
+    SkeletalMeshComponent->SetupAttachment(RootSceneComponent);
+
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -19,11 +26,32 @@ void ACustomerNPC::BeginPlay()
 {
 	Super::BeginPlay();
 	
+    // Disable Tick When Spawned In
+    // Tick We Be Instanly Enabled When There Is A Path For The NPC To Walk Down
+    SetActorTickEnabled(false);
+
+    // Only Run On Server
+    if (!HasAuthority()) { return; }
+
+    // If Mesh Options Array Has Been Setup Properly
+    if (MeshOptions.Num() != 0) {
+
+        int32 ChosenIndex = FMath::RandRange(0, MeshOptions.Num() - 1);
+
+        // Set Skeletal Mesh To Random Option
+        SkeletalMeshComponent->SetSkeletalMesh(MeshOptions[ChosenIndex]);
+
+        // Set Chosen Mesh Variable - Used For Replicating
+        ChosenMesh = MeshOptions[ChosenIndex];
+
+    }
 }
 
 void ACustomerNPC::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+    //if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 0.1, FColor::Red, TEXT("NPC Tick")); }
 
     // Handle walking to target position
     if (bIsMoving)
@@ -48,10 +76,24 @@ void ACustomerNPC::Tick(float DeltaTime)
         }
         else
         {
-            // Move towards target
+            // Move Towards Target
             Direction.Normalize();
             FVector NewLocation = CurrentLocation + (Direction * WalkSpeed * DeltaTime);
             SetActorLocation(NewLocation);
+
+            // Look Towards Target
+            FRotator TargetRotation = Direction.Rotation();
+            FRotator NewRotation = FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, 10.0f);
+            SetActorRotation(NewRotation);
+
+            // If Walking Animation Isn't Playing
+            if (!bWalkingAnimationPlaying)
+            {
+                // Player Walking Animation
+                PlayWalkAnimation();
+                bWalkingAnimationPlaying = true;
+            }
+
         }
     }
 }
@@ -70,6 +112,8 @@ void ACustomerNPC::MoveAlongPath(TArray<FVector> Path)
     CurrentTargetPosition = WaypointPath[0];
     bIsMoving = true;
 
+    // Start Tick
+    SetActorTickEnabled(true);
 }
 
 
@@ -84,21 +128,28 @@ void ACustomerNPC::MoveToNextWaypoint()
     // Is The Path Finished
     if (CurrentWaypointIndex >= WaypointPath.Num()) {
 
+        // Stop Tick
+        SetActorTickEnabled(false);
+
         // Reset Variables
         bIsMoving = false;
         WaypointPath.Empty();
         CurrentWaypointIndex = 0;
 
         if (bIsFirstInLine) {
-
-            //if (GEngine) {
-            //    GEngine->AddOnScreenDebugMessage(-1, 1.0, FColor::Green, TEXT("Finished path - Reached station!"));
-            //}
-
             // Broadcast Event Dispatcher
             OnReachedStation.Broadcast(this);
 
         }
+
+        // If Walking Animation Is Playing
+        if (bWalkingAnimationPlaying)
+        {
+            // Play Idle Animation
+            PlayIdleAnimation();
+            bWalkingAnimationPlaying = false;
+        }
+
         return;
     }
 
@@ -112,4 +163,13 @@ void ACustomerNPC::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(ACustomerNPC, StoredCustomerData);
+    DOREPLIFETIME(ACustomerNPC, ChosenMesh);
+}
+
+
+void ACustomerNPC::OnRep_ChosenMesh()
+{
+    if (!ChosenMesh || !SkeletalMeshComponent) { return; }
+
+    SkeletalMeshComponent->SetSkeletalMesh(ChosenMesh);
 }
