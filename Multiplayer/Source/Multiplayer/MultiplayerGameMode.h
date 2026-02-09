@@ -13,6 +13,8 @@ class AMultiplayerGameMode : public AGameModeBase
 
 public:
 	AMultiplayerGameMode();
+
+	void BeginPlay();
 };
 
 

@@ -1,0 +1,53 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/GameStateBase.h"
+#include "MyGameState.generated.h"
+
+/**
+ * 
+ */
+UCLASS()
+class MULTIPLAYER_API AMyGameState : public AGameStateBase
+{
+	GENERATED_BODY()
+	
+public:
+
+	AMyGameState();
+
+
+
+	// * * * * * * * * * * Level Timer * * * * * * * * * * \\
+
+	// How Long Should The Level Be - In Seconds
+	UPROPERTY()
+	float LevelDuration = 10.0f;
+
+	// Time Left In The Level
+	UPROPERTY(ReplicatedUsing = OnRep_TimeRemaning)
+	float TimeRemaining;
+
+	// Replicaton Event For Time Remaining
+	UFUNCTION()
+	void OnRep_TimeRemaning();
+
+	// How Fast Should The Level Timer Tick
+	UPROPERTY()
+	float TimerTickSpeed = 0.1f;
+
+	// Timer For Ticking Down Level Time - Ticks At TimerTickSpeed 
+	FTimerHandle LevelTimer;
+
+	UFUNCTION()
+	void LevelTimerTick();
+
+	UFUNCTION()
+	void StartLevelTimer();
+
+	UFUNCTION()
+	void StopLevelTimer();
+
+};

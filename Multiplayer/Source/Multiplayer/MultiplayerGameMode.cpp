@@ -3,6 +3,7 @@
 #include "MultiplayerGameMode.h"
 #include "MultiplayerCharacter.h"
 #include "UObject/ConstructorHelpers.h"
+#include "MyGameState.h"
 
 AMultiplayerGameMode::AMultiplayerGameMode()
 {
@@ -12,4 +13,25 @@ AMultiplayerGameMode::AMultiplayerGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+
+
+	GameStateClass = AMyGameState::StaticClass();
+
+}
+
+void AMultiplayerGameMode::BeginPlay()
+{
+	//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("GameMode BeginPlay()")); }
+
+	// Make Game State
+	AMyGameState* GS = GetGameState<AMyGameState>();
+
+	// If Game State is Valid
+	if (GS) {
+
+		// Start Level Timer
+		GS -> StartLevelTimer();
+	}
+
+
 }
