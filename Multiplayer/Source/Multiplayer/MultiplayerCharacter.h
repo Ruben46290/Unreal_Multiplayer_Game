@@ -30,8 +30,6 @@ class AMultiplayerCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 	
-
-
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
@@ -63,6 +61,14 @@ class AMultiplayerCharacter : public ACharacter
 	//** Right Click Key */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* RightClick;
+
+protected:
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UGameHUD> GameHUDClass;
+
+	UPROPERTY()
+	UGameHUD* GameHUDWidget;
 
 public:
 	AMultiplayerCharacter();

@@ -19,6 +19,9 @@ void AMyGameState::LevelTimerTick()
 	// Decrease Level Time
 	TimeRemaining -= TimerTickSpeed;
 
+	// Call Event Dispatcher To Update UI
+	OnTimeRemainingChanged.Broadcast(TimeRemaining);
+
 	// Debugging Print Until UI Is Made
 	if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, TimerTickSpeed, FColor::Cyan,
@@ -40,10 +43,13 @@ void AMyGameState::LevelTimerTick()
 
 void AMyGameState::OnRep_TimeRemaning()
 {
-	if (GEngine) {
+	/*if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, TimerTickSpeed, FColor::Cyan,
 			FString::Printf(TEXT("Time Remaining OnRep Called ")));
-	}
+	}*/
+
+	// Call Event Dispatcher To Update UI
+	OnTimeRemainingChanged.Broadcast(TimeRemaining);
 }
 
 void AMyGameState::StartLevelTimer()

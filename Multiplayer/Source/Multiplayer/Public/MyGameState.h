@@ -6,9 +6,8 @@
 #include "GameFramework/GameStateBase.h"
 #include "MyGameState.generated.h"
 
-/**
- * 
- */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimeRemainingChanged, float, NewTime);
+
 UCLASS()
 class MULTIPLAYER_API AMyGameState : public AGameStateBase
 {
@@ -34,9 +33,13 @@ public:
 	UFUNCTION()
 	void OnRep_TimeRemaning();
 
+	// Event Dispatcher For Updating UI When Time Remaining Is Changed
+	UPROPERTY(BlueprintAssignable, Category = "Game")
+	FOnTimeRemainingChanged OnTimeRemainingChanged;
+
 	// How Fast Should The Level Timer Tick
 	UPROPERTY()
-	float TimerTickSpeed = 0.1f;
+	float TimerTickSpeed = 1.0f;
 
 	// Timer For Ticking Down Level Time - Ticks At TimerTickSpeed 
 	FTimerHandle LevelTimer;

@@ -16,6 +16,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
+#include "GameHUD.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -79,6 +80,24 @@ void AMultiplayerCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	// Only Create UI For The Local Player
+	if (IsLocallyControlled() && GameHUDClass) {
+
+		// Get Player Controller
+		APlayerController* PC = Cast<APlayerController>(GetController());
+
+		if (PC)
+		{
+			// Create HUD Widget using the PlayerController as owner
+			GameHUDWidget = CreateWidget<UGameHUD>(PC, GameHUDClass);
+			if (GameHUDWidget)
+			{
+				// Add HUD To Viewport
+				GameHUDWidget->AddToViewport();
+			}
+		}
+	}
 }
 
 void AMultiplayerCharacter::Tick(float DeltaTime)
