@@ -21,9 +21,17 @@ protected:
 	UPROPERTY(meta = (BindWidget));
 	UTextBlock* TimerText;
 
+	UPROPERTY(meta = (BindWidget));
+	UTextBlock* ScoreText;
+
 
 	void NativeConstruct();
 
+	// Bound To Game State Timer Event Dispatcher
 	UFUNCTION()
 	void UpdateTimerText(float TimeRemaining);
+
+	// Bound To Game State Score Event Dispatcher
+	UFUNCTION()
+	void UpdateScoreText(float NewScore);
 };

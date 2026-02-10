@@ -23,7 +23,7 @@ void AMultiplayerGameMode::BeginPlay()
 {
 	//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("GameMode BeginPlay()")); }
 
-	// Make Game State
+	// Get Game State
 	AMyGameState* GS = GetGameState<AMyGameState>();
 
 	// If Game State is Valid

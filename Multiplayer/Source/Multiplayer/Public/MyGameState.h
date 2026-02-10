@@ -8,6 +8,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimeRemainingChanged, float, NewTime);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnScoreChanged, float, NewScore);
+
 UCLASS()
 class MULTIPLAYER_API AMyGameState : public AGameStateBase
 {
@@ -53,4 +55,18 @@ public:
 	UFUNCTION()
 	void StopLevelTimer();
 
+
+	// * * * * * * * * * * Score * * * * * * * * * * \\
+
+	UFUNCTION()
+	void AddScore(float ScoreToAdd);
+
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentScore)
+	float CurrentScore = 0.0f;
+
+	UFUNCTION()
+	void OnRep_CurrentScore();
+
+	UPROPERTY(BlueprintAssignable, Category = "Game")
+	FOnScoreChanged OnScoreChanged;
 };

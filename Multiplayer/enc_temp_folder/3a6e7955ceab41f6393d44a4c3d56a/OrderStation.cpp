@@ -294,9 +294,10 @@ void AOrderStation::ServeFirstCustomer()
 
 		// Add Score To GameState
 		GS->AddScore(CurrentCustomerData.PointsToGive);
-
-		// Reset Customer Data For Replication To Pickup When The Order Is Finished
-		CurrentCustomerData = FCustomer();
+		if (GEngine) {
+			GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green,
+				FString::Printf(TEXT("Add Score - %.2f"), CurrentCustomerData.PointsToGive));
+		}
 	}
 
 	// Remove from array
@@ -325,21 +326,6 @@ void AOrderStation::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 // When CurrentCustomerData Is Updated On Server
 void AOrderStation::OnRep_CurrentCustomerData()
 {
-	// Update Order Widget Item Icons On Clients
+	// Update Order Widget On Clients
 	UpdateOrderUI();
-
-	// Is The Order Empty
-	// When An Order Is Finished The CustomerData Is Reset To Be Blank (Score = 0)
-	if (CurrentCustomerData.PointsToGive == 0) {
-
-		// Set Order Price Text As Blank
-		OrderWidget->PointText->SetText(FText::FromString(""));
-	}
-
-	// The Order Is Valid
-	else {
-
-		// Update Point Text On Clients
-		OrderWidget->SetPointText(CurrentCustomerData.PointsToGive);
-	}
 }

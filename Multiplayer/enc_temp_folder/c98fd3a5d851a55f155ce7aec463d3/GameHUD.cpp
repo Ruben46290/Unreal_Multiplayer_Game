@@ -40,6 +40,6 @@ void UGameHUD::UpdateTimerText(float TimeRemaining)
 void UGameHUD::UpdateScoreText(float NewScore)
 {
 
-	FString ScoreString = FString::Printf(TEXT("$%.2f"),NewScore);
+	FString ScoreString = FString::Printf(TEXT("$%2d"),NewScore);
 	ScoreText->SetText(FText::FromString(ScoreString));
 }
