@@ -80,8 +80,51 @@ void AOrderManager::SpawnCustomer(FCustomer CustomerData)
 	// If Theres No Station -> Print & Return
 	if (!Station) { if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 10.0, FColor::Red, TEXT("SpawnCustomer() Station Invalid")); } return; }
 
+    // If Points To Give Hasn't Been Overriden For The Customer
+    if (CustomerData.PointsToGive == 0.0f) {
+
+        // Load PointsToGive From CalculateOrderPrice()
+        CustomerData.PointsToGive = CalculateOrderPrice(CustomerData.RequiredItems);
+    }
+
 	// Spawn Customer At The Station
 	Station->SpawnCustomer(CustomerData);
+}
+
+
+// Loop Through All Required Items And Get The Total Point Amount
+float AOrderManager::CalculateOrderPrice(TArray<EItemType> RequiredItems)
+{
+    float TotalPrice = 0;
+
+    if (!ItemDataTable)
+    {
+        if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("OrderManager - ItemDataTable is null!")); }
+        return 0;
+    }
+
+    // For Each Required Item
+    for (EItemType ItemType : RequiredItems) {
+
+        // Convert Enum To Clean FName
+        FString EnumString = UEnum::GetValueAsString(ItemType);
+        FString EnumValueName;
+        EnumString.Split(TEXT("::"), nullptr, &EnumValueName);
+        FName CleanFName = FName(*EnumValueName);
+
+        // Load From Data Table
+        FItemData* ItemData = ItemDataTable->FindRow<FItemData>(CleanFName, TEXT("Calculate Price"));
+
+        // If Item Data Row Is Found
+        if (ItemData) {
+
+            // Add Item Price To Total Price
+            TotalPrice += ItemData->OrderPrice;
+        }
+
+    }
+
+    return TotalPrice;
 }
 
 

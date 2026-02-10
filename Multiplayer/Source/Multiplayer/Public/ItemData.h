@@ -41,4 +41,7 @@ struct FItemData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Order")
 	UTexture2D* OrderTexture = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Order")
+	float OrderPrice = 0.0f;
 };

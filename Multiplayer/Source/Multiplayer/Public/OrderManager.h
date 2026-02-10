@@ -24,14 +24,21 @@ struct FCustomer : public FTableRowBase
 {
 	GENERATED_BODY()
 
+	// How Many Seconds Into The Level Does The Customer Spawn
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SpawnTime = 0.0f;
 
+	// What Station Does The Customer Spawn At
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 StationIndex = 0;
 
+	// What Items Does The Customer Want
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<EItemType> RequiredItems;
+
+	// How Many Points Will The Customer Gice - 0 = Automatic Pricing ( Normal Item = 50, Juice = 100 )
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float PointsToGive = 0.0f;
 };
 
 UCLASS()
@@ -79,4 +86,14 @@ public:
 	int32 CurrentSpawnIndex = 0;
 
 	bool bIsSpawningEnabled = true;
+
+protected:
+
+
+
+	float CalculateOrderPrice(TArray<EItemType> RequiredItems);
+
+	// Refrence To Item Data Table (Needs To Be Set In Editor)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	UDataTable* ItemDataTable;
 };

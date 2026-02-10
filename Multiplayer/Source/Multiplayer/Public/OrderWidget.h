@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/WrapBox.h"
+#include "Components/TextBlock.h"
 #include "OrderIconSlot.h"
 #include "OrderWidget.generated.h"
 
@@ -18,6 +19,11 @@ class MULTIPLAYER_API UOrderWidget : public UUserWidget
 	UPROPERTY(meta = (BindWidget));
 	UWrapBox* OrderWrapBox;
 
+public:
+	UPROPERTY(meta = (BindWidget));
+	UTextBlock* PointText;
+
+protected:
 	// Blueprint Class For OrderIconSlot
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<class UOrderIconSlot> OrderItemWidgetClass;
@@ -28,7 +34,9 @@ class MULTIPLAYER_API UOrderWidget : public UUserWidget
 
 public:
 
-	void MakeOrder(TArray<FName> OrderItems);
+	void MakeOrder(TArray<FName> OrderItemss);
+
+	void SetPointText(float Points);
 
 
 

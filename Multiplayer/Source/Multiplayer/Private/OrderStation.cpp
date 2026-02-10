@@ -173,10 +173,14 @@ void AOrderStation::OnCustomerReachedStation(ACustomerNPC* Customer)
 	// Load & Store Customers Order
 	CurrentCustomerData = Customer->StoredCustomerData;
 
-	// Update UI
+	// Update UI Item Images
 	UpdateOrderUI();
+
+	// Update Point Text
+	OrderWidget->SetPointText(CurrentCustomerData.PointsToGive);
 }
 
+// Load All Current Order Item Icons
 void AOrderStation::UpdateOrderUI()
 {
 	// If Widget Is Valid
@@ -245,32 +249,25 @@ void AOrderStation::OnInteract_Implementation(AActor* Interactor)
 
 	// If The Player Has An Item That Is In The Order
 	if (bItemFound) {
-		
-		Character->ClearHeldItem();
 
 		// Remove the item by index
 		CurrentCustomerData.RequiredItems.RemoveAt(FoundIndex);
 
 		// Remake UI
-		// Should Be Cheap To Remake 10 Widgets Max 
-		// Convert Enums To FNames
-		// Convert Enums To FNames
-		TArray<FName> ItemNames;
-		for (EItemType ItemType : CurrentCustomerData.RequiredItems)
-		{
-			FName ItemName = FName(*UEnum::GetValueAsString(ItemType));
-			ItemNames.Add(ItemName);
-		}
-		// Update UI
-		OrderWidget->MakeOrder(ItemNames);
+		UpdateOrderUI();
 
 		// Clear Players Hands
-		//Character->ClearHeldItem();
-		// 
+		Character->ClearHeldItem();
+		
 		// If The Order Is Now Empty
 		if (CurrentCustomerData.RequiredItems.Num() == 0) {
+
 			// Clear The First Customer
 			ServeFirstCustomer();
+
+			// Set Order Price Text As Blank
+			OrderWidget->PointText->SetText(FText::FromString(""));
+
 		}
 	}
 	else {

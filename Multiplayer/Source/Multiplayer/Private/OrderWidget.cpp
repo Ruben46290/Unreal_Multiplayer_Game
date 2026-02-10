@@ -51,43 +51,11 @@ void UOrderWidget::MakeOrder(TArray<FName> OrderItems)
     }
 }
 
+void UOrderWidget::SetPointText(float Points)
+{
+    // Convert Point Float To String
+    FString PriceString = FString::Printf(TEXT("$%.2f"), Points);
 
-// Un-Used Function For Counting Up All The Orders
-// New Function Makes Single Icons For Each Type Order Even For The Same Type Of Item
-
-//void UOrderWidget::MakeOrder(FOrder NewOrder)
-//{
-//    // Make A New Map For Counting Amount Of The Same Item Types
-//    TMap < FName, int32> ItemCounts;
-//
-//    // For Each Required Item
-//    for (const FName& ItemName : NewOrder.RequiredItems)
-//    {
-//        // If Item Is Already Added 
-//        // Apple Number >= 2 Added
-//        if (ItemCounts.Contains(ItemName))
-//        {
-//            // Add +1 To Item Count
-//            ItemCounts[ItemName]++;
-//        }
-//
-//        // If Its The First Time This Item Is In The Order
-//        // Apple Number 1 Is Loaded
-//        else
-//        {
-//            // Add Current Item To ItemCounts
-//            ItemCounts.Add(ItemName, 1);
-//        }
-//    }
-//
-//    for (const TPair<FName, int32>& ItemPair : ItemCounts)
-//    {
-//        FName ItemName = ItemPair.Key;
-//        int32 Count = ItemPair.Value;
-//
-//        // Print for testing
-//        UE_LOG(LogTemp, Warning, TEXT("Item: %s, Count: %d"), *ItemName.ToString(), Count);
-//    }
-//
-//
-//}
+    // Set Point Text To The String
+    PointText->SetText(FText::FromString(PriceString));
+}
