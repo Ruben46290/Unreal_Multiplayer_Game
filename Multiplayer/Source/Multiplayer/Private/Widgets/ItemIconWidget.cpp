@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "ItemIconWidget.h"
+#include "Widgets/ItemIconWidget.h"
 
 void UItemIconWidget::NativeConstruct()
 {

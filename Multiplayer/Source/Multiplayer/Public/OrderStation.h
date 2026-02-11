@@ -8,7 +8,7 @@
 #include "Engine/TargetPoint.h"
 #include "CustomerNPC.h"
 #include "Components/WidgetComponent.h"
-#include "OrderWidget.h"
+#include "Widgets/OrderWidget.h"
 #include "OrderStation.generated.h"
 
 //struct FOrder;

@@ -10,6 +10,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimeRemainingChanged, float, NewT
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnScoreChanged, float, NewScore);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevelComplete);
+
 UCLASS()
 class MULTIPLAYER_API AMyGameState : public AGameStateBase
 {
@@ -25,7 +27,7 @@ public:
 
 	// How Long Should The Level Be - In Seconds
 	UPROPERTY()
-	float LevelDuration = 70.0f;
+	float LevelDuration = 5.0f;
 
 	// Time Left In The Level
 	UPROPERTY(ReplicatedUsing = OnRep_TimeRemaning)
@@ -38,6 +40,10 @@ public:
 	// Event Dispatcher For Updating UI When Time Remaining Is Changed
 	UPROPERTY(BlueprintAssignable, Category = "Game")
 	FOnTimeRemainingChanged OnTimeRemainingChanged;
+
+	// Event Dispatcher For When Level Time Runs Out
+	UPROPERTY(BlueprintAssignable, Category = "Game")
+	FOnLevelComplete OnLevelComplete;
 
 	// How Fast Should The Level Timer Tick
 	UPROPERTY()
@@ -55,6 +61,11 @@ public:
 	UFUNCTION()
 	void StopLevelTimer();
 
+	UPROPERTY(ReplicatedUsing = OnRep_LevelComplete)
+	bool LevelComplete = false;
+
+	UFUNCTION()
+	void OnRep_LevelComplete();
 
 	// * * * * * * * * * * Score * * * * * * * * * * \\
 

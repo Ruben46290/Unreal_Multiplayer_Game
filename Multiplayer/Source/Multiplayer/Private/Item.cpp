@@ -3,7 +3,7 @@
 
 #include "Item.h"
 #include "Net/UnrealNetwork.h"
-#include "ItemIconWidget.h"
+#include "Widgets/ItemIconWidget.h"
 
 void AItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {

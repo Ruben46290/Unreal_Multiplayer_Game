@@ -16,7 +16,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
-#include "GameHUD.h"
+#include "Widgets/GameHUD.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 

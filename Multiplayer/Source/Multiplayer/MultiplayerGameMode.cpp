@@ -4,6 +4,7 @@
 #include "MultiplayerCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 #include "MyGameState.h"
+#include "MyPlayerController.h"
 
 AMultiplayerGameMode::AMultiplayerGameMode()
 {
@@ -14,8 +15,11 @@ AMultiplayerGameMode::AMultiplayerGameMode()
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
 
-
+	// Set Gane State Class
 	GameStateClass = AMyGameState::StaticClass();
+
+	// Set Player Controler
+	PlayerControllerClass = AMyPlayerController::StaticClass();
 
 }
 

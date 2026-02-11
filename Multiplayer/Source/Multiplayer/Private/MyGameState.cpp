@@ -25,12 +25,14 @@ void AMyGameState::LevelTimerTick()
 	// If Level Is Done
 	if (TimeRemaining <= 0) {
 
-		// Print Until Game Finish Logic Is Done
-		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 10.0, FColor::Red, TEXT("Level Timer Finished")); }
-
 		// Stop Timer
 		StopLevelTimer();
+		
+		// Change A Bool Var To Call OnRep_LevelComplete For Clients To Get The UI Aswell
+		LevelComplete = true;
 
+		// Broadcast Level Complete Dispatcher
+		OnLevelComplete.Broadcast();
 	}
 
 }
@@ -39,6 +41,14 @@ void AMyGameState::OnRep_TimeRemaning()
 {
 	// Call Event Dispatcher To Update UI
 	OnTimeRemainingChanged.Broadcast(TimeRemaining);
+}
+
+void AMyGameState::OnRep_LevelComplete()
+{
+	if (LevelComplete)
+	{
+		OnLevelComplete.Broadcast();
+	}
 }
 
 void AMyGameState::StartLevelTimer()
@@ -101,4 +111,5 @@ void AMyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 
 	DOREPLIFETIME(AMyGameState, TimeRemaining);
 	DOREPLIFETIME(AMyGameState, CurrentScore);
+	DOREPLIFETIME(AMyGameState, LevelComplete);
 }

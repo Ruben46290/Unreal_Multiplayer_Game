@@ -1,0 +1,76 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "MyPlayerController.h"
+#include "MyGameState.h"
+#include "Blueprint/UserWidget.h"
+#include "Kismet/GameplayStatics.h"
+
+AMyPlayerController::AMyPlayerController()
+{
+	// Load 
+	static ConstructorHelpers::FClassFinder<UUserWidget> WidgetClass(TEXT("/Game/Widgets/WBP_GameOver.WBP_GameOver_C"));
+	if (WidgetClass.Succeeded())
+	{
+		LevelCompleteWidgetClass = WidgetClass.Class;
+	}
+	else {
+		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("MyPlayerController Failed To Load GameOver Widget")); }
+	}
+}
+
+void AMyPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Make A Timer For A Small Delay Before Connecting To Game State
+	FTimerHandle BindTimer;
+	GetWorldTimerManager().SetTimer(BindTimer, this, &AMyPlayerController::BindToGameState, 0.5f, false);
+}
+
+void AMyPlayerController::ReceivedPlayer()
+{
+	Super::ReceivedPlayer();
+
+}
+
+void AMyPlayerController::BindToGameState()
+{
+	// Get Game State
+	AMyGameState* GS = GetWorld()->GetGameState<AMyGameState>();
+	if (GS) {
+
+		// Bind To Level Completed Event Dispatcher
+		GS->OnLevelComplete.AddDynamic(this, &AMyPlayerController::ShowLevelCompleteScreen);
+	}
+}
+
+void AMyPlayerController::ShowLevelCompleteScreen()
+{
+	// Only Run On Local Machine
+	if (!IsLocalController()) { return; }
+
+	// If Widget Class Was Set Properly
+	if (LevelCompleteWidgetClass) {
+
+		// Create A Widget Using The Widget Class
+		LevelCompleteWidget = CreateWidget<UGameOverWidget>(this, LevelCompleteWidgetClass);
+
+		// If Widget Valid
+		if (LevelCompleteWidget)
+		{
+			// Get Game State
+			AMyGameState* GS = GetWorld()->GetGameState<AMyGameState>();
+
+			// Set Widget Variables
+			LevelCompleteWidget->SetupUI(GS->CurrentScore);
+
+			// Show Widget
+			LevelCompleteWidget->AddToViewport(10); // High Z-order to appear on top
+		}
+
+		// Pause Game
+		//UGameplayStatics::SetGamePaused(GetWorld(), true);
+	}
+
+}

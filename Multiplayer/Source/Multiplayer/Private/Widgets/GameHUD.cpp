@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "GameHUD.h"
+#include "Widgets/GameHUD.h"
 #include "MyGameState.h"
 #include <Kismet/GameplayStatics.h>
 
@@ -40,6 +40,6 @@ void UGameHUD::UpdateTimerText(float TimeRemaining)
 void UGameHUD::UpdateScoreText(float NewScore)
 {
 
-	FString ScoreString = FString::Printf(TEXT("$%2d"),NewScore);
+	FString ScoreString = FString::Printf(TEXT("$%.2f"),NewScore);
 	ScoreText->SetText(FText::FromString(ScoreString));
 }
