@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "GameOverWidget.h"
+#include "Widgets/GameOverWidget.h"
 #include "MyPlayerController.generated.h"
 
 /**
