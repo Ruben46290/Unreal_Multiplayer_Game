@@ -23,12 +23,15 @@ public:
 	virtual void OnInteract_Implementation(AActor* Interactor);
 
 
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* MeshComponent;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+
 
 	// * * * Components * * *
 	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -39,7 +42,7 @@ protected:
 
 	// * * * Sphere Overlap Functions * * *
 	UFUNCTION()
-	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	virtual void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 		bool bFromSweep, const FHitResult& SweepResult);
 

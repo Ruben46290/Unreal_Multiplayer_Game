@@ -142,4 +142,7 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "Events")
     FOnReachedStation OnCustomerLeaves;
 
+    UFUNCTION()
+    void ToggleUI(bool bIsVisible);
+
 };

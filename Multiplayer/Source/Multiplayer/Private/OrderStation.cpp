@@ -28,6 +28,62 @@ void AOrderStation::BeginPlay()
 	}
 }
 
+void AOrderStation::SetHighlight(bool bEnabled, bool bIsClosest, AActor* Player)
+{
+	// If There Are Customers
+	if (Customers.Num() != 0) {
+
+		// If The Player Is In Range Of The Station
+		if (bEnabled) {
+
+			// If Customer Ui Isn't Showing Already
+			if (!bShowingCustomerUI) {
+
+				// For Each Customer
+				for (int32 i = 0; i < Customers.Num(); i++) {
+
+					// Show Customer Patience Bars
+					Customers[i]->ToggleUI(true);
+				}
+
+				// Change Bool
+				bShowingCustomerUI = true;
+			}
+		}
+
+		// Player Isn't In Range Of The Station
+		// Highlighting System Already Handles Calling This Part Once To Checking The Bool Isn't Needed
+		else {
+
+			// For Each Customer
+			for (int32 i = 0; i < Customers.Num(); i++) {
+
+				// Show Customer Patience Bars
+				Customers[i]->ToggleUI(false);
+			}
+
+			// Change Bool
+			bShowingCustomerUI = false;
+		}
+
+	}
+
+	// Base Highlighting Logic - Improve by reading player item ect
+	// If Mesh Is Valid
+	if (MeshComponent)
+	{
+		// Is Highlight Enabled
+		if (bEnabled)
+		{
+			// Green For Closest, White For Others
+			MeshComponent->SetOverlayMaterial(bIsClosest ? GreenHighlightMaterial : WhiteHighlightMaterial);
+		}
+		else
+		{
+			MeshComponent->SetOverlayMaterial(nullptr);
+		}
+	}
+}
 
 
 
@@ -345,6 +401,7 @@ void AOrderStation::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AOrderStation, CurrentCustomerData);
+	DOREPLIFETIME(AOrderStation, Customers);
 }
 
 // When CurrentCustomerData Is Updated On Server

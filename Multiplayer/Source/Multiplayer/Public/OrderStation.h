@@ -23,7 +23,11 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	// * * * * * * * * * * Components * * * * * * * * * * 
+
+	// Override Set Highlight Function
+	virtual void SetHighlight(bool bEnabled, bool bIsClosest = false, AActor* Player = nullptr) override;
+
+	bool bShowingCustomerUI = false;
 public:
 
 	// Markers For Where NPC'S Can Walk
@@ -45,6 +49,7 @@ public:
 		
 	int32 CustomersInQueue = 0;
 
+	UPROPERTY(Replicated)
 	TArray<ACustomerNPC*> Customers;
 
 	UPROPERTY(ReplicatedUsing = OnRep_CurrentCustomerData)

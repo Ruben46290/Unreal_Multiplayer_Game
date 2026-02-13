@@ -19,6 +19,7 @@ ACustomerNPC::ACustomerNPC()
 
     WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("PatienceWidget"));
     WidgetComponent->SetupAttachment(SkeletalMeshComponent);
+    WidgetComponent->SetVisibility(false);
 
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -213,6 +214,18 @@ void ACustomerNPC::UpdatePatienceUI()
             // Update UI With Percentage Of How Long The Customer Has Been Waiting
             PatienceWidget->UpdateUI(1 - (CurrentWaitTime / StoredCustomerData.TotalPatience));
         }
+    }
+}
+
+// Toggle The Patience Widget Visibility
+void ACustomerNPC::ToggleUI(bool bIsVisible)
+{
+    if (bIsVisible) {
+        WidgetComponent->SetVisibility(true);
+        if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Green, TEXT("Show UI")); }
+    }
+    else {
+        WidgetComponent->SetVisibility(false);
     }
 }
 
