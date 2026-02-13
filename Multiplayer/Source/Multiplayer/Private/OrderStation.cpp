@@ -26,8 +26,6 @@ void AOrderStation::BeginPlay()
 	if (!OrderWidget) {
 		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 100, FColor::Red, TEXT("Order UI NOT LOADED!!!")); return; }
 	}
-
-	// CropUI = Cast<UCropPlotWidget>(IconWidgetComponent->GetUserWidgetObject());
 }
 
 
@@ -50,24 +48,26 @@ void AOrderStation::SpawnCustomer(FCustomer CustomerData)
 		FVector SpawnLocation = QueuePositions[BackPositionIndex]->GetActorLocation();
 		FRotator SpawnRotation = QueuePositions[BackPositionIndex]->GetActorRotation();
 
-		// Set Spawn Paramaters
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-
 		// Spawn The Customer
-		ACustomerNPC* NewCustomer = GetWorld()->SpawnActor<ACustomerNPC>(
-			CustomerBlueprintClass, SpawnLocation, SpawnRotation, SpawnParams);
+		FTransform SpawnTransform(SpawnRotation, SpawnLocation);
+
+		// Start Spawning New Customer
+		ACustomerNPC* NewCustomer = GetWorld()->SpawnActorDeferred<ACustomerNPC>(
+			CustomerBlueprintClass,SpawnTransform,this,nullptr,	ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 
 		if (NewCustomer) {
 
 			//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Spawn Customer")); }
 
-			// Bind Customers Event Dispatcher To OnCustomerReachedStation()
+			// Bind Customers Event Dispatchers
 			NewCustomer->OnReachedStation.AddDynamic(this, &AOrderStation::OnCustomerReachedStation);
+			NewCustomer->OnCustomerLeaves.AddDynamic(this, &AOrderStation::OnCustomerLeaves);
 
 			// Store The Order On The Customer
 			NewCustomer->StoredCustomerData = CustomerData;
+
+			// Finishing Spawning Customer
+			NewCustomer->FinishSpawning(SpawnTransform);
 
 			// Add New Customer To Customer Array
 			Customers.Add(NewCustomer);
@@ -178,6 +178,31 @@ void AOrderStation::OnCustomerReachedStation(ACustomerNPC* Customer)
 
 	// Update Point Text
 	OrderWidget->SetPointText(CurrentCustomerData.PointsToGive);
+}
+
+void AOrderStation::OnCustomerLeaves(ACustomerNPC* Customer)
+{
+	// Only Run On Server
+	if (!HasAuthority()) { return; }
+	
+	if (!Customer) { return; }
+
+	// If Its The Customer At The Station
+	if (Customer->bIsFirstInLine) {
+
+		// Reset Current Order
+		CurrentCustomerData = FCustomer();
+
+		// Clear UI - true = Customer Is Leaving Because It Ran Out Of Time
+		OrderWidget->ClearUI(true);
+	}
+
+	// Remove Customer For Customers Array
+	Customers.Remove(Customer);
+	CustomersInQueue--;
+
+	// Move All Customers Up In The Line
+	MoveCustomersToPositions();
 }
 
 // Load All Current Order Item Icons

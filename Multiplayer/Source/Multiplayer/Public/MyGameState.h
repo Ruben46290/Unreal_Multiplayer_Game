@@ -27,7 +27,7 @@ public:
 
 	// How Long Should The Level Be - In Seconds
 	UPROPERTY()
-	float LevelDuration = 5.0f;
+	float LevelDuration = 90.0f;
 
 	// Time Left In The Level
 	UPROPERTY(ReplicatedUsing = OnRep_TimeRemaning)

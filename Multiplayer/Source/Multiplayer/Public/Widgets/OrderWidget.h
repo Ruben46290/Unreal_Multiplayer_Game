@@ -15,11 +15,12 @@ UCLASS()
 class MULTIPLAYER_API UOrderWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 	UPROPERTY(meta = (BindWidget));
 	UWrapBox* OrderWrapBox;
 
 public:
+
 	UPROPERTY(meta = (BindWidget));
 	UTextBlock* PointText;
 
@@ -38,6 +39,6 @@ public:
 
 	void SetPointText(float Points);
 
-
+	void ClearUI(bool CustomerRanOutOfTime);
 
 };

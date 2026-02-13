@@ -5,6 +5,8 @@
     #include "CoreMinimal.h"
     #include "GameFramework/Actor.h"
     #include "OrderManager.h" // Include For FOrder
+    #include "Components/WidgetComponent.h"
+    #include "CustomerWidget.h"
     #include "CustomerNPC.generated.h"
 
     // Tells Event Distapher Below That ACustomerNPC Class Exists
@@ -13,6 +15,7 @@
 
     // Event Dispatcher F
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReachedStation, ACustomerNPC*, Customer);
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCustomerLeaves, ACustomerNPC*, Customer);
 
 
     UCLASS()
@@ -46,6 +49,10 @@ protected:
 
     UPROPERTY(ReplicatedUsing = OnRep_ChosenMesh)
     USkeletalMesh* ChosenMesh;
+
+    // Widget Component
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+    UWidgetComponent* WidgetComponent;
 
     UFUNCTION()
     void OnRep_ChosenMesh();
@@ -96,4 +103,43 @@ public:
     // Is This Custom The First One In The Line?
     UPROPERTY(BlueprintReadOnly, Category = "Order")
     bool bIsFirstInLine = false;
+
+    // * * * * * * * * * * Patience * * * * * * * * * 
+ protected:
+
+    // How Long Has The Customer Been Waiting
+    UPROPERTY(ReplicatedUsing = OnRep_CurrentWaitTime)
+    float CurrentWaitTime = 0.0f;
+
+    // Replication Event For Current Wait Time
+    UFUNCTION()
+    void OnRep_CurrentWaitTime();
+
+    // Timer For Ticking Patience
+    FTimerHandle PatienceTimer;
+
+    // How Long Between Patience Timer Ticks
+    UPROPERTY()
+    float PatienceTickSpeed = 0.1f;
+
+    // Patience Tiemer Tick
+    UFUNCTION()
+    void PatienceTimerTick();
+
+    // Update Patience Widget
+    // Seperate Function So OnRep & Server Can Call Easily
+    UFUNCTION()
+    void UpdatePatienceUI();
+
+
+    // * * * * * Patience UI * * * * * 
+
+    UPROPERTY()
+    UCustomerWidget* PatienceWidget;
+
+public:
+    // Event Dispather For When Customer Leaves At The Station
+    UPROPERTY(BlueprintAssignable, Category = "Events")
+    FOnReachedStation OnCustomerLeaves;
+
 };

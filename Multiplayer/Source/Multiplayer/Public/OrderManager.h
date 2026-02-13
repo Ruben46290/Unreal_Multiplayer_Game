@@ -39,6 +39,10 @@ struct FCustomer : public FTableRowBase
 	// How Many Points Will The Customer Gice - 0 = Automatic Pricing ( Normal Item = 50, Juice = 100 )
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float PointsToGive = 0.0f;
+
+	// How Long Will The Customer Wait In The Line / Station
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TotalPatience = 60.0f;
 };
 
 UCLASS()

@@ -59,3 +59,18 @@ void UOrderWidget::SetPointText(float Points)
     // Set Point Text To The String
     PointText->SetText(FText::FromString(PriceString));
 }
+
+void UOrderWidget::ClearUI(bool CustomerRanOutOfTime)
+{
+    // If The Customer Left Because They Have Been Waiting Too Long
+    if (CustomerRanOutOfTime) {
+        
+        // Play Special Aniamtion
+    }
+
+    // Clear WrapBox Images
+    OrderWrapBox->ClearChildren();
+
+    // Set Point Text As Blank
+    PointText->SetText(FText::FromString(""));
+}

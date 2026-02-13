@@ -17,6 +17,9 @@ ACustomerNPC::ACustomerNPC()
     SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
     SkeletalMeshComponent->SetupAttachment(RootSceneComponent);
 
+    WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("PatienceWidget"));
+    WidgetComponent->SetupAttachment(SkeletalMeshComponent);
+
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -30,12 +33,17 @@ void ACustomerNPC::BeginPlay()
     // Tick We Be Instanly Enabled When There Is A Path For The NPC To Walk Down
     SetActorTickEnabled(false);
 
+    // Set Saved Widget To Widget Components Widget
+    PatienceWidget = Cast<UCustomerWidget>(WidgetComponent->GetUserWidgetObject());
+
     // Only Run On Server
     if (!HasAuthority()) { return; }
+
 
     // If Mesh Options Array Has Been Setup Properly
     if (MeshOptions.Num() != 0) {
 
+        // Roll A Random Index First To Use The Same Random Int For Setting The Mesh & Replicated ChosenMesh Var
         int32 ChosenIndex = FMath::RandRange(0, MeshOptions.Num() - 1);
 
         // Set Skeletal Mesh To Random Option
@@ -45,8 +53,13 @@ void ACustomerNPC::BeginPlay()
         ChosenMesh = MeshOptions[ChosenIndex];
 
     }
+
+    // Start Patience Timer
+    GetWorldTimerManager().SetTimer(PatienceTimer, this,
+        &ACustomerNPC::PatienceTimerTick, PatienceTickSpeed, true);
 }
 
+// * * * * * * * * * * * * * * * Movement * * * * * * * * * * * * * * *
 void ACustomerNPC::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -98,7 +111,6 @@ void ACustomerNPC::Tick(float DeltaTime)
     }
 }
 
-
 void ACustomerNPC::MoveAlongPath(TArray<FVector> Path)
 {
     // If Theres No Path Set - Print & Return
@@ -115,10 +127,6 @@ void ACustomerNPC::MoveAlongPath(TArray<FVector> Path)
     // Start Tick
     SetActorTickEnabled(true);
 }
-
-
-
-
 
 void ACustomerNPC::MoveToNextWaypoint()
 {
@@ -158,12 +166,65 @@ void ACustomerNPC::MoveToNextWaypoint()
 
 }
 
+
+// * * * * * * * * * * * * * * * Patience * * * * * * * * * * * * * * *
+
+void ACustomerNPC::PatienceTimerTick()
+{
+    // Only Tick When The NPC Isn't Moving
+    if (bIsMoving) { return; }
+
+    // Tick Current Waiting Time Up By Timer Speed
+    // e.g Tick Speed = 0.25, Function Is Called Every 0.25 Seconds & Adds 0.25
+    CurrentWaitTime += PatienceTickSpeed;
+
+    // Update UI On The Server
+    // Only The Server Starts The Timer
+    UpdatePatienceUI();
+
+}
+
+
+void ACustomerNPC::OnRep_CurrentWaitTime()
+{
+    // Update Patience On The Client
+    UpdatePatienceUI();
+}
+
+
+void ACustomerNPC::UpdatePatienceUI()
+{
+    // If The Customer Has Been Waiting For Too Long
+    if (CurrentWaitTime >= StoredCustomerData.TotalPatience) {
+
+        // Broadcast Customer Leaving Event Dispatcher
+        OnCustomerLeaves.Broadcast(this);
+
+        // Replace With Walking Off Animation?
+        Destroy();
+    }
+
+    // Customer Is Still Waiting
+    else {
+
+        // If Widget Is Valid
+        if (PatienceWidget) {
+
+            // Update UI With Percentage Of How Long The Customer Has Been Waiting
+            PatienceWidget->UpdateUI(1 - (CurrentWaitTime / StoredCustomerData.TotalPatience));
+        }
+    }
+}
+
+// * * * * * * * * * * * * * * * Replication * * * * * * * * * * * * * * *
+
 void ACustomerNPC::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(ACustomerNPC, StoredCustomerData);
     DOREPLIFETIME(ACustomerNPC, ChosenMesh);
+    DOREPLIFETIME(ACustomerNPC, CurrentWaitTime);
 }
 
 

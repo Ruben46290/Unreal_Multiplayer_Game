@@ -47,13 +47,10 @@ public:
 
 	TArray<ACustomerNPC*> Customers;
 
-
-	
 	UPROPERTY(ReplicatedUsing = OnRep_CurrentCustomerData)
 	FCustomer CurrentCustomerData;
 
 	void UpdateOrderUI();
-
 
 	UFUNCTION(BlueprintCallable, Category = "Queue")
 	void MoveCustomersToPositions();
@@ -64,7 +61,9 @@ public:
 	UFUNCTION()
 	void OnCustomerReachedStation(ACustomerNPC* Customer);
 
-
+	// Called From Event Dispatcher
+	UFUNCTION()
+	void OnCustomerLeaves(ACustomerNPC* Customer);
 
 	// * * * * * * * * * * Interaction * * * * * * * * * * 
 	
