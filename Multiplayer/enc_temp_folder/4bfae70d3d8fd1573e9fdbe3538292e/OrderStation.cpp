@@ -321,9 +321,7 @@ void AOrderStation::OnInteract_Implementation(AActor* Interactor)
 		FString EnumValueName;
 		EnumString.Split(TEXT("::"), nullptr, &EnumValueName);
 
-		// If Item Was Found
-		// Convert Both To All Lowercase Because Exported Builds Make The Items Full Caps
-		if (EnumValueName.ToLower().Equals(PlayerItemString.ToLower()))
+		if (EnumValueName.Equals(PlayerItemString))
 		{
 			bItemFound = true;
 			FoundIndex = i;
