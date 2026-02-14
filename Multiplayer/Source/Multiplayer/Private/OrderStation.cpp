@@ -4,6 +4,7 @@
 #include "OrderStation.h"
 #include "Net/UnrealNetwork.h"
 #include "MyGameState.h"
+#include "Item.h"
 ;
 
 AOrderStation::AOrderStation()
@@ -81,6 +82,66 @@ void AOrderStation::SetHighlight(bool bEnabled, bool bIsClosest, AActor* Player)
 		else
 		{
 			MeshComponent->SetOverlayMaterial(nullptr);
+		}
+	}
+}
+
+void AOrderStation::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	// Call Parent Function
+	Super::OnOverlapBegin(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
+
+	// Is The Overlapping Actor An Item
+	AItem* Item = Cast<AItem>(OtherActor);
+
+	// If It Is An Item Overlapping
+	if (Item) {
+
+		bool bItemFound = false;
+		int32 FoundIndex = -1;
+
+		FString PlayerItemString = Item->ItemName.ToString();
+
+		// Loop Through All Required Items
+		for (int32 i = 0; i < CurrentCustomerData.RequiredItems.Num(); i++)
+		{
+			FString EnumString = UEnum::GetValueAsString(CurrentCustomerData.RequiredItems[i]);
+			FString EnumValueName;
+			EnumString.Split(TEXT("::"), nullptr, &EnumValueName);
+
+			// If Item Was Found
+			// Convert Both To All Lowercase Because Exported Builds Make The Items Full Caps
+			if (EnumValueName.ToLower().Equals(PlayerItemString.ToLower()))
+			{
+				bItemFound = true;
+				FoundIndex = i;
+				break;
+			}
+		}
+
+		// If The Player Has An Item That Is In The Order
+		if (bItemFound) {
+
+			// Remove the item by index
+			CurrentCustomerData.RequiredItems.RemoveAt(FoundIndex);
+
+			// Remake UI
+			UpdateOrderUI();
+
+			// Destroy The Item
+			OtherActor->Destroy();
+
+			// If The Order Is Now Empty
+			if (CurrentCustomerData.RequiredItems.Num() == 0) {
+
+				// Clear The First Customer
+				ServeFirstCustomer();
+
+
+				// Set Order Price Text As Blank
+				OrderWidget->PointText->SetText(FText::FromString(""));
+
+			}
 		}
 	}
 }
