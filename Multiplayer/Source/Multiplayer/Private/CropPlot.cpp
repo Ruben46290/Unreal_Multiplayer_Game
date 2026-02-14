@@ -44,12 +44,6 @@ void ACropPlot::OnInteract_Implementation(AActor* Interactor)
 {
 	//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("Crop Interact")); }
 
-	// If The Crop Is Fully Grown & Can Be Harvested
-	if (bCanBeHarvested) {
-		HarvestCrop();
-		return;
-	}
-
 	// Cast To Player Class
 	AMultiplayerCharacter* Character = Cast<AMultiplayerCharacter>(Interactor);
 
@@ -73,6 +67,13 @@ void ACropPlot::OnInteract_Implementation(AActor* Interactor)
 		}
 
 		// Stop Function To Skip Other Planting Logic
+		return;
+	}
+
+
+	// If The Crop Is Fully Grown & Can Be Harvested
+	if (bCanBeHarvested) {
+		HarvestCrop();
 		return;
 	}
 
