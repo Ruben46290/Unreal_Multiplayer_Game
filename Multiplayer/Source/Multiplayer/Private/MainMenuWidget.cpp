@@ -9,35 +9,51 @@ void UMainMenuWidget::NativeConstruct()
 	GameInstanceRef = Cast<UMyGameInstance>(GetGameInstance());
 
 	// Bind button click events
-	if (HostButton)
+	if (HostLANButton)
 	{
-		HostButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnHostButtonClicked);
+		HostLANButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnHostLANButtonClicked);
 	}
 
-	if (JoinButton)
+	if (HostOnlineButton)
 	{
-		JoinButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnJoinButtonClicked);
+		HostOnlineButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnHostOnlineButtonClicked);
+	}
+
+	if (JoinLANButton)
+	{
+		JoinLANButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnJoinLANButtonClicked);
+	}
+
+	if (JoinOnlineButton)
+	{
+		JoinOnlineButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnJoinOnlineButtonClicked);
 	}
 }
 
-void UMainMenuWidget::OnHostButtonClicked()
+void UMainMenuWidget::OnHostLANButtonClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Host button clicked!"));
-
 	if (GameInstanceRef)
 	{
-		GameInstanceRef->HostSession();
+		GameInstanceRef->HostLANSession();
 	}
 }
 
-void UMainMenuWidget::OnJoinButtonClicked()
+void UMainMenuWidget::OnHostOnlineButtonClicked()
+{
+	if (GameInstanceRef)
+	{
+		GameInstanceRef->HostOnlineSession();
+	}
+}
+
+void UMainMenuWidget::OnJoinLANButtonClicked()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Join button clicked!"));
 
 	if (GameInstanceRef)
 	{
 		// First find sessions, then join
-		GameInstanceRef->FindSessions();
+		GameInstanceRef->FindLANSessions();
 
 		// In a real implementation, you'd wait for the search to complete
 		// and show a list of sessions. For now, we'll add a delay
@@ -48,6 +64,30 @@ void UMainMenuWidget::OnJoinButtonClicked()
 				{
 					GameInstanceRef->JoinSession();
 				}
-			}, 5.0f, false); // Wait 1 second for search to complete
+			}, 1.0f, false); // Wait 1 second for search to complete
 	}
 }
+
+void UMainMenuWidget::OnJoinOnlineButtonClicked()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Join button clicked!"));
+
+	if (GameInstanceRef)
+	{
+		// First find sessions, then join
+		GameInstanceRef->FindOnlineSessions();
+
+		// In a real implementation, you'd wait for the search to complete
+		// and show a list of sessions. For now, we'll add a delay
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+			{
+				if (GameInstanceRef)
+				{
+					GameInstanceRef->JoinSession();
+				}
+			}, 1.0f, false); // Wait 1 second for search to complete
+	}
+}
+
+

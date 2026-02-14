@@ -24,18 +24,19 @@ public:
 
 	virtual void Init() override;
 
-	// Called from the main menu widget to host a game
 	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
-	void HostSession();
+	void HostLANSession();
 
-	// Called from the main menu widget to find sessions
 	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
-	void FindSessions();
+	void HostOnlineSession();
 
-	// Called from the main menu widget to join the first found session
 	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
+	void FindLANSessions();
+
+	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
+	void FindOnlineSessions();
+
 	void JoinSession();
-
 protected:
 	// Online session interface pointer
 	IOnlineSessionPtr OnlineSessionInterface;
@@ -53,6 +54,9 @@ protected:
 	void OnFindSessionsComplete(bool bWasSuccessful);
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 
+
 	// Helper function to start the game after hosting
 	void StartSession();
+
+	bool bIsLAN;
 };

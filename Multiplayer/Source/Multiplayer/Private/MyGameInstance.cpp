@@ -38,8 +38,10 @@ void UMyGameInstance::Init()
 	}
 }
 
-void UMyGameInstance::HostSession()
+void UMyGameInstance::HostLANSession()
 {
+	bIsLAN = true;
+
 	if (!OnlineSessionInterface.IsValid())
 	{
 		UE_LOG(LogTemp, Error, TEXT("OnlineSessionInterface is not valid!"));
@@ -74,6 +76,80 @@ void UMyGameInstance::HostSession()
 	UE_LOG(LogTemp, Warning, TEXT("Creating session..."));
 }
 
+void UMyGameInstance::HostOnlineSession()
+{
+	bIsLAN = false;
+
+	if (!OnlineSessionInterface.IsValid())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("OnlineSessionInterface is not valid!"));
+		return;
+	}
+
+	FNamedOnlineSession* ExistingSession = OnlineSessionInterface->GetNamedSession(NAME_GameSession);
+	if (ExistingSession)
+	{
+		OnlineSessionInterface->DestroySession(NAME_GameSession);
+	}
+
+	TSharedPtr<FOnlineSessionSettings> SessionSettings = MakeShareable(new FOnlineSessionSettings());
+
+	// Online session settings - different from LAN!
+	SessionSettings->bIsLANMatch = false;  // Not LAN
+	SessionSettings->NumPublicConnections = 4;
+	SessionSettings->bShouldAdvertise = true;
+	SessionSettings->bUsesPresence = true;  // EOS uses presence
+	SessionSettings->bAllowJoinInProgress = true;
+	SessionSettings->bAllowJoinViaPresence = true;  // EOS needs this
+	SessionSettings->bUseLobbiesIfAvailable = true;
+	SessionSettings->bUsesStats = true;
+	SessionSettings->bUseLobbiesVoiceChatIfAvailable = false;
+
+	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	OnlineSessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *SessionSettings);
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Creating Online session..."));
+}
+
+void UMyGameInstance::FindLANSessions()
+{
+	if (!OnlineSessionInterface.IsValid())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("OnlineSessionInterface is not valid!"));
+		return;
+	}
+
+	SessionSearch = MakeShareable(new FOnlineSessionSearch());
+	SessionSearch->bIsLanQuery = true;
+	SessionSearch->MaxSearchResults = 10;
+	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, false, EOnlineComparisonOp::Equals);
+
+	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	OnlineSessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), SessionSearch.ToSharedRef());
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Searching for LAN sessions..."));
+}
+
+void UMyGameInstance::FindOnlineSessions()
+{
+	if (!OnlineSessionInterface.IsValid())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("OnlineSessionInterface is not valid!"));
+		return;
+	}
+
+	SessionSearch = MakeShareable(new FOnlineSessionSearch());
+	SessionSearch->bIsLanQuery = false;  // Search online
+	SessionSearch->MaxSearchResults = 50;
+	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
+
+	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	OnlineSessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), SessionSearch.ToSharedRef());
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Searching for Online sessions..."));
+}
+
+
 void UMyGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
 	if (bWasSuccessful)
@@ -87,31 +163,6 @@ void UMyGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucces
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to create session!"));
 	}
-}
-
-void UMyGameInstance::FindSessions()
-{
-	if (!OnlineSessionInterface.IsValid())
-	{
-		UE_LOG(LogTemp, Error, TEXT("OnlineSessionInterface is not valid!"));
-		return;
-	}
-
-	// Create search settings
-	SessionSearch = MakeShareable(new FOnlineSessionSearch());
-
-	// Configure search settings
-	SessionSearch->bIsLanQuery = true; // Search for LAN games
-	SessionSearch->MaxSearchResults = 10; // Max results to return
-	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, false, EOnlineComparisonOp::Equals);
-
-	// Get the first local player controller
-	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-
-	// Start the search
-	OnlineSessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), SessionSearch.ToSharedRef());
-
-	UE_LOG(LogTemp, Warning, TEXT("Searching for sessions..."));
 }
 
 void UMyGameInstance::OnFindSessionsComplete(bool bWasSuccessful)

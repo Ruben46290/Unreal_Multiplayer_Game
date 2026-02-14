@@ -22,16 +22,28 @@ public:
 protected:
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* HostButton;
+	UButton* HostLANButton;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* JoinButton;
+	UButton* HostOnlineButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* JoinLANButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* JoinOnlineButton;
 
 	UFUNCTION()
-	void OnHostButtonClicked();
+	void OnHostLANButtonClicked();
 
 	UFUNCTION()
-	void OnJoinButtonClicked();
+	void OnHostOnlineButtonClicked();
+
+	UFUNCTION()
+	void OnJoinLANButtonClicked();
+
+	UFUNCTION()
+	void OnJoinOnlineButtonClicked();
 
 private:
 
