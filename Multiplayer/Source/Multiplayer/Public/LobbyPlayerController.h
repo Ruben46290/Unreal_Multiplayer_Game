@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Lobby_MainMenu/LobbyHUD.h"
 #include "LobbyPlayerController.generated.h"
 
 /**
@@ -26,4 +27,26 @@ protected:
 
 	// Teleport To The Right Spawn Pos
 	void TeleportPlayerToSpawn();
+
+	// * * * * * * * * * * UI * * * * * * * * *
+
+protected:
+
+	// Blueprint Class For Lobby UI
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<ULobbyHUD> LobbyWidgetClass;
+
+	// Refrence
+	UPROPERTY()
+	ULobbyHUD* LobbyWidget;
+
+	void CreateLobbyUI();
+
+public:
+	// Called by the UI button
+	UFUNCTION(BlueprintCallable)
+	void ToggleReady();
+
+
+
 };

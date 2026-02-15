@@ -34,7 +34,7 @@ void ALobbyCharacter::BeginPlay()
 	}
 }
 
-// Add a server RPC to request the animation
+
 void ALobbyCharacter::Server_PlayJoiningAnimation_Implementation()
 {
 	// Server RPC - Client Calls This To Tell The Server To Play Animation
@@ -47,6 +47,27 @@ void ALobbyCharacter::Multicast_PlayJoiningAnimation_Implementation()
 	PlayJoiningAnimation();
 }
 
+
+void ALobbyCharacter::Server_SetReady_Implementation(bool bReady)
+{
+	// Set Saved Ready bool To Input - Calls OnRep
+	bIsReady = bReady;
+
+	// Call Visual Feedback Blueprint Event
+	OnReadyStatusChanged(bIsReady);
+
+
+}
+
+
+void ALobbyCharacter::OnRep_IsReady()
+{
+	// Call Visual Feedback Blueprint Event
+	OnReadyStatusChanged(bIsReady);
+}
+
+
+
 // Called to bind functionality to input
 void ALobbyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -54,16 +75,16 @@ void ALobbyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 }
 
+
+
 void ALobbyCharacter::SetCharacterMesh(USkeletalMesh* NewMesh)
 {
 	Mesh->SetSkeletalMesh(NewMesh);
 }
 
 
-void ALobbyCharacter::SetReady(bool bReady)
-{
-	bIsReady = bReady;
-}
+
+
 
 void ALobbyCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {

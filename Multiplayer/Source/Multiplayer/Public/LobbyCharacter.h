@@ -39,15 +39,33 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Customization")
 	void SetCharacterMesh(USkeletalMesh* NewMesh);
 
+// * * * * * * * * * * Ready System * * * * * * * * * * d
+
+public:
+	// Server RPC To Set Ready Status
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void Server_SetReady(bool bReady);
+
+	// Get ready status
+	UFUNCTION(BlueprintCallable)
+	bool GetIsReady() const { return bIsReady; }
+
+	// Visual Feeback For Ready Status Changing (Done In Blueprints)
+	UFUNCTION(BlueprintImplementableEvent, Category = "Lobby")
+	void OnReadyStatusChanged(bool bReady);
 
 protected:
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Lobby")
+	UPROPERTY(ReplicatedUsing = OnRep_IsReady, BlueprintReadOnly, Category = "Lobby")
 	bool bIsReady;
 
-	// Function to set ready status
-	UFUNCTION(BlueprintCallable, Category = "Lobby")
-	void SetReady(bool bReady);
+	UFUNCTION()
+	void OnRep_IsReady();
+
+
+
+
+
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 };

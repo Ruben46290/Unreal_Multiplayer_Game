@@ -7,13 +7,21 @@
 #include "GameFramework/PlayerStart.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/GameStateBase.h"
+#include "Blueprint/UserWidget.h"
+#include <LobbyCharacter.h>
+
+
 
 
 void ALobbyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Connect To Camera On The Level & Teleport Player Mesh To Proper Spot
 	SetupLobbyCamera();
+
+	// Make The Lobby UI
+	CreateLobbyUI();
 }
 
 
@@ -71,5 +79,50 @@ void ALobbyPlayerController::TeleportPlayerToSpawn()
 		MyPawn->SetActorLocationAndRotation(NewSpawnLocation, NewSpawnRotation);
 
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Teleported Player %d"), PlayerIndex));
+	}
+}
+
+void ALobbyPlayerController::CreateLobbyUI()
+{
+	// Only Run On Local Machine
+	if (!IsLocalController()) { return; }
+
+	// If HUD Blueprint Class Was Set
+	if (LobbyWidgetClass)
+	{
+		// Create The Widget
+		LobbyWidget = CreateWidget<ULobbyHUD>(this, LobbyWidgetClass);
+
+		// If Widget Is Valid
+		if (LobbyWidget)
+		{
+			// Add Widget To Viewport
+			LobbyWidget->AddToViewport();
+
+			// Set Input Mode To UI Only & Show Mouse Cursor
+			FInputModeUIOnly InputMode;
+			InputMode.SetWidgetToFocus(LobbyWidget->TakeWidget());
+			SetInputMode(InputMode);
+			bShowMouseCursor = true;
+		}
+	}
+}
+
+void ALobbyPlayerController::ToggleReady()
+{
+	// Get Owning Pawn & Cast To ALobbyCharacter
+	ALobbyCharacter* LobbyChar = Cast<ALobbyCharacter>(GetPawn());
+
+	// If Character Refrence Valid
+	if (LobbyChar)
+	{
+		// Flip bIsReady bool (true -> false || false -> true)
+		bool bNewReady = !LobbyChar->GetIsReady();
+
+		// Set The Server Status To New Ready Status
+		LobbyChar->Server_SetReady(bNewReady);
+
+		// Update Ready Button UI
+		LobbyWidget->UpdateReadyButton(bNewReady);
 	}
 }
