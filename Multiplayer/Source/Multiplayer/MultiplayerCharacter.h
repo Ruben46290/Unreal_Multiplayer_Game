@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
-#include "ItemData.h"
+#include "Data/ItemData.h"
 #include "MultiplayerCharacter.generated.h"
 
 class AItem;

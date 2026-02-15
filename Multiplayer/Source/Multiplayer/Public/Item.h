@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "InteractableActor.h"
-#include "ItemData.h"
+#include "Data/ItemData.h"
 #include "Components/WidgetComponent.h"
 #include "Item.generated.h"
 

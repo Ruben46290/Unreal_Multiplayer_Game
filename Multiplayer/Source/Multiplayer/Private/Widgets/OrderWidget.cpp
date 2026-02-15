@@ -2,8 +2,8 @@
 
 
 #include "Widgets/OrderWidget.h"
-#include "OrderManager.h"
-#include <ItemData.h>
+#include "Ordering/OrderManager.h"
+#include <Data/ItemData.h>
 
 
 void UOrderWidget::MakeOrder(TArray<FName> OrderItems)

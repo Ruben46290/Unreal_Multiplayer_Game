@@ -157,7 +157,7 @@ void UMyGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucces
 		UE_LOG(LogTemp, Warning, TEXT("Session created successfully!"));
 
 		// Travel to the game map (server travel)
-		GetWorld()->ServerTravel("/Game/Maps/TestMap?listen"); // Change to your game map path
+		GetWorld()->ServerTravel("/Game/Lobby_MainMenu/Maps/LobbyMap?listen"); // Change to your game map path
 	}
 	else
 	{
