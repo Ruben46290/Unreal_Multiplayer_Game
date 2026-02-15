@@ -19,7 +19,23 @@ public:
 	ALobbyGameMode();
 
 
+	// * * * * * * * * * * Ready * * * * * * * * * *
+public:
+	// Called when a player's ready status changes
+	UFUNCTION()
+	void OnPlayerReadyChanged();
+
+	// Start the game (travel to game map)
+	UFUNCTION()
+	void StartGame();
+
 protected:
+	// Check if all players are ready
+	bool AreAllPlayersReady();
+
+	// The map to travel to when game starts
+	UPROPERTY(EditDefaultsOnly, Category = "Game")
+	FString GameMapPath = "/Game/Maps/TestMap";
 
 
 private:

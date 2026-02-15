@@ -3,6 +3,7 @@
 
 #include "LobbyCharacter.h"
 #include "Net/UnrealNetwork.h"
+#include "Lobby_MainMenu/LobbyGameMode.h"
 
 // Sets default values
 ALobbyCharacter::ALobbyCharacter()
@@ -56,6 +57,12 @@ void ALobbyCharacter::Server_SetReady_Implementation(bool bReady)
 	// Call Visual Feedback Blueprint Event
 	OnReadyStatusChanged(bIsReady);
 
+	// Notify The Gamemode
+	ALobbyGameMode* GameMode = Cast<ALobbyGameMode>(GetWorld()->GetAuthGameMode());
+	if (GameMode)
+	{
+		GameMode->OnPlayerReadyChanged();
+	}
 
 }
 

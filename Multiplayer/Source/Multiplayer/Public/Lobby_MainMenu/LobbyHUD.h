@@ -15,11 +15,20 @@ class ULobbyHUD : public UUserWidget
 {
 	GENERATED_BODY()
 	
-protected:
+public:
+
+	virtual void NativeConstruct() override;
+
 
 public:
+	// Public To Access In Blueprints
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UButton* ReadyButton;
+
+protected:
+
+	UFUNCTION()
+	void OnReadyButtonPressed();
 
 public:
 
