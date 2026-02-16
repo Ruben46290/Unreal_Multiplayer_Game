@@ -51,10 +51,14 @@ void AMultiplayerGameMode::PostLogin(APlayerController* NewPlayer)
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green,
 		FString::Printf(TEXT("Player loaded: %d/%d"), LoadedPlayers.Num(), ExpectedPlayerCount));
 
+	// Check If All The Players Have Been Loaded In
+	CheckAllPlayersLoaded();
 }
 
 
-
+void AMultiplayerGameMode::OnPlayerLoaded()
+{
+}
 
 void AMultiplayerGameMode::CheckAllPlayersLoaded()
 {

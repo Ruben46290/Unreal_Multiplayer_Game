@@ -2,7 +2,7 @@
 
 
 #include "Lobby_MainMenu/LobbyHUD.h"
-#include "LobbyPlayerController.h"
+#include "Lobby_MainMenu/LobbyPlayerController.h"
 
 
 void ULobbyHUD::NativeConstruct()

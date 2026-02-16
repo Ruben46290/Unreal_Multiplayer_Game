@@ -20,7 +20,6 @@ AMyPlayerController::AMyPlayerController()
 	}
 }
 
-
 void AMyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -36,11 +35,11 @@ void AMyPlayerController::BeginPlay()
 	GetWorld()->GetTimerManager().SetTimer(NotifyTimer, [this]()
 		{
 			AMultiplayerGameMode* GM = Cast<AMultiplayerGameMode>(GetWorld()->GetAuthGameMode());
-			if (GM)
+			if (GM && HasAuthority())
 			{
-				GM->CheckAllPlayersLoaded();
+				GM->OnPlayerLoaded();
 			}
-		}, 2.0f, false);
+		}, 0.5f, false);
 }
 
 

@@ -20,7 +20,6 @@ protected:
 
 	AMyPlayerController();
 
-
 	void BeginPlay();
 
 	//void ReceivedPlayer();

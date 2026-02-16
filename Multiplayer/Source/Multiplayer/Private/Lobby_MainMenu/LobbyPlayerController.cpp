@@ -1,14 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "LobbyPlayerController.h"
+#include "Lobby_MainMenu/LobbyPlayerController.h"
 #include "Camera/CameraActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/GameStateBase.h"
 #include "Blueprint/UserWidget.h"
-#include <LobbyCharacter.h>
+#include <Lobby_MainMenu/LobbyCharacter.h>
 
 
 
@@ -124,5 +124,27 @@ void ALobbyPlayerController::ToggleReady()
 
 		// Update Ready Button UI
 		LobbyWidget->UpdateReadyButton(bNewReady);
+	}
+}
+
+
+void ALobbyPlayerController::Client_ShowLoadingScreen_Implementation()
+{
+	if (LoadingScreenClass)
+	{
+		// Remove lobby UI
+		if (LobbyWidget)
+		{
+			LobbyWidget->RemoveFromParent();
+		}
+
+		// Create loading screen
+		LoadingScreen = CreateWidget<ULoadingScreenWidget>(this, LoadingScreenClass);
+		if (LoadingScreen)
+		{
+			LoadingScreen->AddToViewport(999); // High Z-order to be on top
+
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("Loading screen shown"));
+		}
 	}
 }

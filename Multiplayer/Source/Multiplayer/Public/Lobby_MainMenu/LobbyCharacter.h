@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "LoadingScreenWidget.h"
 #include "LobbyCharacter.generated.h"
 
 UCLASS()
@@ -39,7 +40,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Customization")
 	void SetCharacterMesh(USkeletalMesh* NewMesh);
 
-// * * * * * * * * * * Ready System * * * * * * * * * * d
+// * * * * * * * * * * Ready System * * * * * * * * * * 
 
 public:
 	// Server RPC To Set Ready Status
@@ -67,5 +68,6 @@ protected:
 
 
 
+protected:
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 };

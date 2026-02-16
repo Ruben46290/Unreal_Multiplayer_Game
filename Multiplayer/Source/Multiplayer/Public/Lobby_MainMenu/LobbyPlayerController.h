@@ -48,5 +48,15 @@ public:
 	void ToggleReady();
 
 
+	// * * * * * * * * * * Loading Screen * * * * * * * * * * 
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<ULoadingScreenWidget> LoadingScreenClass;
 
+	UPROPERTY()
+	ULoadingScreenWidget* LoadingScreen;
+
+public:
+	UFUNCTION(Client, Reliable)
+	void Client_ShowLoadingScreen();
 };

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "LobbyCharacter.h"
+#include "Lobby_MainMenu/LobbyCharacter.h"
 #include "Net/UnrealNetwork.h"
 #include "Lobby_MainMenu/LobbyGameMode.h"
 
@@ -75,6 +75,9 @@ void ALobbyCharacter::OnRep_IsReady()
 
 
 
+
+
+
 // Called to bind functionality to input
 void ALobbyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -88,8 +91,6 @@ void ALobbyCharacter::SetCharacterMesh(USkeletalMesh* NewMesh)
 {
 	Mesh->SetSkeletalMesh(NewMesh);
 }
-
-
 
 
 

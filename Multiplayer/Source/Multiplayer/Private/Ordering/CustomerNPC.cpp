@@ -222,7 +222,7 @@ void ACustomerNPC::ToggleUI(bool bIsVisible)
 {
     if (bIsVisible) {
         WidgetComponent->SetVisibility(true);
-        if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Green, TEXT("Show UI")); }
+       
     }
     else {
         WidgetComponent->SetVisibility(false);

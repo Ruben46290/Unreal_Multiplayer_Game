@@ -72,3 +72,10 @@ Plugins/**/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# Packaged builds (Windows, Linux, Mac, etc.)
+Windows/*
+Linux/*
+Mac/*
+Android/*
+IOS/*

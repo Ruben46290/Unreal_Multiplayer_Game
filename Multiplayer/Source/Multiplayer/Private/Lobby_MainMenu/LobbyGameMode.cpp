@@ -2,8 +2,8 @@
 
 
 #include "Lobby_MainMenu/LobbyGameMode.h"
-#include "LobbyPlayerController.h"
-#include "LobbyCharacter.h"
+#include "Lobby_MainMenu/LobbyPlayerController.h"
+#include "Lobby_MainMenu/LobbyCharacter.h"
 
 
 ALobbyGameMode::ALobbyGameMode()
@@ -77,6 +77,15 @@ void ALobbyGameMode::StartGame()
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Starting game!"));
+	}
+
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		ALobbyPlayerController* LobbyPC = Cast<ALobbyPlayerController>(It->Get());
+		if (LobbyPC)
+		{
+			LobbyPC->Client_ShowLoadingScreen();
+		}
 	}
 
 	// Travel to the game map
