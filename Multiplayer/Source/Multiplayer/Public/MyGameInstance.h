@@ -59,4 +59,8 @@ protected:
 	void StartSession();
 
 	bool bIsLAN;
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "Loading")
+	void ManuallyShowLoadingScreen();
 };

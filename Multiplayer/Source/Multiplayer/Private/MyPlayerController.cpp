@@ -27,6 +27,10 @@ void AMyPlayerController::BeginPlay()
 
 	ShowGameStartWidget();
 
+	FInputModeGameOnly InputMode;
+	SetInputMode(InputMode);
+	bShowMouseCursor = false;
+
 	// Make A Timer For A Small Delay Before Connecting To Game State
 	FTimerHandle BindTimer;
 	GetWorldTimerManager().SetTimer(BindTimer, this, &AMyPlayerController::BindToGameState, 0.25f, false);

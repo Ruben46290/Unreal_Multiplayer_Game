@@ -43,7 +43,7 @@ void ALobbyGameMode::OnPlayerReadyChanged()
 
 		// Start game after a short delay
 		FTimerHandle StartGameTimer;
-		GetWorldTimerManager().SetTimer(StartGameTimer, this, &ALobbyGameMode::StartGame, 3.0f, false);
+		GetWorldTimerManager().SetTimer(StartGameTimer, this, &ALobbyGameMode::StartGame, 1.0f, false);
 	}
 }
 
@@ -79,14 +79,14 @@ void ALobbyGameMode::StartGame()
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Starting game!"));
 	}
 
-	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
-	{
-		ALobbyPlayerController* LobbyPC = Cast<ALobbyPlayerController>(It->Get());
-		if (LobbyPC)
-		{
-			LobbyPC->Client_ShowLoadingScreen();
-		}
-	}
+	//for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	//{
+	//	ALobbyPlayerController* LobbyPC = Cast<ALobbyPlayerController>(It->Get());
+	//	if (LobbyPC)
+	//	{
+	//		LobbyPC->Client_ShowLoadingScreen();
+	//	}
+	//}
 
 	// Travel to the game map
 	GetWorld()->ServerTravel(GameMapPath + "?listen");
