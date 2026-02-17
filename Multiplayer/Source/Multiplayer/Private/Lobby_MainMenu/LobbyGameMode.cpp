@@ -79,15 +79,6 @@ void ALobbyGameMode::StartGame()
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Starting game!"));
 	}
 
-	//for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
-	//{
-	//	ALobbyPlayerController* LobbyPC = Cast<ALobbyPlayerController>(It->Get());
-	//	if (LobbyPC)
-	//	{
-	//		LobbyPC->Client_ShowLoadingScreen();
-	//	}
-	//}
-
 	// Travel to the game map
 	GetWorld()->ServerTravel(GameMapPath + "?listen");
 }

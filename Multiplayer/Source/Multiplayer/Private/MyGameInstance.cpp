@@ -5,7 +5,6 @@
 #include <OnlineSessionSettings.h>
 #include <Online/OnlineSessionNames.h>
 #include <Kismet/GameplayStatics.h>
-#include "ILoadingScreenModule.h"
 
 UMyGameInstance::UMyGameInstance()
 {
@@ -252,8 +251,3 @@ void UMyGameInstance::StartSession()
 {
 }
 
-void UMyGameInstance::ManuallyShowLoadingScreen()
-{
-	ILoadingScreenModule& LoadingScreenModule = FModuleManager::LoadModuleChecked<ILoadingScreenModule>("LoadingScreen");
-	LoadingScreenModule.StartInGameLoadingScreen();
-}

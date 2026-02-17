@@ -60,7 +60,4 @@ protected:
 
 	bool bIsLAN;
 
-public:
-	UFUNCTION(BlueprintCallable, Category = "Loading")
-	void ManuallyShowLoadingScreen();
 };
