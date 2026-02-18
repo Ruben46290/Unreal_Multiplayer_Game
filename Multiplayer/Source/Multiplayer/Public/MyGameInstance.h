@@ -8,10 +8,37 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "MyGameInstance.generated.h"
 
+// Struct For Server Infomation
+USTRUCT(BlueprintType)
+struct FServerInfo
+{
+	GENERATED_BODY()
 
-/**
- * 
- */
+	UPROPERTY(BlueprintReadOnly)
+	FString ServerName;
+
+	UPROPERTY(BlueprintReadOnly)
+	FString HostName;
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 CurrentPlayers;
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 MaxPlayers;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsLAN;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsPasswordProtected;
+
+	// Index in search results array
+	int32 SearchResultIndex;
+};
+
+// Event Dispatcher For Sessions Found
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSessionsFound, const TArray<FServerInfo>&, ServerList);
+
 UCLASS()
 class MULTIPLAYER_API UMyGameInstance : public UGameInstance
 {
@@ -55,9 +82,34 @@ protected:
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 
 
-	// Helper function to start the game after hosting
-	void StartSession();
+
 
 	bool bIsLAN;
 
+
+public:
+	// Delegate that fires when sessions are found (UI binds to this)
+	UPROPERTY(BlueprintAssignable, Category = "Multiplayer")
+	FOnSessionsFound OnSessionsFound;
+
+	// Updated host function that takes parameters
+	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
+	void HostSessionWithSettings(FString ServerName, bool bIsLAN, FString Password);
+
+	// Join a specific session by index
+	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
+	void JoinSessionByIndex(int32 Index, FString Password);
+
+	// Refresh server list
+	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
+	void RefreshServerList(bool bSearchLAN);
+
+private:
+	// Store password for validation when joining
+	FString CurrentPassword;
+
+	// Settings keys for session data
+	static const FName SERVER_NAME_KEY;
+	static const FName PASSWORD_KEY;
+	static const FName IS_PASSWORD_PROTECTED_KEY;
 };

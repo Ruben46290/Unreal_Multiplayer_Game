@@ -6,6 +6,10 @@
 #include <Online/OnlineSessionNames.h>
 #include <Kismet/GameplayStatics.h>
 
+const FName UMyGameInstance::SERVER_NAME_KEY = FName("ServerName");
+const FName UMyGameInstance::PASSWORD_KEY = FName("Password");
+const FName UMyGameInstance::IS_PASSWORD_PROTECTED_KEY = FName("IsPasswordProtected");
+
 UMyGameInstance::UMyGameInstance()
 {
 }
@@ -165,23 +169,23 @@ void UMyGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucces
 	}
 }
 
-void UMyGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
-{
-	if (bWasSuccessful)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Session search complete! Found %d sessions"), SessionSearch->SearchResults.Num());
-
-		// Log all found sessions
-		for (int32 i = 0; i < SessionSearch->SearchResults.Num(); i++)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Session %d: %s"), i, *SessionSearch->SearchResults[i].GetSessionIdStr());
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Session search failed!"));
-	}
-}
+//void UMyGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
+//{
+//	if (bWasSuccessful)
+//	{
+//		UE_LOG(LogTemp, Warning, TEXT("Session search complete! Found %d sessions"), SessionSearch->SearchResults.Num());
+//
+//		// Log all found sessions
+//		for (int32 i = 0; i < SessionSearch->SearchResults.Num(); i++)
+//		{
+//			UE_LOG(LogTemp, Warning, TEXT("Session %d: %s"), i, *SessionSearch->SearchResults[i].GetSessionIdStr());
+//		}
+//	}
+//	else
+//	{
+//		UE_LOG(LogTemp, Error, TEXT("Session search failed!"));
+//	}
+//}
 
 void UMyGameInstance::JoinSession()
 {
@@ -247,7 +251,160 @@ void UMyGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCom
 }
 
 
-void UMyGameInstance::StartSession()
+
+
+
+
+void UMyGameInstance::HostSessionWithSettings(FString ServerName, bool IsLAN, FString Password)
 {
+	if (!OnlineSessionInterface.IsValid())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("OnlineSessionInterface is not valid!"));
+		return;
+	}
+
+	// Destroy existing session if there is one
+	FNamedOnlineSession* ExistingSession = OnlineSessionInterface->GetNamedSession(NAME_GameSession);
+	if (ExistingSession)
+	{
+		OnlineSessionInterface->DestroySession(NAME_GameSession);
+	}
+
+	TSharedPtr<FOnlineSessionSettings> SessionSettings = MakeShareable(new FOnlineSessionSettings());
+
+	// Set LAN or Online settings
+	SessionSettings->bIsLANMatch = IsLAN;
+	SessionSettings->NumPublicConnections = 2;
+	SessionSettings->bShouldAdvertise = true;
+	SessionSettings->bAllowJoinInProgress = true;
+	SessionSettings->bUseLobbiesIfAvailable = !IsLAN;
+	SessionSettings->bUsesPresence = !IsLAN;
+	SessionSettings->bAllowJoinViaPresence = !IsLAN;
+
+	// Store server name in session settings
+	SessionSettings->Set(SERVER_NAME_KEY, ServerName, EOnlineDataAdvertisementType::ViaOnlineService);
+
+	// Store password info
+	bool bHasPassword = !Password.IsEmpty();
+	SessionSettings->Set(IS_PASSWORD_PROTECTED_KEY, bHasPassword, EOnlineDataAdvertisementType::ViaOnlineService);
+
+	// Only store password if there is one
+	if (bHasPassword)
+	{
+		SessionSettings->Set(PASSWORD_KEY, Password, EOnlineDataAdvertisementType::ViaOnlineService);
+		CurrentPassword = Password;
+	}
+
+	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	OnlineSessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *SessionSettings);
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Creating session: %s"), *ServerName));
+}
+
+void UMyGameInstance::RefreshServerList(bool bSearchLAN)
+{
+	if (!OnlineSessionInterface.IsValid())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("OnlineSessionInterface is not valid!"));
+		return;
+	}
+
+	SessionSearch = MakeShareable(new FOnlineSessionSearch());
+	SessionSearch->bIsLanQuery = bSearchLAN;
+	SessionSearch->MaxSearchResults = 50;
+	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, !bSearchLAN, EOnlineComparisonOp::Equals);
+
+	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	OnlineSessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), SessionSearch.ToSharedRef());
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Searching for sessions..."));
+}
+
+void UMyGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
+{
+	TArray<FServerInfo> ServerList;
+
+	if (bWasSuccessful)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
+			FString::Printf(TEXT("Found %d sessions"), SessionSearch->SearchResults.Num()));
+
+		// Loop through all found sessions and build server info
+		for (int32 i = 0; i < SessionSearch->SearchResults.Num(); i++)
+		{
+			FOnlineSessionSearchResult& Result = SessionSearch->SearchResults[i];
+
+			FServerInfo Info;
+
+			// Get server name from session settings
+			FString ServerName;
+			Result.Session.SessionSettings.Get(SERVER_NAME_KEY, ServerName);
+			Info.ServerName = ServerName.IsEmpty() ? TEXT("Unnamed Server") : ServerName;
+
+			// Get password protection status
+			bool bIsPasswordProtected = false;
+			Result.Session.SessionSettings.Get(IS_PASSWORD_PROTECTED_KEY, bIsPasswordProtected);
+			Info.bIsPasswordProtected = bIsPasswordProtected;
+
+			// Get player counts
+			Info.MaxPlayers = Result.Session.SessionSettings.NumPublicConnections;
+			Info.CurrentPlayers = Info.MaxPlayers - Result.Session.NumOpenPublicConnections;
+
+			// LAN or Online
+			Info.bIsLAN = Result.Session.SessionSettings.bIsLANMatch;
+
+			// Store index for joining later
+			Info.SearchResultIndex = i;
+
+			ServerList.Add(Info);
+		}
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Session search failed!"));
+	}
+
+	// Fire delegate so UI can update (even if empty - will show "No servers found")
+	OnSessionsFound.Broadcast(ServerList);
+}
+
+
+void UMyGameInstance::JoinSessionByIndex(int32 Index, FString Password)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Game Instance Join Session Called"));
+	if (!OnlineSessionInterface.IsValid())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("OnlineSessionInterface is not valid!"));
+		return;
+	}
+
+	if (!SessionSearch.IsValid() || !SessionSearch->SearchResults.IsValidIndex(Index))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Invalid session index!"));
+		return;
+	}
+
+	FOnlineSessionSearchResult& Result = SessionSearch->SearchResults[Index];
+
+	// Validate password if session is password protected
+	bool bIsPasswordProtected = false;
+	Result.Session.SessionSettings.Get(IS_PASSWORD_PROTECTED_KEY, bIsPasswordProtected);
+
+	if (bIsPasswordProtected)
+	{
+		FString ServerPassword;
+		Result.Session.SessionSettings.Get(PASSWORD_KEY, ServerPassword);
+
+		if (Password != ServerPassword)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Wrong password!"));
+			return;
+		}
+	}
+
+	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	OnlineSessionInterface->JoinSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, Result);
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Joining session..."));
 }
 
