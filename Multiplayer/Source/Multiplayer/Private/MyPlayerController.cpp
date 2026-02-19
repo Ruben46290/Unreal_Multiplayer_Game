@@ -63,6 +63,15 @@ void AMyPlayerController::ShowGameStartWidget()
 	}
 }
 
+void AMyPlayerController::Server_NotifyCountdownFinished_Implementation()
+{
+	AMultiplayerGameMode* GM = Cast<AMultiplayerGameMode>(GetWorld()->GetAuthGameMode());
+	if (GM)
+	{
+		GM->StartGameplay();
+	}
+}
+
 // Start Countdown On Starting Widget
 void AMyPlayerController::Client_StartGameCountdown_Implementation()
 {

@@ -54,4 +54,8 @@ protected:
 public:
 	UFUNCTION(Client, Reliable)
 	void Client_StartGameCountdown();
+
+	// Called when countdown finishes
+	UFUNCTION(Server, Reliable)
+	void Server_NotifyCountdownFinished();
 };

@@ -56,7 +56,7 @@ public:
 	void LevelTimerTick();
 
 	UFUNCTION()
-	void StartLevelTimer();
+	void StartLevelTimer(float Duration = 60.0f);
 
 	UFUNCTION()
 	void StopLevelTimer();

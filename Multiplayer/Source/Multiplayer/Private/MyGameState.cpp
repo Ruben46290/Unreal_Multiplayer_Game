@@ -51,11 +51,15 @@ void AMyGameState::OnRep_LevelComplete()
 	}
 }
 
-void AMyGameState::StartLevelTimer()
+void AMyGameState::StartLevelTimer(float Duration)
 {
 	// Only Run On Server
 	if (HasAuthority()) {
 
+		// Store the duration
+		LevelDuration = Duration;
+
+		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("GameState Start Level Timer")); }
 		// If Level Timer Isn't Active
 		if (!GetWorld()->GetTimerManager().IsTimerActive(LevelTimer)) {
 

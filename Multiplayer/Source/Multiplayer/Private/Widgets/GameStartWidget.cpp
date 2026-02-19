@@ -2,6 +2,7 @@
 
 
 #include "Widgets/GameStartWidget.h"
+#include "MyPlayerController.h"
 
 void UGameStartWidget::NativeConstruct()
 {
@@ -43,6 +44,8 @@ void UGameStartWidget::OnCountdownTick()
 		// Update Countdown Text
 		ShowCountdown(CountdownValue);
 	}
+
+	// Countdown Is Done
 	else
 	{
 		// Show Countdown As 0 - Hides The Countdown Text In The Blueprint
@@ -51,15 +54,23 @@ void UGameStartWidget::OnCountdownTick()
 		// Countdown Finished - Stop Timer
 		GetWorld()->GetTimerManager().ClearTimer(CountdownTimer);
 
-		// Set Status Text To "GO"
-		//UpdateStatusText(TEXT("GO!"));
+		// Tell the server we're ready to start
+		AMyPlayerController* PC = Cast<AMyPlayerController>(GetOwningPlayer());
+		if (PC)
+		{
+			PC->Server_NotifyCountdownFinished();
+		}
+		else {
+			if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("GameStartWidget - MyPlayerController Cast Invalid")); }
+		}
 
 		// Hide Widget 1 Second After Showing "GO"
 		FTimerHandle HideTimer;
 		GetWorld()->GetTimerManager().SetTimer(HideTimer, [this]()
 			{
 				HideWidget();
-				RemoveFromParent();	
+				RemoveFromParent();
 			}, 1.0f, false);
+
 	}
 }

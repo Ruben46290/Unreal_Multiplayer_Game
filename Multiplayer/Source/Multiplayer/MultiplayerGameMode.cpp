@@ -5,6 +5,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "MyGameState.h"
 #include "MyPlayerController.h"
+#include <Kismet/GameplayStatics.h>
 
 AMultiplayerGameMode::AMultiplayerGameMode()
 {
@@ -25,19 +26,8 @@ AMultiplayerGameMode::AMultiplayerGameMode()
 
 void AMultiplayerGameMode::BeginPlay()
 {
-	//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Green, TEXT("GameMode BeginPlay()")); }
-
-	// Get Game State
-	AMyGameState* GS = GetGameState<AMyGameState>();
-
-	// If Game State is Valid
-	if (GS) {
-
-		// Start Level Timer
-		GS -> StartLevelTimer();
-	}
-
-
+	// Load Level Settings From LevelSettings Actor
+	LoadLevelSettings();
 }
 
 
@@ -48,9 +38,32 @@ void AMultiplayerGameMode::PostLogin(APlayerController* NewPlayer)
 	// Add Player To Array
 	LoadedPlayers.Add(NewPlayer);
 
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green,
-		FString::Printf(TEXT("Player loaded: %d/%d"), LoadedPlayers.Num(), ExpectedPlayerCount));
+	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green,
+	//	FString::Printf(TEXT("Player loaded: %d/%d"), LoadedPlayers.Num(), ExpectedPlayerCount));
 
+}
+
+void AMultiplayerGameMode::LoadLevelSettings()
+{
+	// Find the LevelSettings actor in the level
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALevelSettings::StaticClass(), FoundActors);
+
+	if (FoundActors.Num() > 0)
+	{
+		LevelSettings = Cast<ALevelSettings>(FoundActors[0]);
+
+		if (LevelSettings)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
+				TEXT("LevelSettings actor found"));
+		}
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,
+			TEXT("No LevelSettings actor found in level! Using defaults."));
+	}
 }
 
 
@@ -79,4 +92,39 @@ void AMultiplayerGameMode::CheckAllPlayersLoaded()
 		}
 	}
 }
+
+void AMultiplayerGameMode::StartGameplay()
+{
+	ReadyPlayerCount++;
+
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow,
+		FString::Printf(TEXT("Players ready: %d/%d"), ReadyPlayerCount, ExpectedPlayerCount));
+
+	// Check if all players have finished countdown
+	if (ReadyPlayerCount >= ExpectedPlayerCount)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("All players ready! Starting game timer!"));
+
+		// NOW start the timer
+		AMyGameState* GS = GetGameState<AMyGameState>();
+
+		if (!GS) {
+			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("MultiplayerGameMoode - StartGameplay() - Cast To GameState Failed"));
+			return;
+		}
+
+		// If Level Settings Are Valid
+		if (LevelSettings)
+		{
+			GS->StartLevelTimer(LevelSettings->GameLength);
+		}
+
+		// No Settings Loaded
+		else {
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("MultiplayerGameMoode - StartGameplay() - No Settings Loaded!"));
+			GS->StartLevelTimer(120.f); // Fall Back To 2 Minute Timer
+		}
+	}
+}
+
 
