@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "InteractableActor.h"
+#include "WorkStations/WorkStationWidgets/SawBenchWidget.h"
+#include "Components/WidgetComponent.h"
 #include "SawBench.generated.h"
 
 /**
@@ -21,6 +23,10 @@ protected:
 	// Mesh Component For Log & Bowl
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* ItemMeshComponent;
+
+	// Widget Component
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	UWidgetComponent* WidgetComponent;
 
 	// * * * * * * * * * * Variables * * * * * * * * * * 
 
@@ -48,11 +54,17 @@ protected:
 
 	int32 StoredLogs = 0;
 
+	// Widget Refrence
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+	USawBenchWidget* SawBenchWidget;
 
 	// * * * * * * * * * * Functions * * * * * * * * * * 
 
 	// Constructor
 	ASawBench();
+
+	// BeginPlay
+	virtual void BeginPlay() override;
 
 	// Implement & Override The Interface Function
 	virtual void OnInteract_Implementation(AActor* Interactor);
@@ -66,6 +78,8 @@ protected:
 		bool bFromSweep, const FHitResult& SweepResult) override;
 
 
+	UFUNCTION()
+	void PlaceLog();
 
 	UFUNCTION()
 	void StartSawing();

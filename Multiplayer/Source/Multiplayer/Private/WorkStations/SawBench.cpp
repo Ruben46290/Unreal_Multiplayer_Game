@@ -11,6 +11,18 @@ ASawBench::ASawBench()
 	// Make Item Mesh
 	ItemMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
 	ItemMeshComponent->SetupAttachment(MeshComponent);
+
+	WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
+	WidgetComponent->SetupAttachment(MeshComponent);
+	WidgetComponent->SetVisibility(false);
+}
+
+void ASawBench::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Get The SawBench Widget
+	SawBenchWidget = Cast<USawBenchWidget>(WidgetComponent->GetUserWidgetObject());
 }
 
 void ASawBench::OnInteract_Implementation(AActor* Interactor)
@@ -27,7 +39,7 @@ void ASawBench::OnInteract_Implementation(AActor* Interactor)
 		// Remove The Log From The Player
 		Character->ClearHeldItem();
 
-		StartSawing();
+		PlaceLog();
 	}
 
 	// If The Player Has Empty Hands & A Bucket Is Waiting To Be Picked Up
@@ -42,6 +54,9 @@ void ASawBench::OnInteract_Implementation(AActor* Interactor)
 		// Send Bucket Item Data To Player To Equip Bucket
 		Character->PickupItem(*RowData);
 
+		// Clear Progress Bar
+		SawBenchWidget->UpdateProgressBar(0.0f);
+
 		if (StoredLogs > 0) {
 
 			// If There Are Stored Logs, Start Sawing Again
@@ -50,10 +65,12 @@ void ASawBench::OnInteract_Implementation(AActor* Interactor)
 			// Reduce Stored Logs By One
 			StoredLogs--;
 
+			// Update Stored Logs UI
+			SawBenchWidget->UpdateLogCount(StoredLogs);
+
 			// Skip Clearing Logic
 			return;
 		}
-
 
 		// Clear Item Mesh
 		ItemMeshComponent->SetStaticMesh(nullptr);
@@ -64,7 +81,12 @@ void ASawBench::OnInteract_Implementation(AActor* Interactor)
 		// Set State As Empty So Another Log Can Be Placed
 		CurrentState = "Empty";
 
-	}
+		// Set Bucket Image To False
+		SawBenchWidget->UpdateBucketUI(false);
+
+		// Update Stored Logs UI - Called Here When There Are No Stored Logs To Clear The UI & Called Above When There Are Stored Logs To Update The Count
+		SawBenchWidget->UpdateLogCount(-1);
+	}	
 }
 
 void ASawBench::SetHighlight(bool bEnabled, bool bIsClosest, AActor* Player)
@@ -75,6 +97,9 @@ void ASawBench::SetHighlight(bool bEnabled, bool bIsClosest, AActor* Player)
 		// Is Highlight Enabled
 		if (bEnabled)
 		{
+			// Show UI
+			WidgetComponent->SetVisibility(true);
+
 			// If There Is Currently A Bucket Waiting On The Table
 			if (ItemMeshComponent && CurrentState == "HasBucket") {
 
@@ -156,6 +181,9 @@ void ASawBench::SetHighlight(bool bEnabled, bool bIsClosest, AActor* Player)
 		// Highlight Is Not Enabled
 		else
 		{
+			// Hide UI
+			WidgetComponent->SetVisibility(false);
+
 			// Hide Body Highlight
 			MeshComponent->SetOverlayMaterial(nullptr);
 
@@ -188,17 +216,10 @@ void ASawBench::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor*
 		// If The Item Thrown At The Station Is A Log
 		if (PlayerItemString == "Log") {
 
-			// There Are No Stored Logs & The Bench Is Empty
-			if (StoredLogs == 0 && CurrentState == "Empty") {
+			PlaceLog();
 
-				StartSawing();
-			}
-
-			// There Are Stored Logs Or The Bench Isn't Empty
-			else {
-
-				StoredLogs++;
-			}
+			// Update Stored Logs UI
+			SawBenchWidget->UpdateLogCount(StoredLogs);
 
 			// Destroy The Log
 			OtherActor->Destroy();
@@ -206,6 +227,24 @@ void ASawBench::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor*
 	}
 }
 
+
+void ASawBench::PlaceLog()
+{
+	// There Are No Stored Logs & The Bench Is Empty
+	if (StoredLogs == 0 && CurrentState == "Empty") {
+
+		StartSawing();
+	}
+
+	// There Are Stored Logs Or The Bench Isn't Empty
+	else {
+
+		StoredLogs++;
+	}
+
+	// Update Stored Logs UI
+	SawBenchWidget->UpdateLogCount(StoredLogs);
+}
 
 void ASawBench::StartSawing()
 {
@@ -224,6 +263,10 @@ void ASawBench::StartSawing()
 
 	// Play Animation On All Clients & Server
 	Multicast_OnAnimationStart();
+
+	SawBenchWidget->UpdateLogCount(StoredLogs);
+
+	SawBenchWidget->UpdateBucketUI(false);
 }
 
 
@@ -258,7 +301,10 @@ void ASawBench::OnAnimaitionComplete()
 
 	// Update Current State
 	CurrentState = "HasBucket";
+	
+	SawBenchWidget->UpdateBucketUI(true);
 
+	SawBenchWidget->UpdateLogCount(StoredLogs - 1);
 }
 
 
