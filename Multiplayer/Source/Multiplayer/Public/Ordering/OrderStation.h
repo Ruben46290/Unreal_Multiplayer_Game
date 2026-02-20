@@ -27,6 +27,7 @@ protected:
 	// Override Set Highlight Function
 	virtual void SetHighlight(bool bEnabled, bool bIsClosest = false, AActor* Player = nullptr) override;
 
+	// Override Overlap Function To Check For Items Being Thrown At The Station
 	virtual void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 		bool bFromSweep, const FHitResult& SweepResult) override;

@@ -4,6 +4,7 @@
 #include "WorkStations/SawBench.h"
 #include "Net/UnrealNetwork.h"
 #include "../MultiplayerCharacter.h"
+#include "Item.h"
 
 ASawBench::ASawBench()
 {
@@ -26,21 +27,7 @@ void ASawBench::OnInteract_Implementation(AActor* Interactor)
 		// Remove The Log From The Player
 		Character->ClearHeldItem();
 
-		// Apply The Log Mesh
-		ItemMeshComponent->SetStaticMesh(LogMesh);
-
-		// Move & Rotate Log Mesh To Fit On Table
-		ItemMeshComponent->SetRelativeRotation(FRotator(-90.0f,0.0f,0.0f));
-		ItemMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 65.0f));
-
-		// Change The CurrentItemMesh To Trigger OnRep Event
-		CurrentItemMesh = LogMesh;
-
-		// Update State, So You Have To Wait For Animation To Finish
-		CurrentState = "PlayingAnimation";
-
-		// Play Animation On All Clients & Server
-		Multicast_OnAnimationStart();
+		StartSawing();
 	}
 
 	// If The Player Has Empty Hands & A Bucket Is Waiting To Be Picked Up
@@ -54,6 +41,19 @@ void ASawBench::OnInteract_Implementation(AActor* Interactor)
 
 		// Send Bucket Item Data To Player To Equip Bucket
 		Character->PickupItem(*RowData);
+
+		if (StoredLogs > 0) {
+
+			// If There Are Stored Logs, Start Sawing Again
+			StartSawing();
+
+			// Reduce Stored Logs By One
+			StoredLogs--;
+
+			// Skip Clearing Logic
+			return;
+		}
+
 
 		// Clear Item Mesh
 		ItemMeshComponent->SetStaticMesh(nullptr);
@@ -168,6 +168,65 @@ void ASawBench::SetHighlight(bool bEnabled, bool bIsClosest, AActor* Player)
 		}
 	}
 }
+
+
+// Override Overlap Function To Check For Items Being Thrown At The Station
+void ASawBench::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	// Call Parent Function
+	Super::OnOverlapBegin(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
+
+	// Is The Overlapping Actor An Item
+	AItem* Item = Cast<AItem>(OtherActor);
+
+	// If It Is An Item Overlapping
+	if (Item) {
+
+		// Get The Items Name
+		FString PlayerItemString = Item->ItemName.ToString();
+
+		// If The Item Thrown At The Station Is A Log
+		if (PlayerItemString == "Log") {
+
+			// There Are No Stored Logs & The Bench Is Empty
+			if (StoredLogs == 0 && CurrentState == "Empty") {
+
+				StartSawing();
+			}
+
+			// There Are Stored Logs Or The Bench Isn't Empty
+			else {
+
+				StoredLogs++;
+			}
+
+			// Destroy The Log
+			OtherActor->Destroy();
+		}
+	}
+}
+
+
+void ASawBench::StartSawing()
+{
+	// Apply The Log Mesh
+	ItemMeshComponent->SetStaticMesh(LogMesh);
+
+	// Move & Rotate Log Mesh To Fit On Table
+	ItemMeshComponent->SetRelativeRotation(FRotator(-90.0f, 0.0f, 0.0f));
+	ItemMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 65.0f));
+
+	// Change The CurrentItemMesh To Trigger OnRep Event
+	CurrentItemMesh = LogMesh;
+
+	// Update State, So You Have To Wait For Animation To Finish
+	CurrentState = "PlayingAnimation";
+
+	// Play Animation On All Clients & Server
+	Multicast_OnAnimationStart();
+}
+
+
 
 
 void ASawBench::Multicast_OnAnimationStart_Implementation()
