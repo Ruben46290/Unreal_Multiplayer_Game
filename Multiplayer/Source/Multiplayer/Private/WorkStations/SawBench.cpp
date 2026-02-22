@@ -6,6 +6,7 @@
 #include "../MultiplayerCharacter.h"
 #include "Item.h"
 
+
 ASawBench::ASawBench()
 {
 	// Make Item Mesh
@@ -33,8 +34,8 @@ void ASawBench::OnInteract_Implementation(AActor* Interactor)
 	// Get Item Name
 	FName PlayerItem = Character->GetHeldItemName();
 
-	// If The Player Is Holding A Log & The Bench Is Empty
-	if (PlayerItem == "Log" && CurrentState == "Empty") {
+	// If The Player Is Placing A log
+	if (PlayerItem == "Log") {
 
 		// Remove The Log From The Player
 		Character->ClearHeldItem();
@@ -65,8 +66,8 @@ void ASawBench::OnInteract_Implementation(AActor* Interactor)
 			// Reduce Stored Logs By One
 			StoredLogs--;
 
-			// Update Stored Logs UI
-			SawBenchWidget->UpdateLogCount(StoredLogs);
+			// Update UI On All Clients & Server
+			Multicast_UpdateLogUI(StoredLogs);
 
 			// Skip Clearing Logic
 			return;
@@ -84,8 +85,8 @@ void ASawBench::OnInteract_Implementation(AActor* Interactor)
 		// Set Bucket Image To False
 		SawBenchWidget->UpdateBucketUI(false);
 
-		// Update Stored Logs UI - Called Here When There Are No Stored Logs To Clear The UI & Called Above When There Are Stored Logs To Update The Count
-		SawBenchWidget->UpdateLogCount(-1);
+		// Update UI On All Clients & Server, -1 To Set Image As Blank Image
+		Multicast_UpdateLogUI(-1);
 	}	
 }
 
@@ -218,9 +219,6 @@ void ASawBench::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor*
 
 			PlaceLog();
 
-			// Update Stored Logs UI
-			SawBenchWidget->UpdateLogCount(StoredLogs);
-
 			// Destroy The Log
 			OtherActor->Destroy();
 		}
@@ -230,20 +228,18 @@ void ASawBench::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor*
 
 void ASawBench::PlaceLog()
 {
+
 	// There Are No Stored Logs & The Bench Is Empty
 	if (StoredLogs == 0 && CurrentState == "Empty") {
 
 		StartSawing();
 	}
-
-	// There Are Stored Logs Or The Bench Isn't Empty
 	else {
-
 		StoredLogs++;
 	}
 
-	// Update Stored Logs UI
-	SawBenchWidget->UpdateLogCount(StoredLogs);
+	// Update UI On All Clients & Server
+	Multicast_UpdateLogUI(StoredLogs);
 }
 
 void ASawBench::StartSawing()
@@ -264,7 +260,8 @@ void ASawBench::StartSawing()
 	// Play Animation On All Clients & Server
 	Multicast_OnAnimationStart();
 
-	SawBenchWidget->UpdateLogCount(StoredLogs);
+	// Update UI On All Clients & Server
+	Multicast_UpdateLogUI(StoredLogs);
 
 	SawBenchWidget->UpdateBucketUI(false);
 }
@@ -304,10 +301,17 @@ void ASawBench::OnAnimaitionComplete()
 	
 	SawBenchWidget->UpdateBucketUI(true);
 
-	SawBenchWidget->UpdateLogCount(StoredLogs - 1);
+	SawBenchWidget->UpdateLogCount(StoredLogs);
 }
 
 
+void ASawBench::Multicast_UpdateLogUI_Implementation(int32 LogCount)
+{
+	if (SawBenchWidget)
+	{
+		SawBenchWidget->UpdateLogCount(LogCount);
+	}
+}
 
 void ASawBench::OnRep_CurrentItemMesh()
 {
@@ -332,6 +336,24 @@ void ASawBench::OnRep_CurrentItemMesh()
 			ItemMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 			ItemMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 55.0f));
 		}
+	}
+}
+
+void ASawBench::OnRep_CurrentState()
+{
+	// Replication Event For Current State, Updates The UI Based On The Current State
+	if (CurrentState == "HasBucket") {
+
+		// Show Bucket Image On UI
+		SawBenchWidget->UpdateBucketUI(true);
+	}
+	else {
+
+		// Show Empty Image On UI
+		SawBenchWidget->UpdateBucketUI(false);
+
+		// Clear Progress Bar When The Bucket Is Picked Up
+		SawBenchWidget->UpdateProgressBar(0.0f);
 	}
 }
 

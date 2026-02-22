@@ -48,12 +48,21 @@ protected:
 	UDataTable* ItemDataTable;
 
 	// 'Empty', 'PlayingAnimation', 'HasBucket;
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentState)
 	FName CurrentState = "Empty";
 
+	UFUNCTION()
+	void OnRep_CurrentState();
 
+	UPROPERTY()
 	int32 StoredLogs = 0;
 
+public:
+	// Multicast to update UI on all clients
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_UpdateLogUI(int32 LogCount);
+
+protected:
 	// Widget Refrence
 	UPROPERTY(BlueprintReadWrite, Category = "UI")
 	USawBenchWidget* SawBenchWidget;
