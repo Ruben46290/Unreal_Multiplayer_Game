@@ -29,13 +29,3 @@ void ULobbyHUD::OnReadyButtonPressed()
 
 
 
-
-
-
-
-
-
-
-
-
-//HostLANButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnHostLANButtonClicked);

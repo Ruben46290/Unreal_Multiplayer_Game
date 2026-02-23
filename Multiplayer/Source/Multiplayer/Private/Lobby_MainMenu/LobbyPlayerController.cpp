@@ -108,6 +108,18 @@ void ALobbyPlayerController::CreateLobbyUI()
 	}
 }
 
+// Called By The GameMode To Disable / Enable The Ready Button
+void ALobbyPlayerController::UpdateReadyButtonAvailability(bool bCanReady)
+{
+	// Pass Along To The Widget
+	if (LobbyWidget) {
+		LobbyWidget->SetReadyButtonEnabled(bCanReady);
+	}
+	else {
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("LobbyPlayerController - UpdateReadyButtonAvailability - Lobby Widget Invalid"));
+	}
+}
+
 void ALobbyPlayerController::ToggleReady()
 {
 	// Get Owning Pawn & Cast To ALobbyCharacter
@@ -123,7 +135,7 @@ void ALobbyPlayerController::ToggleReady()
 		LobbyChar->Server_SetReady(bNewReady);
 
 		// Update Ready Button UI
-		LobbyWidget->UpdateReadyButton(bNewReady);
+		LobbyWidget->UpdateReadyButtonStatus(bNewReady);
 	}
 }
 

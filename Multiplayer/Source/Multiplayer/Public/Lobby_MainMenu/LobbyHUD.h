@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
+#include "Components/TextBlock.h"
 #include "LobbyHUD.generated.h"
 
 /**
@@ -32,6 +33,11 @@ protected:
 
 public:
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void UpdateReadyButton(bool bIsReady);
+	// Enable / Disable The Ready Button - Called From Gamemode -> PlayerController -> This Widget
+	UFUNCTION(BlueprintImplementableEvent, Category = "Lobby")
+	void SetReadyButtonEnabled(bool bEnabled);
+
+	// Set Ready Button To Ready / Not Ready - Called From PlayerController
+	UFUNCTION(BlueprintImplementableEvent, Category = "Lobby")
+	void UpdateReadyButtonStatus(bool bIsReady);
 };

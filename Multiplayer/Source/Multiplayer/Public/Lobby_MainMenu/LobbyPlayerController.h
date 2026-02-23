@@ -43,9 +43,15 @@ protected:
 	void CreateLobbyUI();
 
 public:
+
+	// Called By The GameMode To Disable / Enable The Ready Button
+	void UpdateReadyButtonAvailability(bool bCanReady);
+
+
 	// Called by the UI button
 	UFUNCTION(BlueprintCallable)
 	void ToggleReady();
+
 
 
 	// * * * * * * * * * * Loading Screen * * * * * * * * * * 

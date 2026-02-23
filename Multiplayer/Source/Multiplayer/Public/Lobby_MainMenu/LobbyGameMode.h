@@ -37,6 +37,19 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Game")
 	FString GameMapPath = "/Game/Maps/TestMap";
 
+	// * * * Ready Button * * *
+public:
+
+	// Override Login Event
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+
+	// Multicast to tell all clients to update their ready button state
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_UpdateReadyButtonState(bool bCanReady);
+
+	// Check player count and update ready buttons
+	void UpdateReadyButtonAvailability();
+
 
 private:
 

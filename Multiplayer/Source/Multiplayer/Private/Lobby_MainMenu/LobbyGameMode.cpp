@@ -23,6 +23,57 @@ ALobbyGameMode::ALobbyGameMode()
 	PlayerSpawnIndex = 0;
 }
 
+
+// Called When A Player Loads In
+void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+
+	FTimerHandle UpdateTimer;
+	GetWorldTimerManager().SetTimer(UpdateTimer, this, &ALobbyGameMode::UpdateReadyButtonAvailability, 0.5f, false);
+
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("GameMode PostLogin()"));
+}
+
+
+
+void ALobbyGameMode::UpdateReadyButtonAvailability()
+{
+	// Get Amount Of Players
+	int32 PlayerCount = GetNumPlayers();
+
+	// Set Can Ready Var To True If Theres 2 Players
+	bool bCanReady = (PlayerCount == 2);
+	
+	// Broadcast Ready Button Status To All Clients & Server
+	Multicast_UpdateReadyButtonState(bCanReady);
+
+	if (bCanReady) {
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("GameMode There Is 2 Players"));
+	}
+	else {
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("GameMode There Is 1 Player"));
+	}
+}
+
+void ALobbyGameMode::Multicast_UpdateReadyButtonState_Implementation(bool bCanReady)
+{
+	// Loop Through All Players
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		// Cast To Lobby Player Controller
+		ALobbyPlayerController* LobbyPC = Cast<ALobbyPlayerController>(It->Get());
+
+		if (LobbyPC)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("Update Ready Buttons"));
+			LobbyPC->UpdateReadyButtonAvailability(bCanReady);
+		}
+	}
+}
+
+
+
 // * * * * * * * * * * Ready * * * * * * * * * *
 
 // When A Player Changes There Ready Status
@@ -71,6 +122,9 @@ bool ALobbyGameMode::AreAllPlayersReady()
 	// All players are ready
 	return true;
 }
+
+
+
 
 void ALobbyGameMode::StartGame()
 {
