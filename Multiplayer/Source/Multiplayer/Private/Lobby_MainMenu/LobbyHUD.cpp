@@ -12,15 +12,40 @@ void ULobbyHUD::NativeConstruct()
 		ReadyButton->OnClicked.AddDynamic(this, &ULobbyHUD::OnReadyButtonPressed);
 	}
 
-	if (LeftArrowButton)
-	{
-		LeftArrowButton->OnClicked.AddDynamic(this, &ULobbyHUD::OnLeftArrowClicked);
+	// Get Owning Player Controller & Check If Its The Server Or A Client
+	APlayerController* PC = GetOwningPlayer();
+
+	// If Server
+	if (PC && PC->HasAuthority()) {
+
+		// Bind Level Selection Buttons For The Server Only
+		if (LeftArrowButton)
+		{
+			LeftArrowButton->OnClicked.AddDynamic(this, &ULobbyHUD::OnLeftArrowClicked);
+		}
+
+		if (RightArrowButton)
+		{
+			RightArrowButton->OnClicked.AddDynamic(this, &ULobbyHUD::OnRightArrowClicked);
+		}
 	}
 
-	if (RightArrowButton)
-	{
-		RightArrowButton->OnClicked.AddDynamic(this, &ULobbyHUD::OnRightArrowClicked);
+	else 	{
+
+		// Hide Level Selection Buttons For Clients
+		if (LeftArrowButton)
+		{
+			LeftArrowButton->SetIsEnabled(false);
+			LeftArrowButton->SetVisibility(ESlateVisibility::Hidden);
+		}
+		if (RightArrowButton)
+		{
+			RightArrowButton->SetIsEnabled(false);
+			RightArrowButton->SetVisibility(ESlateVisibility::Hidden);
+		}
 	}
+
+
 
 	// Set Inital Level Display - Shows Level 1 For Now
 	UpdateLevelDisplay(1);
@@ -65,19 +90,9 @@ void ULobbyHUD::OnRightArrowClicked()
 
 void ULobbyHUD::UpdateLevelDisplay(int32 Level)
 {
-	UE_LOG(LogTemp, Warning, TEXT("[WIDGET] UpdateLevelDisplay called with Level %d"), Level);
-
+	
 	CurrentLevel = Level;
 
-	if (LevelText)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[WIDGET] LevelText valid, updating text"));
-		LevelText->SetText(FText::FromString(FString::Printf(TEXT("Level %d"), Level)));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("[WIDGET] LevelText is NULL!"));
-	}
 
 	if (LevelText)
 	{
