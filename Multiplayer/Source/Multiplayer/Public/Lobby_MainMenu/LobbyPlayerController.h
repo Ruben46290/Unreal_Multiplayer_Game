@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "Lobby_MainMenu/LobbyHUD.h"
+#include "LoadingScreenWidget.h"
 #include "LobbyPlayerController.generated.h"
 
 /**
@@ -65,4 +66,18 @@ protected:
 public:
 	UFUNCTION(Client, Reliable)
 	void Client_ShowLoadingScreen();
+
+
+	// * * * * * * * * * * Level Display * * * * * * * * * * 
+public:
+
+	UFUNCTION(Client, Reliable)
+	void Client_UpdateLevelDisplay(int32 Level);
+
+	// Update the level display
+	void UpdateLevelDisplay(int32 Level);
+
+	// Called when host clicks arrow buttons
+	UFUNCTION(Server, Reliable)
+	void Server_ChangeLevel(int32 Direction); // +1 or -1
 };

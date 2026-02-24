@@ -55,4 +55,29 @@ private:
 
 	// What Spawn Index Should The Player Spawn At
 	int32 PlayerSpawnIndex = 0;
+
+
+	// * * * * * * * * * * Level Selection * * * * * * * * * *
+protected:
+
+	// Currently selected level
+	UPROPERTY(BlueprintReadOnly, Category = "Lobby")
+	int32 SelectedLevel = 1;
+
+	// Map paths for each level
+	UPROPERTY(EditDefaultsOnly, Category = "Lobby")
+	TArray<FString> LevelPaths;
+
+public:
+	// Change the selected level (host only)
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
+	void ChangeSelectedLevel(int32 NewLevel);
+
+	// Get current selected level
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
+	int32 GetSelectedLevel() const { return SelectedLevel; }
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_UpdateLevelDisplay(int32 Level);
+
 };

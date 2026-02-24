@@ -4,7 +4,7 @@
 #include "Lobby_MainMenu/LobbyGameMode.h"
 #include "Lobby_MainMenu/LobbyPlayerController.h"
 #include "Lobby_MainMenu/LobbyCharacter.h"
-
+#include "Net/UnrealNetwork.h"
 
 ALobbyGameMode::ALobbyGameMode()
 {
@@ -18,9 +18,14 @@ ALobbyGameMode::ALobbyGameMode()
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
 
-
 	// Reset Player Spawn Index
 	PlayerSpawnIndex = 0;
+
+	// Set Default Level Paths
+	LevelPaths = {
+	"/Game/Maps/TestMap",
+	"/Game/Maps/TestMap1",
+	};
 }
 
 
@@ -48,12 +53,12 @@ void ALobbyGameMode::UpdateReadyButtonAvailability()
 	// Broadcast Ready Button Status To All Clients & Server
 	Multicast_UpdateReadyButtonState(bCanReady);
 
-	if (bCanReady) {
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("GameMode There Is 2 Players"));
-	}
-	else {
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("GameMode There Is 1 Player"));
-	}
+	//if (bCanReady) {
+	//	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("GameMode There Is 2 Players"));
+	//}
+	//else {
+	//	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("GameMode There Is 1 Player"));
+	//}
 }
 
 void ALobbyGameMode::Multicast_UpdateReadyButtonState_Implementation(bool bCanReady)
@@ -66,7 +71,7 @@ void ALobbyGameMode::Multicast_UpdateReadyButtonState_Implementation(bool bCanRe
 
 		if (LobbyPC)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("Update Ready Buttons"));
+			//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("Update Ready Buttons"));
 			LobbyPC->UpdateReadyButtonAvailability(bCanReady);
 		}
 	}
@@ -123,9 +128,6 @@ bool ALobbyGameMode::AreAllPlayersReady()
 	return true;
 }
 
-
-
-
 void ALobbyGameMode::StartGame()
 {
 	if (GEngine)
@@ -133,10 +135,51 @@ void ALobbyGameMode::StartGame()
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Starting game!"));
 	}
 
+	FString SelectedLevelPath = GameMapPath;
+
+	if (LevelPaths.IsValidIndex(SelectedLevel - 1))
+	{
+		SelectedLevelPath = LevelPaths[SelectedLevel - 1];
+	}
+
 	// Travel to the game map
-	GetWorld()->ServerTravel(GameMapPath + "?listen");
+	GetWorld()->ServerTravel(SelectedLevelPath + "?listen");
 }
 
 
+// * * * * * * * * * * Level Selection * * * * * * * * * *
 
+void ALobbyGameMode::ChangeSelectedLevel(int32 NewLevel)
+{
+	SelectedLevel = FMath::Clamp(NewLevel, 1, LevelPaths.Num());
+
+	UE_LOG(LogTemp, Warning, TEXT("[SERVER] ChangeSelectedLevel: New Level = %d"), SelectedLevel);
+
+	// Update ALL player controllers (server and clients)
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		ALobbyPlayerController* LobbyPC = Cast<ALobbyPlayerController>(It->Get());
+		if (LobbyPC)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[SERVER] Calling Client_UpdateLevelDisplay on controller"));
+			LobbyPC->Client_UpdateLevelDisplay(SelectedLevel);
+		}
+	}
+}
+
+void ALobbyGameMode::Multicast_UpdateLevelDisplay_Implementation(int32 Level)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Cyan,
+		TEXT("Multicast_UpdateLevelDisplay Called"));
+
+	// Update all local controllers
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		ALobbyPlayerController* LobbyPC = Cast<ALobbyPlayerController>(It->Get());
+		if (LobbyPC && LobbyPC->IsLocalController())
+		{
+			LobbyPC->UpdateLevelDisplay(Level);
+		}
+	}
+}
 

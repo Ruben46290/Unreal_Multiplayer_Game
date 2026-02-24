@@ -9,6 +9,7 @@
 #include "GameFramework/GameStateBase.h"
 #include "Blueprint/UserWidget.h"
 #include <Lobby_MainMenu/LobbyCharacter.h>
+#include <Lobby_MainMenu/LobbyGameMode.h>
 
 
 
@@ -136,6 +137,35 @@ void ALobbyPlayerController::ToggleReady()
 
 		// Update Ready Button UI
 		LobbyWidget->UpdateReadyButtonStatus(bNewReady);
+	}
+}
+
+void ALobbyPlayerController::UpdateLevelDisplay(int32 Level)
+{
+	// Called From LobbyGameMode When Host Clicks Arrow Buttons To Change Level
+	if (LobbyWidget)
+	{
+		LobbyWidget->UpdateLevelDisplay(Level);
+	}
+}
+
+void ALobbyPlayerController::Client_UpdateLevelDisplay_Implementation(int32 Level)
+{
+	UE_LOG(LogTemp, Warning, TEXT("[CLIENT RPC] Client_UpdateLevelDisplay called with Level %d"), Level);
+	UpdateLevelDisplay(Level);
+}
+
+
+void ALobbyPlayerController::Server_ChangeLevel_Implementation(int32 Direction)
+{
+	// Get GameMode & Cast To ALobbyGameMode
+	ALobbyGameMode* GM = Cast<ALobbyGameMode>(GetWorld()->GetAuthGameMode());
+
+	if (GM)
+	{
+		// Calculate New Level Based On Direction (-1 = Left Arrow, +1 = Right Arrow)
+		int32 NewLevel = GM->GetSelectedLevel() + Direction;
+		GM->ChangeSelectedLevel(NewLevel);
 	}
 }
 

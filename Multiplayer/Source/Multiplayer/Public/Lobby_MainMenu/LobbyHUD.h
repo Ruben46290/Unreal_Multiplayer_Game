@@ -20,16 +20,32 @@ public:
 
 	virtual void NativeConstruct() override;
 
-
+	// * * * * * Components * * * * *
 public:
 	// Public To Access In Blueprints
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UButton* ReadyButton;
 
+	UPROPERTY(meta = (BindWidget))
+	UButton* LeftArrowButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* RightArrowButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* LevelText;
+
+	// * * * * * Functions * * * * *
 protected:
 
 	UFUNCTION()
 	void OnReadyButtonPressed();
+
+	UFUNCTION()
+	void OnLeftArrowClicked();
+
+	UFUNCTION()
+	void OnRightArrowClicked();
 
 public:
 
@@ -40,4 +56,11 @@ public:
 	// Set Ready Button To Ready / Not Ready - Called From PlayerController
 	UFUNCTION(BlueprintImplementableEvent, Category = "Lobby")
 	void UpdateReadyButtonStatus(bool bIsReady);
+
+	// Update Level Displayed On The UI - Called From PlayerController
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
+	void UpdateLevelDisplay(int32 Level);
+
+private:
+	int32 CurrentLevel = 1;
 };
