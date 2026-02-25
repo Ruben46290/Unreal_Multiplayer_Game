@@ -10,6 +10,7 @@
 #include "Blueprint/UserWidget.h"
 #include <Lobby_MainMenu/LobbyCharacter.h>
 #include <Lobby_MainMenu/LobbyGameMode.h>
+#include <MyGameInstance.h>
 
 
 
@@ -189,4 +190,27 @@ void ALobbyPlayerController::Client_ShowLoadingScreen_Implementation()
 			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("Loading screen shown"));
 		}
 	}
+}
+
+
+
+void ALobbyPlayerController::LeaveSession()
+{
+	// Called From LobbyHUD Back Button
+
+	// Get Game Instance
+	UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance());
+
+	IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
+
+	if (OnlineSubsystem) {
+
+		IOnlineSessionPtr SessionInterface = OnlineSubsystem->GetSessionInterface();
+		if (SessionInterface.IsValid())
+		{
+			SessionInterface->DestroySession(NAME_GameSession);
+		}
+	}
+
+	UGameplayStatics::OpenLevel(this, FName("MainMenuMap"));
 }

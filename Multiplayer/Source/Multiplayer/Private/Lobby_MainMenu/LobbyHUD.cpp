@@ -46,10 +46,25 @@ void ULobbyHUD::NativeConstruct()
 	}
 
 
+	// Bind Back Button
+	if (BackButton) {
+		BackButton->OnClicked.AddDynamic(this, &ULobbyHUD::OnBackButtonClicked);
+	}
+
 
 	// Set Inital Level Display - Shows Level 1 For Now
 	UpdateLevelDisplay(1);
 
+}
+
+void ULobbyHUD::OnBackButtonClicked()
+{
+	// Get Player Controller
+	ALobbyPlayerController* PC = Cast<ALobbyPlayerController>(GetOwningPlayer());
+	if (PC)
+	{
+		PC->LeaveSession();
+	}
 }
 
 void ULobbyHUD::OnReadyButtonPressed()

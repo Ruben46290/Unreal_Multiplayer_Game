@@ -53,7 +53,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ToggleReady();
 
-
+	UFUNCTION()
+	void LeaveSession();
 
 	// * * * * * * * * * * Loading Screen * * * * * * * * * * 
 protected:

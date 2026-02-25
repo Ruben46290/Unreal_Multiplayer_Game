@@ -35,6 +35,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* LevelText;
 
+	UPROPERTY(meta = (BindWidget))
+	UButton* BackButton;
+
 	// * * * * * Functions * * * * *
 protected:
 
@@ -46,6 +49,9 @@ protected:
 
 	UFUNCTION()
 	void OnRightArrowClicked();
+
+	UFUNCTION()
+	void OnBackButtonClicked();
 
 public:
 
