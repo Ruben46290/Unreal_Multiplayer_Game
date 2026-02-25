@@ -31,6 +31,10 @@ void AOrderManager::BeginPlay()
 
 	// Get Spawn Time Of First Customer
 	NextSpawnTime = CustomerSequence[0].SpawnTime;
+
+    // Disable Tick At The Start
+    SetActorTickEnabled(false);
+
 }
 
 void AOrderManager::Tick(float DeltaTime)

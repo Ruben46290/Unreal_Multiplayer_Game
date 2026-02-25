@@ -6,6 +6,7 @@
 #include "MyGameState.h"
 #include "MyPlayerController.h"
 #include <Kismet/GameplayStatics.h>
+#include "Ordering/OrderManager.h"
 
 AMultiplayerGameMode::AMultiplayerGameMode()
 {
@@ -121,8 +122,28 @@ void AMultiplayerGameMode::StartGameplay()
 
 		// No Settings Loaded
 		else {
-			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("MultiplayerGameMoode - StartGameplay() - No Settings Loaded!"));
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("MultiplayerGameMoode - StartGameplay() - No Settings Loaded!"));
 			GS->StartLevelTimer(120.f); // Fall Back To 2 Minute Timer
+		}
+
+		// Only Run On Server
+		if (HasAuthority()) {
+			// Enable OrderManager Tick
+			TArray<AActor*> FoundActors;
+			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AOrderManager::StaticClass(), FoundActors);
+
+			if (FoundActors.Num() > 0)
+			{
+				AOrderManager* OrderMgr = Cast<AOrderManager>(FoundActors[0]);
+				if (OrderMgr)
+				{
+					OrderMgr->SetActorTickEnabled(true);
+				}
+			}
+			else
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("MultiplayerGameMoode - StartGameplay() - ! No Order Manager Found !"));
+			}
 		}
 	}
 }
