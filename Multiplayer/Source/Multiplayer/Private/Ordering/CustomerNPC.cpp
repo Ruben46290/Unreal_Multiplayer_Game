@@ -3,6 +3,7 @@
 
 #include "Ordering/CustomerNPC.h"
 #include "Net/UnrealNetwork.h"
+#include "Ordering/OrderStation.h"
 
 // Sets default values
 ACustomerNPC::ACustomerNPC()
@@ -214,6 +215,15 @@ void ACustomerNPC::UpdatePatienceUI()
             // Update UI With Percentage Of How Long The Customer Has Been Waiting
             PatienceWidget->UpdateUI(1 - (CurrentWaitTime / StoredCustomerData.TotalPatience));
         }
+
+        // If This Customer Is At The Station
+        if (bIsFirstInLine) {
+
+			// Update Patience UI On The Station
+            if (CurrentStation) {
+				CurrentStation->Multicast_UpdateOrderUI(1 - (CurrentWaitTime / StoredCustomerData.TotalPatience));
+            }
+        }
     }
 }
 
@@ -228,6 +238,7 @@ void ACustomerNPC::ToggleUI(bool bIsVisible)
         WidgetComponent->SetVisibility(false);
     }
 }
+
 
 // * * * * * * * * * * * * * * * Replication * * * * * * * * * * * * * * *
 

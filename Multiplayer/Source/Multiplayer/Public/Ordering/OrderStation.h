@@ -45,6 +45,9 @@ public:
 
 	UOrderWidget* OrderWidget;
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_UpdateOrderUI(float PatiencePercent);
+
 	// * * * * * * * * * * Spawn Customer * * * * * * * * * * 
 
 	void SpawnCustomer(FCustomer CustomerData);

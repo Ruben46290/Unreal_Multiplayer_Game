@@ -11,7 +11,7 @@
 
     // Tells Event Distapher Below That ACustomerNPC Class Exists
     class ACustomerNPC; 
-    
+	class AOrderStation;
 
     // Event Dispatcher F
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReachedStation, ACustomerNPC*, Customer);
@@ -144,5 +144,9 @@ public:
 
     UFUNCTION()
     void ToggleUI(bool bIsVisible);
+
+    UPROPERTY()
+    AOrderStation* CurrentStation;
+
 
 };

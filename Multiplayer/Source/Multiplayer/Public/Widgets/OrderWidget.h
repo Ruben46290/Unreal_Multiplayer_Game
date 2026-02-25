@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/WrapBox.h"
 #include "Components/TextBlock.h"
+#include "Components/ProgressBar.h"
 #include "OrderIconSlot.h"
 #include "OrderWidget.generated.h"
 
@@ -20,6 +21,9 @@ class MULTIPLAYER_API UOrderWidget : public UUserWidget
 	UWrapBox* OrderWrapBox;
 
 public:
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UProgressBar* TimeProgressBar;
 
 	UPROPERTY(meta = (BindWidget));
 	UTextBlock* PointText;
@@ -40,5 +44,9 @@ public:
 	void SetPointText(float Points);
 
 	void ClearUI(bool CustomerRanOutOfTime);
+
+	// Done In Blueprint To Allow For More Customization
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpdatePatienceBar(float TimePercentRemaining);
 
 };

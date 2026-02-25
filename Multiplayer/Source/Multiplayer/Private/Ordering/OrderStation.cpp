@@ -148,6 +148,7 @@ void AOrderStation::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 
 
 
+
 void AOrderStation::SpawnCustomer(FCustomer CustomerData)
 {
 
@@ -182,6 +183,9 @@ void AOrderStation::SpawnCustomer(FCustomer CustomerData)
 
 			// Store The Order On The Customer
 			NewCustomer->StoredCustomerData = CustomerData;
+
+			// Set Customer Station Refrence To Self
+			NewCustomer->CurrentStation = this;
 
 			// Finishing Spawning Customer
 			NewCustomer->FinishSpawning(SpawnTransform);
@@ -463,6 +467,14 @@ void AOrderStation::ServeFirstCustomer()
 	MoveCustomersToPositions();
 }
 
+
+void AOrderStation::Multicast_UpdateOrderUI_Implementation(float PatiencePercent)
+{
+	// If Widget Is Valid
+	if (OrderWidget) {
+		OrderWidget->UpdatePatienceBar(PatiencePercent);
+	}
+}
 
 // * * * * * * * * * * Replication * * * * * * * * * * 
 
