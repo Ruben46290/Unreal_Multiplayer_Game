@@ -36,10 +36,6 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	// Change Players Mesh
-	UFUNCTION(BlueprintCallable, Category = "Customization")
-	void SetCharacterMesh(USkeletalMesh* NewMesh);
-
 // * * * * * * * * * * Ready System * * * * * * * * * * 
 
 public:
@@ -63,8 +59,19 @@ protected:
 	UFUNCTION()
 	void OnRep_IsReady();
 
+	// * * * * * Skin Customization * * * * *
+public:
 
+	// Array Of Available Skins To Choose From - Set In Editor
+	UPROPERTY(EditAnywhere, Category = "Skins")
+	TArray<USkeletalMesh*> SkinMeshes;
 
+	// Called By The Widget
+	UFUNCTION(BlueprintCallable)
+	void LocalSelectSkin(int32 SkinIndex);
+
+	// Called by PlayerState's OnRep to visually update the mesh
+	void ApplySkin(int32 SkinIndex);
 
 
 

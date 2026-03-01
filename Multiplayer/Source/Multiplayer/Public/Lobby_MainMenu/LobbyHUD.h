@@ -26,6 +26,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UButton* ReadyButton;
 
+	// * * * Level Selction * * *
+
 	UPROPERTY(meta = (BindWidget))
 	UButton* LeftArrowButton;
 
@@ -37,6 +39,17 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	UButton* BackButton;
+
+	// * * * Skin Selection * * *
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* SkinLeftButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* SkinRightButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* SkinText;
 
 	// * * * * * Functions * * * * *
 protected:
@@ -52,6 +65,16 @@ protected:
 
 	UFUNCTION()
 	void OnBackButtonClicked();
+
+	UFUNCTION()
+	void OnSkinLeftButtonClicked();
+
+	UFUNCTION()
+	void OnSkinRightButtonClicked();
+
+	UFUNCTION()
+	void UpdateSkinText();
+
 
 public:
 
@@ -69,4 +92,15 @@ public:
 
 private:
 	int32 CurrentLevel = 1;
+
+
+	// * * * * * Skin Customization * * * * *
+private:
+	int32 CurrentSkinIndex = 0;
+	const int32 MaxSkins = 5;
+
+	void ApplySkinToCharacter();
+
+
+
 };

@@ -17,6 +17,7 @@
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
 #include "Widgets/GameHUD.h"
+#include "MyPlayerState.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -97,6 +98,12 @@ void AMultiplayerCharacter::BeginPlay()
 				GameHUDWidget->AddToViewport();
 			}
 		}
+	}
+
+	// Load Player's Selected Skin From Player State
+	if (AMyPlayerState* PS = GetPlayerState<AMyPlayerState>())
+	{
+		ApplySkin(PS->SelectedSkinIndex);
 	}
 }
 
@@ -757,6 +764,27 @@ void AMultiplayerCharacter::UpdateSplineMeshes()
 	}
 }
 
+// * * * * * * * * * * Skin Selection * * * * * * * * * *
+
+void AMultiplayerCharacter::ApplySkin(int32 SkinIndex)
+{
+	// Load Mesh - Called At BeginPlay
+	if (SkinMeshes.IsValidIndex(SkinIndex))
+	{
+		GetMesh()->SetSkeletalMesh(SkinMeshes[SkinIndex]);
+	}
+}
+
+void AMultiplayerCharacter::OnRep_PlayerState()
+{
+	// Load Mesh - Called When PlayerState Replicates (e.g. When Client Joins)
+	Super::OnRep_PlayerState();
+
+	if (AMyPlayerState* PS = GetPlayerState<AMyPlayerState>())
+	{
+		ApplySkin(PS->SelectedSkinIndex);
+	}
+}
 
 // * * * * * * * * * * Helper Functions * * * * * * * * * *
 FName AMultiplayerCharacter::GetHeldItemName()

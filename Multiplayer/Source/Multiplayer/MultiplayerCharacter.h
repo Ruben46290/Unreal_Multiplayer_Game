@@ -258,5 +258,16 @@ public:
 	// Public So It Can Be Called From Item Class
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void PickupItem(FItemData Item);
+
+
+	// * * * * * Skin Customization * * * * *
+public:
+		UPROPERTY(EditAnywhere, Category = "Skins")
+		TArray<USkeletalMesh*> SkinMeshes;
+
+		void ApplySkin(int32 SkinIndex);
+
+protected:
+	virtual void OnRep_PlayerState() override;
 };
 

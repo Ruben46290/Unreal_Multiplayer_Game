@@ -7,6 +7,7 @@
 #include "MyPlayerController.h"
 #include <Kismet/GameplayStatics.h>
 #include "Ordering/OrderManager.h"
+#include "MyPlayerState.h"
 
 AMultiplayerGameMode::AMultiplayerGameMode()
 {
@@ -23,6 +24,11 @@ AMultiplayerGameMode::AMultiplayerGameMode()
 	// Set Player Controler
 	PlayerControllerClass = AMyPlayerController::StaticClass();
 
+	// Set Player State Class
+	PlayerStateClass = AMyPlayerState::StaticClass();
+
+	// Enable Seamless Travel - Carries Over Player State Instead Of Resetting It
+	bUseSeamlessTravel = false;
 }
 
 void AMultiplayerGameMode::BeginPlay()

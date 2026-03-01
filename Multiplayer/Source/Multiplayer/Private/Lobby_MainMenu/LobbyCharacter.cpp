@@ -4,6 +4,7 @@
 #include "Lobby_MainMenu/LobbyCharacter.h"
 #include "Net/UnrealNetwork.h"
 #include "Lobby_MainMenu/LobbyGameMode.h"
+#include "MyPlayerState.h"
 
 // Sets default values
 ALobbyCharacter::ALobbyCharacter()
@@ -87,10 +88,27 @@ void ALobbyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 
 
-void ALobbyCharacter::SetCharacterMesh(USkeletalMesh* NewMesh)
+
+// * * * * * * * * * * Skin Customization * * * * * * * * * *
+
+void ALobbyCharacter::LocalSelectSkin(int32 SkinIndex)
 {
-	Mesh->SetSkeletalMesh(NewMesh);
+	if (AMyPlayerState* PS = GetPlayerState<AMyPlayerState>())
+	{
+		PS->ServerSetSkin(SkinIndex);
+	}
 }
+
+void ALobbyCharacter::ApplySkin(int32 SkinIndex)
+{
+	if (SkinMeshes.IsValidIndex(SkinIndex))
+	{
+		GetMesh()->SetSkeletalMesh(SkinMeshes[SkinIndex]);
+	}
+}
+
+
+
 
 
 

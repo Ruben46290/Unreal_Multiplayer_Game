@@ -3,7 +3,7 @@
 
 #include "Lobby_MainMenu/LobbyHUD.h"
 #include "Lobby_MainMenu/LobbyPlayerController.h"
-
+#include "Lobby_MainMenu/LobbyCharacter.h"
 
 void ULobbyHUD::NativeConstruct()
 {
@@ -46,9 +46,15 @@ void ULobbyHUD::NativeConstruct()
 	}
 
 
-	// Bind Back Button
+	// Bind Other Buttons
 	if (BackButton) {
 		BackButton->OnClicked.AddDynamic(this, &ULobbyHUD::OnBackButtonClicked);
+	}
+	if (SkinLeftButton) {
+		SkinLeftButton->OnClicked.AddDynamic(this, &ULobbyHUD::OnSkinLeftButtonClicked);
+	}
+	if (SkinRightButton) {
+		SkinRightButton->OnClicked.AddDynamic(this, &ULobbyHUD::OnSkinRightButtonClicked);
 	}
 
 
@@ -67,6 +73,8 @@ void ULobbyHUD::OnBackButtonClicked()
 	}
 }
 
+
+
 void ULobbyHUD::OnReadyButtonPressed()
 {
 	// Get Owning Character & Cast To Lobby Player Controller
@@ -81,6 +89,9 @@ void ULobbyHUD::OnReadyButtonPressed()
 		// Player Controller Function Calls The Update UI Blueprint Event
 	}
 }
+
+
+// * * * * * Level Selection * * * * *
 
 void ULobbyHUD::OnLeftArrowClicked()
 {
@@ -101,7 +112,6 @@ void ULobbyHUD::OnRightArrowClicked()
 		PC->Server_ChangeLevel(1); // Next Level
 	}
 }
-
 
 void ULobbyHUD::UpdateLevelDisplay(int32 Level)
 {
@@ -124,4 +134,45 @@ void ULobbyHUD::UpdateLevelDisplay(int32 Level)
 	{
 		RightArrowButton->SetIsEnabled(Level < 10);
 	}
+}
+
+
+
+
+// * * * * * Skin Selection * * * * *
+
+void ULobbyHUD::OnSkinLeftButtonClicked()
+{
+	CurrentSkinIndex = (CurrentSkinIndex - 1 + MaxSkins) % MaxSkins;
+	UpdateSkinText();
+	ApplySkinToCharacter();
+}
+
+void ULobbyHUD::OnSkinRightButtonClicked()
+{
+	CurrentSkinIndex = (CurrentSkinIndex + 1) % MaxSkins;
+	UpdateSkinText();
+	ApplySkinToCharacter();
+}
+
+void ULobbyHUD::ApplySkinToCharacter()
+{
+	APlayerController* PC = GetOwningPlayer();
+	if (!PC) return;
+
+	ALobbyCharacter* LobbyChar = Cast<ALobbyCharacter>(PC->GetPawn());
+	if (!LobbyChar) return;
+
+	// Instantly Aoply The Skin To The Character
+	LobbyChar->ApplySkin(CurrentSkinIndex);
+
+	// Tell The Server To Update The Skin For All Clients - Small Delay But Ensures All Clients See The Same Skin
+	LobbyChar->LocalSelectSkin(CurrentSkinIndex);
+}
+
+void ULobbyHUD::UpdateSkinText()
+{
+	// Use "Skin %d" as a placeholder. 
+	FString DisplayText = FString::Printf(TEXT("Skin %d / %d"), CurrentSkinIndex + 1, MaxSkins);
+	SkinText->SetText(FText::FromString(DisplayText));
 }

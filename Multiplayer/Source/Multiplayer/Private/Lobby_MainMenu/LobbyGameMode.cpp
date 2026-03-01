@@ -5,11 +5,18 @@
 #include "Lobby_MainMenu/LobbyPlayerController.h"
 #include "Lobby_MainMenu/LobbyCharacter.h"
 #include "Net/UnrealNetwork.h"
+#include "MyPlayerState.h"
 
 ALobbyGameMode::ALobbyGameMode()
 {
 	// Set Player Controller To Lobby Controller
 	PlayerControllerClass = ALobbyPlayerController::StaticClass();
+
+	// Set Player State Class
+	PlayerStateClass = AMyPlayerState::StaticClass();
+	
+	// Enable Seamless Travel - Carries Over Player State Instead Of Resetting It
+	bUseSeamlessTravel = false;
 
 	// Keep Using The Normal Player - Could Replace With A Custom Character Class
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/Lobby_MainMenu/Blueprints/BP_LobbyCharacter"));
@@ -130,6 +137,7 @@ bool ALobbyGameMode::AreAllPlayersReady()
 
 void ALobbyGameMode::StartGame()
 {
+
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Starting game!"));
