@@ -4,13 +4,13 @@
 #include "MyPlayerState.h"
 #include "Net/UnrealNetwork.h"
 #include "Lobby_MainMenu/LobbyCharacter.h"
-
+#include "EngineUtils.h"
+#include "MyGameInstance.h"
 
 
 void AMyPlayerState::BeginPlay()
 {
     Super::BeginPlay();
-    UE_LOG(LogTemp, Warning, TEXT("PlayerState BeginPlay - SkinIndex: %d"), SelectedSkinIndex);
 }
 
 void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -23,41 +23,43 @@ void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 void AMyPlayerState::ServerSetSkin_Implementation(int32 NewSkinIndex)
 {
+    UE_LOG(LogTemp, Warning, TEXT("ServerSetSkin called - NewSkinIndex: %d"), NewSkinIndex);
     SelectedSkinIndex = NewSkinIndex;
-    OnRep_SelectedSkinIndex(); // manually call on server since RepNotify only fires on clients
+    OnRep_SelectedSkinIndex();
+
+    // Tell ALL clients to save this skin to their GameInstance
+    MulticastSaveSkin(GetPlayerName(), NewSkinIndex);
+    UE_LOG(LogTemp, Warning, TEXT("ServerSetSkin - about to multicast for player: '%s', skin: %d"), *GetPlayerName(), NewSkinIndex);
+}
+
+void AMyPlayerState::MulticastSaveSkin_Implementation(const FString& PlayerName, int32 SkinIndex)
+{
+    UE_LOG(LogTemp, Warning, TEXT("MulticastSaveSkin fired - PlayerName: '%s', SkinIndex: %d"), *PlayerName, SkinIndex);
+
+    if (UMyGameInstance* GI = GetWorld()->GetGameInstance<UMyGameInstance>())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Multicast saving skin %d for player: %s"), SkinIndex, *PlayerName);
+        GI->SavePlayerSkin(PlayerName, SkinIndex);
+    }
 }
 
 void AMyPlayerState::OnRep_SelectedSkinIndex()
 {
-    APawn* OwningPawn = GetPawn();
-    if (!OwningPawn) return;
+    UE_LOG(LogTemp, Warning, TEXT("OnRep_SelectedSkinIndex fired - SkinIndex: %d"), SelectedSkinIndex);
 
-    if (ALobbyCharacter* LobbyChar = Cast<ALobbyCharacter>(OwningPawn))
+    for (TActorIterator<ALobbyCharacter> It(GetWorld()); It; ++It)
     {
-        LobbyChar->ApplySkin(SelectedSkinIndex);
+        ALobbyCharacter* LobbyChar = *It;
+        UE_LOG(LogTemp, Warning, TEXT("Found LobbyCharacter - has playerstate: %s"), LobbyChar->GetPlayerState() ? TEXT("YES") : TEXT("NO"));
+
+        if (LobbyChar->GetPlayerState() == this)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Matched! Applying skin"));
+            LobbyChar->ApplySkin(SelectedSkinIndex);
+            return;
+        }
     }
+
+    UE_LOG(LogTemp, Warning, TEXT("No matching LobbyCharacter found"));
 }
 
-
-void AMyPlayerState::CopyProperties(APlayerState* PlayerState)
-{
-    Super::CopyProperties(PlayerState);
-    UE_LOG(LogTemp, Warning, TEXT("CopyProperties called - SkinIndex: %d"), SelectedSkinIndex);
-
-    if (AMyPlayerState* PS = Cast<AMyPlayerState>(PlayerState))
-    {
-        PS->SelectedSkinIndex = SelectedSkinIndex;
-    }
-}
-
-void AMyPlayerState::OverrideWith(APlayerState* PlayerState)
-{
-    Super::OverrideWith(PlayerState);
-    UE_LOG(LogTemp, Warning, TEXT("OverrideWith called"));
-
-    if (AMyPlayerState* PS = Cast<AMyPlayerState>(PlayerState))
-    {
-        SelectedSkinIndex = PS->SelectedSkinIndex;
-        UE_LOG(LogTemp, Warning, TEXT("OverrideWith - SkinIndex: %d"), SelectedSkinIndex);
-    }
-}

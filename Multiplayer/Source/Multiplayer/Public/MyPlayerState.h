@@ -28,7 +28,7 @@ public:
     UFUNCTION()
     void OnRep_SelectedSkinIndex();
 
-   // virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutProps) const override;
-    virtual void CopyProperties(APlayerState* PlayerState) override;
-    virtual void OverrideWith(APlayerState* PlayerState) override;
+    UFUNCTION(NetMulticast, Reliable)
+    void MulticastSaveSkin(const FString& PlayerName, int32 SkinIndex);
+
 };

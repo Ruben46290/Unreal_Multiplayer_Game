@@ -5,6 +5,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Lobby_MainMenu/LobbyGameMode.h"
 #include "MyPlayerState.h"
+#include <MyGameInstance.h>
 
 // Sets default values
 ALobbyCharacter::ALobbyCharacter()
@@ -91,8 +92,10 @@ void ALobbyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 // * * * * * * * * * * Skin Customization * * * * * * * * * *
 
+// Delete
 void ALobbyCharacter::LocalSelectSkin(int32 SkinIndex)
 {
+	// Tell the server
 	if (AMyPlayerState* PS = GetPlayerState<AMyPlayerState>())
 	{
 		PS->ServerSetSkin(SkinIndex);

@@ -8,6 +8,7 @@
 #include <Kismet/GameplayStatics.h>
 #include "Ordering/OrderManager.h"
 #include "MyPlayerState.h"
+#include "MyGameInstance.h"
 
 AMultiplayerGameMode::AMultiplayerGameMode()
 {
@@ -81,24 +82,43 @@ void AMultiplayerGameMode::CheckAllPlayersLoaded()
 	// If All Players Are Loaded In & The Countdown Isn't Active
 	if (LoadedPlayers.Num() >= ExpectedPlayerCount && !bCountdownStarted)
 	{
-		// Set Countdown As Active
-		bCountdownStarted = true;
 
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("All players loaded! Starting countdown..."));
-
-		// For Each Loaded Player
+		// Apply skins for all players now that everyone is loaded
 		for (APlayerController* PC : LoadedPlayers)
 		{
-			// Cast To MyPlayerController
-			AMyPlayerController* GamePC = Cast<AMyPlayerController>(PC);
-			if (GamePC)
+			if (AMultiplayerCharacter* GameChar = Cast<AMultiplayerCharacter>(PC->GetPawn()))
 			{
-				// Start Countdown
-				GamePC->Client_StartGameCountdown();
+				if (APlayerState* PS = PC->GetPlayerState<APlayerState>())
+				{
+					if (UMyGameInstance* GI = GetWorld()->GetGameInstance<UMyGameInstance>())
+					{
+						int32 SkinIndex = GI->GetPlayerSkin(PS->GetPlayerName());
+						UE_LOG(LogTemp, Warning, TEXT("CheckAllPlayersLoaded - applying skin %d to %s"), SkinIndex, *PS->GetPlayerName());
+						GameChar->ApplySkin(SkinIndex);
+					}
+				}
+			}
+
+			// Set Countdown As Active
+			bCountdownStarted = true;
+
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("All players loaded! Starting countdown..."));
+
+			// For Each Loaded Player
+			for (APlayerController* PPC : LoadedPlayers)
+			{
+				// Cast To MyPlayerController
+				AMyPlayerController* GamePPC = Cast<AMyPlayerController>(PPC);
+				if (GamePPC)
+				{
+					// Start Countdown
+					GamePPC->Client_StartGameCountdown();
+				}
 			}
 		}
 	}
 }
+
 
 void AMultiplayerGameMode::StartGameplay()
 {
@@ -153,5 +173,6 @@ void AMultiplayerGameMode::StartGameplay()
 		}
 	}
 }
+
 
 

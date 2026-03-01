@@ -18,6 +18,7 @@
 #include "Components/SplineMeshComponent.h"
 #include "Widgets/GameHUD.h"
 #include "MyPlayerState.h"
+#include "MyGameInstance.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -100,10 +101,15 @@ void AMultiplayerCharacter::BeginPlay()
 		}
 	}
 
-	// Load Player's Selected Skin From Player State
-	if (AMyPlayerState* PS = GetPlayerState<AMyPlayerState>())
+	// Load Player Skin From Game Instance
+	if (UMyGameInstance* GI = GetWorld()->GetGameInstance<UMyGameInstance>())
 	{
-		ApplySkin(PS->SelectedSkinIndex);
+		if (APlayerState* PS = GetPlayerState())
+		{
+			int32 SkinIndex = GI->GetPlayerSkin(PS->GetPlayerName());
+			UE_LOG(LogTemp, Warning, TEXT("GameCharacter BeginPlay - applying skin %d"), SkinIndex);
+			ApplySkin(SkinIndex);
+		}
 	}
 }
 
@@ -780,9 +786,14 @@ void AMultiplayerCharacter::OnRep_PlayerState()
 	// Load Mesh - Called When PlayerState Replicates (e.g. When Client Joins)
 	Super::OnRep_PlayerState();
 
-	if (AMyPlayerState* PS = GetPlayerState<AMyPlayerState>())
+	if (UMyGameInstance* GI = GetWorld()->GetGameInstance<UMyGameInstance>())
 	{
-		ApplySkin(PS->SelectedSkinIndex);
+		if (APlayerState* PS = GetPlayerState())
+		{
+			int32 SkinIndex = GI->GetPlayerSkin(PS->GetPlayerName());
+			UE_LOG(LogTemp, Warning, TEXT("GameCharacter OnRep_PlayerState - applying skin %d"), SkinIndex);
+			ApplySkin(SkinIndex);
+		}
 	}
 }
 

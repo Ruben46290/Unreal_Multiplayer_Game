@@ -42,6 +42,7 @@ void UMyGameInstance::Init()
 	}
 }
 
+// Delete These Soon
 void UMyGameInstance::HostLANSession()
 {
 	bIsLAN = true;
@@ -152,7 +153,10 @@ void UMyGameInstance::FindOnlineSessions()
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Searching for Online sessions..."));
 }
+// Delete These Soon
 
+
+// * * * * * * * * * * Server Hosting & Joining * * * * * * * * * *
 
 void UMyGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
@@ -168,24 +172,6 @@ void UMyGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucces
 		UE_LOG(LogTemp, Error, TEXT("Failed to create session!"));
 	}
 }
-
-//void UMyGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
-//{
-//	if (bWasSuccessful)
-//	{
-//		UE_LOG(LogTemp, Warning, TEXT("Session search complete! Found %d sessions"), SessionSearch->SearchResults.Num());
-//
-//		// Log all found sessions
-//		for (int32 i = 0; i < SessionSearch->SearchResults.Num(); i++)
-//		{
-//			UE_LOG(LogTemp, Warning, TEXT("Session %d: %s"), i, *SessionSearch->SearchResults[i].GetSessionIdStr());
-//		}
-//	}
-//	else
-//	{
-//		UE_LOG(LogTemp, Error, TEXT("Session search failed!"));
-//	}
-//}
 
 void UMyGameInstance::JoinSession()
 {
@@ -249,11 +235,6 @@ void UMyGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCom
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Failed to join session!"));
 	}
 }
-
-
-
-
-
 
 void UMyGameInstance::HostSessionWithSettings(FString ServerName, bool IsLAN, FString Password)
 {
@@ -368,7 +349,6 @@ void UMyGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 	OnSessionsFound.Broadcast(ServerList);
 }
 
-
 void UMyGameInstance::JoinSessionByIndex(int32 Index, FString Password)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Game Instance Join Session Called"));
@@ -408,3 +388,31 @@ void UMyGameInstance::JoinSessionByIndex(int32 Index, FString Password)
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Joining session..."));
 }
 
+
+// * * * * * * * * * * * Skin Customization * * * * * * * * * *
+
+void UMyGameInstance::SavePlayerSkin(const FString& PlayerName, int32 SkinIndex)
+{
+	PlayerSkinSelections.Add(PlayerName, SkinIndex);
+	UE_LOG(LogTemp, Warning, TEXT("GameInstance saved skin %d for player %s"), SkinIndex, *PlayerName);
+
+	// Log everything currently saved
+	for (auto& Entry : PlayerSkinSelections)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GameInstance currently has: '%s' -> %d"), *Entry.Key, Entry.Value);
+	}
+}
+
+int32 UMyGameInstance::GetPlayerSkin(const FString& PlayerName)
+{
+
+	UE_LOG(LogTemp, Warning, TEXT("GameInstance looking up skin for: '%s'"), *PlayerName);
+
+	if (int32* SkinIndex = PlayerSkinSelections.Find(PlayerName))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GameInstance found skin %d for player %s"), *SkinIndex, *PlayerName);
+		return *SkinIndex;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("GameInstance found no skin for player %s, defaulting to 0"), *PlayerName);
+	return 0;
+}

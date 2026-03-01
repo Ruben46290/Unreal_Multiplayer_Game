@@ -112,4 +112,13 @@ private:
 	static const FName SERVER_NAME_KEY;
 	static const FName PASSWORD_KEY;
 	static const FName IS_PASSWORD_PROTECTED_KEY;
+
+	// * * * * * Skin Customiaztion * * * * *
+public:
+	// Maps player name to their selected skin index
+	UPROPERTY()
+	TMap<FString, int32> PlayerSkinSelections;
+
+	void SavePlayerSkin(const FString& PlayerName, int32 SkinIndex);
+	int32 GetPlayerSkin(const FString& PlayerName);
 };
