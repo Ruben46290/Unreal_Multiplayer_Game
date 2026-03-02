@@ -17,6 +17,7 @@ void UOrderWidget::MakeOrder(TArray<FName> OrderItems)
         if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 100, FColor::Red, TEXT("OrderWidget DataTable Not Set")); return; }
     }
 
+	// Clear WrapBox Of Previous Images
     OrderWrapBox->ClearChildren();
 
     // For Each Required Item
@@ -49,6 +50,9 @@ void UOrderWidget::MakeOrder(TArray<FName> OrderItems)
             OrderWrapBox->AddChildToWrapBox(ItemWidget);
         }
     }
+
+	// Show Time Progress Bar
+	TimeProgressBar->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UOrderWidget::SetPointText(float Points)
@@ -73,4 +77,7 @@ void UOrderWidget::ClearUI(bool CustomerRanOutOfTime)
 
     // Set Point Text As Blank
     PointText->SetText(FText::FromString(""));
+
+	// Hide Progress Bar
+	TimeProgressBar->SetVisibility(ESlateVisibility::Hidden);
 }

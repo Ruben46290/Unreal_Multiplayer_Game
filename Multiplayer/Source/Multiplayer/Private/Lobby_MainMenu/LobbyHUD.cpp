@@ -155,6 +155,8 @@ void ULobbyHUD::OnSkinRightButtonClicked()
 	ApplySkinToCharacter();
 }
 
+
+
 void ULobbyHUD::ApplySkinToCharacter()
 {
 	APlayerController* PC = GetOwningPlayer();
@@ -172,7 +174,8 @@ void ULobbyHUD::ApplySkinToCharacter()
 
 void ULobbyHUD::UpdateSkinText()
 {
-	// Use "Skin %d" as a placeholder. 
-	FString DisplayText = FString::Printf(TEXT("Skin %d / %d"), CurrentSkinIndex + 1, MaxSkins);
+	
+	FString DisplayText = SkinNames[CurrentSkinIndex];
+
 	SkinText->SetText(FText::FromString(DisplayText));
 }

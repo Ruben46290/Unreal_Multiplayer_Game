@@ -101,6 +101,12 @@ private:
 
 	void ApplySkinToCharacter();
 
-
+	TArray<FString> SkinNames = {
+		TEXT("Barbarian"),
+		TEXT("Knight"),
+		TEXT("Mage"),
+		TEXT("Ranger"),
+		TEXT("Rouge")
+	};
 
 };

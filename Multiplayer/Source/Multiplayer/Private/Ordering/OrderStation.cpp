@@ -314,7 +314,7 @@ void AOrderStation::OnCustomerLeaves(ACustomerNPC* Customer)
 		// Reset Current Order
 		CurrentCustomerData = FCustomer();
 
-		// Clear UI - true = Customer Is Leaving Because It Ran Out Of Time
+		// Clear UI - true = Customer Is Leaving Because It Ran Out Of Time - Play Special Animation ( no animation made yet )
 		OrderWidget->ClearUI(true);
 	}
 
@@ -465,6 +465,9 @@ void AOrderStation::ServeFirstCustomer()
 
 	// Move remaining customers forward
 	MoveCustomersToPositions();
+
+	// Clear UI - false = Customer Is Leaving Cause The Order Is DOne - Don't Play Special Animation ( no animation made yet )
+	OrderWidget->ClearUI(false);
 }
 
 
