@@ -70,6 +70,7 @@ void UOrderWidget::ClearUI(bool CustomerRanOutOfTime)
     if (CustomerRanOutOfTime) {
         
         // Play Special Aniamtion
+        // Probably will need a multicast event for this to play on clients aswell
     }
 
     // Clear WrapBox Images

@@ -207,12 +207,12 @@ void ACropPlot::GrowingTick()
 	if (CurrentWaterLevel > 0) {
 
 		// Yes - Don't Apply Growing Penalty
-		GrowingProgress += 0.1f;
+		GrowingProgress += GrowingSpeed;
 	}
 	else {
 
 		// No - Apply Growing Penalty
-		GrowingProgress += 0.1f / NoWaterPenalty;
+		GrowingProgress += GrowingSpeed / NoWaterPenalty;
 	}
 
 	// If Growing Progress Hit The Next Growing Goal

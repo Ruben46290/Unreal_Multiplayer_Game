@@ -89,6 +89,10 @@ protected:
 	// Is The Crop Ready To Be Harvested
 	bool bCanBeHarvested = false;
 
+	// How Fast Does The Crop Grow ( Tick Called Every 0.1 Seconds - Defualt Is 0.1 )
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Growing")
+	float GrowingSpeed = 0.1f;
+
 	// * * * * * Water * * * * *
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Water")
@@ -103,7 +107,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Water")
 	float WaterDecayRate = 0.1f;
 
-	// Growing Rate
+	// How Much Slower Is The Crop Going To Grow Without Wayer ( 10 = 1 Growth Tick / 10 )
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Water")
 	float NoWaterPenalty = 4.0f;
 

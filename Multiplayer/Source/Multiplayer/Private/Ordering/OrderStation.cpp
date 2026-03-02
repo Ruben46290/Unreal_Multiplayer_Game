@@ -466,7 +466,7 @@ void AOrderStation::ServeFirstCustomer()
 	// Move remaining customers forward
 	MoveCustomersToPositions();
 
-	// Clear UI - false = Customer Is Leaving Cause The Order Is DOne - Don't Play Special Animation ( no animation made yet )
+	// Clear UI - false = Customer Is Leaving Cause The Order Is Done - Don't Play Special Animation ( no animation made yet )
 	OrderWidget->ClearUI(false);
 }
 
@@ -499,8 +499,8 @@ void AOrderStation::OnRep_CurrentCustomerData()
 	// When An Order Is Finished The CustomerData Is Reset To Be Blank (Score = 0)
 	if (CurrentCustomerData.PointsToGive == 0) {
 
-		// Set Order Price Text As Blank
-		OrderWidget->PointText->SetText(FText::FromString(""));
+		// Clear UI - false = Customer Is Leaving Cause The Order Is Done - Don't Play Special Animation ( no animation made yet )
+		OrderWidget->ClearUI(false);
 	}
 
 	// The Order Is Valid
