@@ -62,6 +62,10 @@ class AMultiplayerCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* RightClick;
 
+	//** Sprint Key */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* Sprint;
+
 protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
@@ -82,6 +86,18 @@ protected:
 	void Look(const FInputActionValue& Value);
 	
 
+	// * * * * * * * * * * * Sprinting * * * * * * * * * *
+	void StartSprint();
+
+	void StopSprint();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
+	float WalkSpeed = 600.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
+	float SprintSpeed = 1200.f;
+
+	bool bIsSprinting;
 
 	// * * * * * * * * * * Interatable Objects Highlights * * * * * * * * * *
 protected:

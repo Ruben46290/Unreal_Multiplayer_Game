@@ -30,8 +30,8 @@ ALobbyGameMode::ALobbyGameMode()
 
 	// Set Default Level Paths
 	LevelPaths = {
-	"/Game/Maps/TestMap",
-	"/Game/Maps/TestMap1",
+	"/Game/Maps/Level1",
+	"/Game/Maps/Level2",
 	};
 }
 

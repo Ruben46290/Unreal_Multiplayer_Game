@@ -83,6 +83,9 @@ void AMultiplayerCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
+	// Set Movement Speed To Walk Speed By Default
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+
 	// Only Create UI For The Local Player
 	if (IsLocallyControlled() && GameHUDClass) {
 
@@ -118,8 +121,15 @@ void AMultiplayerCharacter::Tick(float DeltaTime)
 	// If A Throw Is Currently Being Charged
 	if (bIsChargingThrow) {
 
-		// Add Delta Time To Current Charge
-		CurrentThrowCharge = FMath::Min(CurrentThrowCharge + (ChargeRate * DeltaTime), MaxThrowCharge);
+		if (bIsSprinting) {
+
+			// Add Delta Time * Bonus Charge Rate To Current Charge
+			CurrentThrowCharge = FMath::Min(CurrentThrowCharge + (ChargeRate * DeltaTime * 2), MaxThrowCharge);
+		}
+		else {
+			// Add Delta Time To Current Charge
+			CurrentThrowCharge = FMath::Min(CurrentThrowCharge + (ChargeRate * DeltaTime), MaxThrowCharge);
+		}
 
 		UpdateTrajectoryVisualization();
 	}
@@ -163,6 +173,11 @@ void AMultiplayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 		// Right Click
 		EnhancedInputComponent->BindAction(RightClick, ETriggerEvent::Started, this, &AMultiplayerCharacter::StartRightClick);
+
+		// Sprint
+		EnhancedInputComponent->BindAction(Sprint, ETriggerEvent::Started, this, &AMultiplayerCharacter::StartSprint);
+		EnhancedInputComponent->BindAction(Sprint, ETriggerEvent::Completed, this, &AMultiplayerCharacter::StopSprint);
+
 	}
 }
 
@@ -242,6 +257,21 @@ void AMultiplayerCharacter::StartRightClick()
 
 	}
 }
+
+void AMultiplayerCharacter::StartSprint()
+{
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+
+	bIsSprinting = true;
+}
+
+void AMultiplayerCharacter::StopSprint()
+{
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+
+	bIsSprinting = false;
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 
