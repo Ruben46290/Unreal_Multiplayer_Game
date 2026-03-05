@@ -221,6 +221,9 @@ void AMultiplayerCharacter::StartLeftClick()
 {
 	if (HeldItem.ItemID != NAME_None) {
 		StartThrowingHeldItem();
+
+		// Play Throwing Start Animation Montage
+		PlayActionMontage(ECharacterAction::ThrowStart);
 	}
 }
 
@@ -228,6 +231,9 @@ void AMultiplayerCharacter::StopLeftClick()
 {
 	if (bIsChargingThrow) {
 		StopThrowingHeldItem();
+
+		// Play Throwing End Animation Montage
+		PlayActionMontage(ECharacterAction::ThrowEnd);
 	}
 }
 
@@ -272,6 +278,15 @@ void AMultiplayerCharacter::StopSprint()
 	bIsSprinting = false;
 }
 
+void AMultiplayerCharacter::PlayActionMontage(ECharacterAction Action)
+{
+	UAnimMontage** Found = ActionMontages.Find(Action);
+	if (Found && *Found)
+	{
+		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Yellow, TEXT("Play Anim Montage")); }
+		PlayAnimMontage(*Found);
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////
 

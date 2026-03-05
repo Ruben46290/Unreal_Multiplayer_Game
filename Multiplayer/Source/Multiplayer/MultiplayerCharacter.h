@@ -17,6 +17,13 @@ struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
+UENUM(BlueprintType)
+enum class ECharacterAction : uint8
+{
+	ThrowStart   UMETA(DisplayName = "ThrowStart"),
+	ThrowEnd   UMETA(DisplayName = "ThrowEnd"),
+};
+
 UCLASS(config=Game)
 class AMultiplayerCharacter : public ACharacter
 {
@@ -98,6 +105,14 @@ protected:
 	float SprintSpeed = 1200.f;
 
 	bool bIsSprinting;
+
+	// * * * * * * * * * * Animation Montages * * * * * * * * * *
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	TMap<ECharacterAction, UAnimMontage*> ActionMontages;
+
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	void PlayActionMontage(ECharacterAction Action);
 
 	// * * * * * * * * * * Interatable Objects Highlights * * * * * * * * * *
 protected:
@@ -221,7 +236,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Throwing")
 	float CurrentThrowCharge = 0.0f;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Throwing")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Throwing")
 	bool bIsChargingThrow = false;
 
 
