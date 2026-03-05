@@ -119,7 +119,7 @@ void AMultiplayerCharacter::BeginPlay()
 void AMultiplayerCharacter::Tick(float DeltaTime)
 {
 	// If A Throw Is Currently Being Charged
-	if (bIsChargingThrow) {
+	if (bIsChargingThrow && IsLocallyControlled()) {
 
 		if (bIsSprinting) {
 
@@ -220,20 +220,30 @@ void AMultiplayerCharacter::Look(const FInputActionValue& Value)
 void AMultiplayerCharacter::StartLeftClick()
 {
 	if (HeldItem.ItemID != NAME_None) {
+
+		// Start Throwing Locally
 		StartThrowingHeldItem();
 
-		// Play Throwing Start Animation Montage
-		PlayActionMontage(ECharacterAction::ThrowStart);
+		// Start Throwing Animation On The Server
+		Server_StartThrow();
+
+		// Show Throwing Trajectory
+		ShowThrowTrajectory();
 	}
 }
 
 void AMultiplayerCharacter::StopLeftClick()
 {
 	if (bIsChargingThrow) {
+
+		// Stop Throwing Locally
 		StopThrowingHeldItem();
 
-		// Play Throwing End Animation Montage
-		PlayActionMontage(ECharacterAction::ThrowEnd);
+		// Stop Throwing Animation On The Server
+		Server_EndThrow();
+
+		// Hide Throwing Trajectory
+		HideThrowTrajectory();
 	}
 }
 
@@ -246,36 +256,32 @@ void AMultiplayerCharacter::StartRightClick()
 		CurrentThrowCharge = 0.0f;
 
 		// Hide Trajectory
-		if (TrajectorySpline)
-		{
-			TrajectorySpline->SetVisibility(false);
-
-			// Destroy Trajectory Mesh Componenets
-			for (USplineMeshComponent* MeshComp : SplineMeshComponents)
-			{
-				if (MeshComp)
-				{
-					MeshComp->DestroyComponent();
-				}
-			}
-		}
-
-
+		HideThrowTrajectory();
 	}
 }
 
 void AMultiplayerCharacter::StartSprint()
 {
+	// Set Movement Speed Locally For Immediate Response
 	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
 
-	bIsSprinting = true;
+	// Send Signal To The Server To Change Speed - Client Can't Change Speed Without Asking The Server
+	Server_SetSprinting(true);
 }
 
 void AMultiplayerCharacter::StopSprint()
 {
+	// Set Movement Speed Locally For Immediate Response
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
-	bIsSprinting = false;
+	// Send Signal To The Server To Change Speed - Client Can't Change Speed Without Asking The Server
+	Server_SetSprinting(false);
+}
+
+void AMultiplayerCharacter::Server_SetSprinting_Implementation(bool bSprinting)
+{
+	bIsSprinting = bSprinting;
+	GetCharacterMovement()->MaxWalkSpeed = bSprinting ? SprintSpeed : WalkSpeed;
 }
 
 void AMultiplayerCharacter::PlayActionMontage(ECharacterAction Action)
@@ -321,73 +327,6 @@ void AMultiplayerCharacter::Server_Interact_Implementation(AActor* ActorToIntera
 	IInteractInterface::Execute_OnInteract(ActorToInteract, this);
 
 }
-
-
-//AActor* AMultiplayerCharacter::FindInteractableActor()
-//{
-//
-//	// Get Player Location
-//	FVector PlayerLocation = GetActorLocation();
-//
-//	// Setup Collision Paramaters
-//	FCollisionQueryParams QueryParams;
-//	QueryParams.AddIgnoredActor(this); // Ignore Self
-//
-//	// Make An Array To Store Hit Results
-//	TArray < FHitResult> HitResults;
-//
-//	// Sphere Trace
-//	bool bHit = GetWorld()->SweepMultiByChannel(
-//		HitResults, // Array To Store Hit Results
-//		PlayerLocation, // Start Location
-//		PlayerLocation, // End Location
-//		FQuat::Identity,
-//		ECC_Visibility,
-//		FCollisionShape::MakeSphere(InteractionRadius),
-//		QueryParams // Apply Custom Paramters (Ingore Self)
-//	);
-//
-//	// Draw Debug Sphere
-//	//DrawDebugSphere(GetWorld(),PlayerLocation,InteractionRadius,16,bHit ? FColor::Green : FColor::Red,false,2.0f);
-//
-//
-//	// Make A New Pointer For The Closest Object
-//	AActor* ClosestInteractableItem = nullptr;
-//
-//	// Make A New Closest Distance Float, Set To Max Distance Possible / Max Distance Of Sight Sphere
-//	float ClosestDistance = InteractionRadius;
-//
-//	// For Each Hit Actor
-//	for (const FHitResult& Hit : HitResults) {
-//
-//		// Get Current Actor
-//		AActor* HitActor = Hit.GetActor();
-//
-//		// Is The Actor Valid & Does The Actor Have The Interact Interface
-//		if (HitActor && HitActor->Implements<UInteractInterface>()) {
-//
-//			// Set Distance 
-//			float Distance = FVector::Dist(PlayerLocation, HitActor->GetActorLocation());
-//
-//			// Is This Actor The New Closest Actor?
-//			if (Distance < ClosestDistance) {
-//
-//				// Set Closest Distance To Distance
-//				ClosestDistance = Distance;
-//
-//				// Set Closest Actor Refrence To Current Actor
-//				ClosestInteractableItem = HitActor;
-//
-//			}
-//
-//		}
-//
-//
-//
-//	}
-//
-//	return ClosestInteractableItem;
-//}
 
 
 // * * * * * * * * * * Item Picking Up & Dropping * * * * * * * * * *
@@ -498,6 +437,8 @@ void AMultiplayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AMultiplayerCharacter, HeldItem);
+	DOREPLIFETIME(AMultiplayerCharacter, bIsSprinting);
+	DOREPLIFETIME(AMultiplayerCharacter, bIsChargingThrow);
 }
 
 
@@ -600,15 +541,11 @@ void AMultiplayerCharacter::StartThrowingHeldItem()
 		// Reset Charging Variables
 		bIsChargingThrow = true;
 		CurrentThrowCharge = 0.0f;
-
-		// Show Trajectory Spline
-		if (TrajectorySpline)
-		{
-			TrajectorySpline->SetVisibility(true);
-		}
+	
+		// Play Throwing Start Animation Montage
+		PlayActionMontage(ECharacterAction::ThrowStart);
 	}
 }
-
 
 void AMultiplayerCharacter::StopThrowingHeldItem()
 {
@@ -630,22 +567,26 @@ void AMultiplayerCharacter::StopThrowingHeldItem()
 		CurrentThrowCharge = 0.0f;
 
 		// Hide Trajectory
-		if (TrajectorySpline)
-		{
-			TrajectorySpline->SetVisibility(false);
+		HideThrowTrajectory();
 
-			// Destroy Trajectory Mesh Componenets
-			for (USplineMeshComponent* MeshComp : SplineMeshComponents)
-			{
-				if (MeshComp)
-				{
-					MeshComp->DestroyComponent();
-				}
-			}
-		}
+		// Play Throwing End Animation Montage
+		PlayActionMontage(ECharacterAction::ThrowEnd);
 	}
 }
 
+void AMultiplayerCharacter::Server_StartThrow_Implementation()
+{
+	bIsChargingThrow = true;
+	OnRep_IsThrowing(); // Server won't call RepNotify itself, so call manually
+}
+
+void AMultiplayerCharacter::Server_EndThrow_Implementation()
+{
+	bIsChargingThrow = false;
+	OnRep_IsThrowing(); // Server won't call RepNotify itself, so call manually
+}
+
+// Thrown Item Spawning & Physics
 void AMultiplayerCharacter::Server_ThrowItem_Implementation(FVector ThrowDirection, float ThrowStrength)
 {
 	if (HeldItem.ItemID == NAME_None)
@@ -702,7 +643,47 @@ void AMultiplayerCharacter::Server_ThrowItem_Implementation(FVector ThrowDirecti
 	}
 }
 
+void AMultiplayerCharacter::OnRep_IsThrowing()
+{
+	if (bIsChargingThrow)
+	{
+		PlayActionMontage(ECharacterAction::ThrowStart);
+	}
+	else {
+		PlayActionMontage(ECharacterAction::ThrowEnd);
+	}
+}
 
+
+
+
+void AMultiplayerCharacter::ShowThrowTrajectory()
+{
+	// Show Trajectory Spline
+	if (TrajectorySpline)
+	{
+		TrajectorySpline->SetVisibility(true);
+	}
+}
+
+void AMultiplayerCharacter::HideThrowTrajectory()
+{
+	// Hide Trajectory Spline
+	if (TrajectorySpline)
+	{
+		TrajectorySpline->SetVisibility(false);
+
+
+		// Destroy Trajectory Mesh Componenets - Not Sure If Nessasary
+		for (USplineMeshComponent* MeshComp : SplineMeshComponents)
+		{
+			if (MeshComp)
+			{
+				MeshComp->DestroyComponent();
+			}
+		}
+	}
+}
 
 // * * * * * * * * * * Throwing Trajectoy Visualization * * * * * * * * * *
 

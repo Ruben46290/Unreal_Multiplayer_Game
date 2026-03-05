@@ -94,20 +94,34 @@ protected:
 	
 
 	// * * * * * * * * * * * Sprinting * * * * * * * * * *
+
+	// Bound To Sprint Input Action Pressed
 	void StartSprint();
 
+	// Bound To Sprint Input Action Released
 	void StopSprint();
 
+	// Server Event Because Movement Is Replicated From Server, So Clients Need To Tell Server When They Start/Stop Sprinting
+	UFUNCTION(Server, Reliable)
+	void Server_SetSprinting(bool bSprinting);
+
+	// Defualt Walking Speed
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float WalkSpeed = 600.f;
 
+	// Sprinting Speed
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float SprintSpeed = 1200.f;
 
+	// bool To Track If Currently Sprinting, Used For Speeding Up Item Throwing
+	// Could Use This In The Animation Blueprint Instead Of Velocity Replicated For Clients To Know When Other Players Are Sprinting
+	UPROPERTY(Replicated)
 	bool bIsSprinting;
 
 	// * * * * * * * * * * Animation Montages * * * * * * * * * *
 protected:
+
+	// Map To Store Animation Montages For Different Character Actions - Set In Editor
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	TMap<ECharacterAction, UAnimMontage*> ActionMontages;
 
@@ -212,9 +226,27 @@ protected:
 	// Throwing Input Finished
 	void StopThrowingHeldItem();
 
+	UFUNCTION()
+	void OnRep_IsThrowing();
+
+	// Play Throwing Animation On The Server
+	UFUNCTION(Server, Reliable)
+	void Server_StartThrow();
+
+	UFUNCTION(Server, Reliable)
+	void Server_EndThrow();
+
+	// Item Spawning & Physics Logic
 	UFUNCTION(Server, Reliable)
 	void Server_ThrowItem(FVector ThrowDirection, float ThrowStrength);
 
+	// Functions To Toggle Throw Trajectory On Local Machine Only
+	void ShowThrowTrajectory();
+
+	void HideThrowTrajectory();
+
+
+	 
 	// * * * * * Variables * * * * *
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Throwing")
@@ -232,12 +264,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Throwing")
 	float MaxThrowForce = 1500.0f;
 
-
 	UPROPERTY(BlueprintReadOnly, Category = "Throwing")
 	float CurrentThrowCharge = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Throwing")
+	UPROPERTY(ReplicatedUsing = OnRep_IsThrowing, EditAnywhere, BlueprintReadOnly, Category = "Throwing")
 	bool bIsChargingThrow = false;
+
 
 
 	// * * * * * * * * * * Throwing Trajectory Visualization * * * * * * * * * *
