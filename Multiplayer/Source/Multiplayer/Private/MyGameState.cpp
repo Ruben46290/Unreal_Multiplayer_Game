@@ -3,14 +3,37 @@
 
 #include "MyGameState.h"
 #include "Net/UnrealNetwork.h"
-
+#include "LevelSettings.h"
+#include <Kismet/GameplayStatics.h>
 
 
 AMyGameState::AMyGameState()
 {
 }
 
+void AMyGameState::BeginPlay()
+{
+	Super::BeginPlay();
 
+	// Only server needs to track milestones
+	if (HasAuthority())
+	{
+		TArray<AActor*> FoundActors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALevelSettings::StaticClass(), FoundActors);
+
+		if (FoundActors.Num() > 0)
+		{
+			// Cast To Level Settings
+			ALevelSettings* LoadedLevelSettings = Cast<ALevelSettings>(FoundActors[0]);
+
+			// Load Score Milestones From Level Settings Actor
+			ScoreMilestones = LoadedLevelSettings->ScoreMilestones;
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("GameState: No LevelSettings actor found in level!"));
+		}
+	}
+}
 
 
 
@@ -59,7 +82,8 @@ void AMyGameState::StartLevelTimer(float Duration)
 		// Store the duration
 		LevelDuration = Duration;
 
-		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("GameState Start Level Timer")); }
+		//if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("GameState Start Level Timer")); }
+
 		// If Level Timer Isn't Active
 		if (!GetWorld()->GetTimerManager().IsTimerActive(LevelTimer)) {
 
@@ -94,6 +118,9 @@ void AMyGameState::AddScore(float ScoreToAdd)
 	// Add New Score To Total Score
 	CurrentScore += ScoreToAdd;
 
+	// Check If Any Milestones Have Been Hit
+	CheckScoreMilestones();
+
 	// Call Event Dispatcher For Updating Score UI
 	OnScoreChanged.Broadcast(CurrentScore);
 }
@@ -105,8 +132,34 @@ void AMyGameState::OnRep_CurrentScore()
 
 	// Call Event Dispatcher For Updating Score UI
 	OnScoreChanged.Broadcast(CurrentScore);
+
+	// Check If Any Milestones Have Been Hit
+	CheckScoreMilestones();
 }
 
+void AMyGameState::CheckScoreMilestones()
+{
+	// For Each Milestone
+	for (int32 i = 0; i < ScoreMilestones.Num(); i++) {
+
+		// Skip If Milestone Has Already Been Hit
+		if (i <= LastMilestoneIndex) { continue; }
+
+		if (CurrentScore >= ScoreMilestones[i]) {
+
+			// Update Last Milestone Index
+			LastMilestoneIndex = i;
+
+			// Broadcast Milestone Reached Event Dispatcher
+			OnScoreMilestoneReached.Broadcast(i);
+		}
+	}
+}
+
+void AMyGameState::OnRep_MilestoneIndex()
+{
+	OnScoreMilestoneReached.Broadcast(LastMilestoneIndex);
+}
 
 
 void AMyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -115,5 +168,6 @@ void AMyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 
 	DOREPLIFETIME(AMyGameState, TimeRemaining);
 	DOREPLIFETIME(AMyGameState, CurrentScore);
+	DOREPLIFETIME(AMyGameState, LastMilestoneIndex);
 	DOREPLIFETIME(AMyGameState, LevelComplete);
 }

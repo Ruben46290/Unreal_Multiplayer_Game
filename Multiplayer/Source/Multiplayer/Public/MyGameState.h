@@ -10,6 +10,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimeRemainingChanged, float, NewT
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnScoreChanged, float, NewScore);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnScoreMilestoneReached, int32, CurrentStars);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevelComplete);
 
 UCLASS()
@@ -21,7 +23,7 @@ public:
 
 	AMyGameState();
 
-
+	virtual void BeginPlay() override;
 
 	// * * * * * * * * * * Level Timer * * * * * * * * * * \\
 
@@ -78,6 +80,24 @@ public:
 	UFUNCTION()
 	void OnRep_CurrentScore();
 
+	// Event Dispatcher For Updating UI When Score Is Changed - Bound On GameHUD
 	UPROPERTY(BlueprintAssignable, Category = "Game")
 	FOnScoreChanged OnScoreChanged;
+
+	// Event Dispatcher For When Score Milestone Is Reached - Bound On GameHUD
+	UPROPERTY(BlueprintAssignable, Category = "Game")
+	FOnScoreMilestoneReached OnScoreMilestoneReached;
+
+	// Loaded From Level Settings Actor
+	TArray<float> ScoreMilestones;
+
+	// Track The Last Milestone Index 
+	UPROPERTY(ReplicatedUsing = OnRep_MilestoneIndex)
+	int32 LastMilestoneIndex = -1;
+
+	UFUNCTION()
+	void OnRep_MilestoneIndex();
+
+	// Check If Any Milestones Have Been Hit And Broadcast Event If They Have
+	void CheckScoreMilestones();
 };

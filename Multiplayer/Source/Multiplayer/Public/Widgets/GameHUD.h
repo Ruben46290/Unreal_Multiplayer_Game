@@ -34,4 +34,12 @@ protected:
 	// Bound To Game State Score Event Dispatcher
 	UFUNCTION()
 	void UpdateScoreText(float NewScore);
+
+	// Bound To Game State ScoreMilestoneHit Event Dispatcher
+	UFUNCTION()
+	void ScoreMilestoneReached(int32 CurrentStars);
+
+	//Blueprint Event To Update Score Milestone UI
+	UFUNCTION(BlueprintImplementableEvent, Category = "Score")
+	void UpdateScoreMilestoneUI(int32 CurrentStars);
 };

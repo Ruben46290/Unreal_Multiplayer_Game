@@ -27,6 +27,7 @@ void AMyPlayerController::BeginPlay()
 
 	ShowGameStartWidget();
 
+	// Set Input Mode
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
 	bShowMouseCursor = false;
@@ -81,7 +82,7 @@ void AMyPlayerController::Client_StartGameCountdown_Implementation()
 	}
 }
 
-
+// Bind To Game State Event Dispathcers
 void AMyPlayerController::BindToGameState()
 {
 	// Get Game State

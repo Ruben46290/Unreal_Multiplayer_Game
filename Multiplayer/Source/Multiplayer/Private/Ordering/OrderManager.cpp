@@ -148,10 +148,5 @@ void AOrderManager::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 }
 
 
-//void AOrderManager::OnRep_CurrentOrderIndex()
-//{
-//}
-
-
 
 

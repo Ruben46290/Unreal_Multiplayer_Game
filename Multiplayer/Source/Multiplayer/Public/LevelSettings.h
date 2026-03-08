@@ -22,7 +22,12 @@ protected:
 
 public:
 
+	// How Many Seconds Does The Level Last?
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level Settings")
 	float GameLength = 60.f;
+
+	// Score Miltstones - Used At End Of Game To Calculate Stars Earned - [0] = 1 star, [1] = 2 stars, etc.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level Settings")
+	TArray<float> ScoreMilestones = { 10.f, 20.f, 30.f, 40.f, 50.f };
 
 };

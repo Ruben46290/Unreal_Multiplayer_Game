@@ -20,9 +20,14 @@ void UGameHUD::NativeConstruct()
 
 		// Bind Score Event Dispatcher
 		GS->OnScoreChanged.AddDynamic(this, &UGameHUD::UpdateScoreText);
+
+		// Bind Score Milestone Hit Event Dispatcher
+		GS->OnScoreMilestoneReached.AddDynamic(this, &UGameHUD::ScoreMilestoneReached);
 	}
 
 }
+
+
 
 void UGameHUD::UpdateTimerText(float TimeRemaining)
 {
@@ -39,7 +44,14 @@ void UGameHUD::UpdateTimerText(float TimeRemaining)
 
 void UGameHUD::UpdateScoreText(float NewScore)
 {
-
 	FString ScoreString = FString::Printf(TEXT("$%.2f"),NewScore);
 	ScoreText->SetText(FText::FromString(ScoreString));
+}
+
+
+
+void UGameHUD::ScoreMilestoneReached(int32 CurrentStars)
+{
+	// Call Blueprint Event For Updating Star UI
+	UpdateScoreMilestoneUI(CurrentStars);
 }
