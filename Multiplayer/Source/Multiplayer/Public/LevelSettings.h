@@ -30,4 +30,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level Settings")
 	TArray<float> ScoreMilestones = { 10.f, 20.f, 30.f, 40.f, 50.f };
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level Settings")
+	TSoftObjectPtr<UWorld> NextLevel;
 };

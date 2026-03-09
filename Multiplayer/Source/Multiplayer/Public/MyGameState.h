@@ -100,4 +100,13 @@ public:
 
 	// Check If Any Milestones Have Been Hit And Broadcast Event If They Have
 	void CheckScoreMilestones();
+
+
+	// * * * * * * * * * * * Next Level * * * * * * * * * \\
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Level")
+	TSoftObjectPtr<UWorld> NextLevel;
+
+	UFUNCTION(BlueprintCallable, Category = "Level")
+	void LoadNextLevel() const;
 };

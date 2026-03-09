@@ -28,6 +28,9 @@ void AMyGameState::BeginPlay()
 
 			// Load Score Milestones From Level Settings Actor
 			ScoreMilestones = LoadedLevelSettings->ScoreMilestones;
+
+			// Load & Save Next Level From Level Settings Actor
+			NextLevel = LoadedLevelSettings->NextLevel;
 		}
 		else {
 			UE_LOG(LogTemp, Warning, TEXT("GameState: No LevelSettings actor found in level!"));
@@ -161,6 +164,20 @@ void AMyGameState::OnRep_MilestoneIndex()
 	OnScoreMilestoneReached.Broadcast(LastMilestoneIndex);
 }
 
+void AMyGameState::LoadNextLevel() const
+{
+	if (NextLevel.IsNull())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GameState: No next level set!"));
+		return;
+	}
+
+	// Get Level Path From Soft Object Ptr
+	FString LevelPath = NextLevel.GetLongPackageName();
+
+	// Travel To The Next Level
+	GetWorld()->ServerTravel(LevelPath + "?listen");
+}
 
 void AMyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -170,4 +187,5 @@ void AMyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(AMyGameState, CurrentScore);
 	DOREPLIFETIME(AMyGameState, LastMilestoneIndex);
 	DOREPLIFETIME(AMyGameState, LevelComplete);
+	DOREPLIFETIME(AMyGameState, NextLevel)
 }

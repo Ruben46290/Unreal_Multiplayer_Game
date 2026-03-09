@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/TextBlock.h"
+#include "Components/Button.h"
 #include "GameOverWidget.generated.h"
 
 /**
@@ -15,11 +16,22 @@ class MULTIPLAYER_API UGameOverWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
+	virtual void NativeConstruct() override;
+
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* TotalScoreText;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* NextLevelButton;
+
 
 public:
 
 	UFUNCTION()
 	void SetupUI(float TotalScore);
+
+protected:
+
+	UFUNCTION()
+	void OnNextLevelButtonPressed();
 };

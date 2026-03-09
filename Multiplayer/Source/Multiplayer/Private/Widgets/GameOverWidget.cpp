@@ -2,6 +2,24 @@
 
 
 #include "Widgets/GameOverWidget.h"
+#include <MyGameState.h>
+#include <Kismet/GameplayStatics.h>
+
+
+void UGameOverWidget::NativeConstruct()
+{
+	
+	// Get Owning Player Controller & Check If Its The Server Or A Client
+	APlayerController* PC = GetOwningPlayer();
+
+	// If Server
+	if (PC && PC->HasAuthority()) {
+
+		// Bind Next Level Button Pressed Event
+		if (NextLevelButton) { NextLevelButton->OnClicked.AddDynamic(this, &UGameOverWidget::OnNextLevelButtonPressed); }
+	}
+
+}
 
 void UGameOverWidget::SetupUI(float TotalScore)
 {
@@ -13,4 +31,16 @@ void UGameOverWidget::SetupUI(float TotalScore)
 
 	// Set Toal Score Text To The String That Was Just Made
 	TotalScoreText->SetText(FText::FromString(TotalScoreString));
+}
+
+void UGameOverWidget::OnNextLevelButtonPressed()
+{
+	// Get Game State
+	AMyGameState* GS = Cast<AMyGameState>(UGameplayStatics::GetGameState(this));
+
+	if (GS){
+
+		// Call Function To Change Level
+		GS->LoadNextLevel();
+	}
 }

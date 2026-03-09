@@ -152,7 +152,7 @@ void ALobbyPlayerController::UpdateLevelDisplay(int32 Level)
 
 void ALobbyPlayerController::Client_UpdateLevelDisplay_Implementation(int32 Level)
 {
-	UE_LOG(LogTemp, Warning, TEXT("[CLIENT RPC] Client_UpdateLevelDisplay called with Level %d"), Level);
+	//UE_LOG(LogTemp, Warning, TEXT("[CLIENT RPC] Client_UpdateLevelDisplay called with Level %d"), Level);
 	UpdateLevelDisplay(Level);
 }
 

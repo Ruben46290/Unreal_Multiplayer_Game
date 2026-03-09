@@ -394,25 +394,20 @@ void UMyGameInstance::JoinSessionByIndex(int32 Index, FString Password)
 void UMyGameInstance::SavePlayerSkin(const FString& PlayerName, int32 SkinIndex)
 {
 	PlayerSkinSelections.Add(PlayerName, SkinIndex);
-	UE_LOG(LogTemp, Warning, TEXT("GameInstance saved skin %d for player %s"), SkinIndex, *PlayerName);
+	//UE_LOG(LogTemp, Warning, TEXT("GameInstance saved skin %d for player %s"), SkinIndex, *PlayerName);
 
-	// Log everything currently saved
-	for (auto& Entry : PlayerSkinSelections)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("GameInstance currently has: '%s' -> %d"), *Entry.Key, Entry.Value);
-	}
 }
 
 int32 UMyGameInstance::GetPlayerSkin(const FString& PlayerName)
 {
 
-	UE_LOG(LogTemp, Warning, TEXT("GameInstance looking up skin for: '%s'"), *PlayerName);
+	//UE_LOG(LogTemp, Warning, TEXT("GameInstance looking up skin for: '%s'"), *PlayerName);
 
 	if (int32* SkinIndex = PlayerSkinSelections.Find(PlayerName))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GameInstance found skin %d for player %s"), *SkinIndex, *PlayerName);
+		//UE_LOG(LogTemp, Warning, TEXT("GameInstance found skin %d for player %s"), *SkinIndex, *PlayerName);
 		return *SkinIndex;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("GameInstance found no skin for player %s, defaulting to 0"), *PlayerName);
+	//UE_LOG(LogTemp, Warning, TEXT("GameInstance found no skin for player %s, defaulting to 0"), *PlayerName);
 	return 0;
 }

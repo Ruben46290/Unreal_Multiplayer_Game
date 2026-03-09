@@ -93,7 +93,7 @@ void ALobbyGameMode::OnPlayerReadyChanged()
 {
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, TEXT("Player ready status changed, checking..."));
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, TEXT("Player ready status changed, checking..."));
 	}
 
 	// Check If All Players Are Ready
@@ -101,7 +101,7 @@ void ALobbyGameMode::OnPlayerReadyChanged()
 	{
 		if (GEngine)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("All players ready! Starting game in 3 seconds..."));
+			//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("All players ready! Starting game in 3 seconds..."));
 		}
 
 		// Start game after a short delay
