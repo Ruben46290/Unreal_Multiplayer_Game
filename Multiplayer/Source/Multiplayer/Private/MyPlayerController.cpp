@@ -112,7 +112,7 @@ void AMyPlayerController::ShowLevelCompleteScreen()
 			AMyGameState* GS = GetWorld()->GetGameState<AMyGameState>();
 
 			// Set Widget Variables
-			LevelCompleteWidget->SetupUI(GS->CurrentScore);
+			LevelCompleteWidget->SetupUI(GS->CurrentScore, GS->LastMilestoneIndex);
 
 			// Show Widget
 			LevelCompleteWidget->AddToViewport(10); // High Z-order to appear on top
