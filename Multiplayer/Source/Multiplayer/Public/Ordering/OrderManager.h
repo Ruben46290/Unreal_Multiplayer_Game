@@ -36,7 +36,7 @@ struct FCustomer : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<EItemType> RequiredItems;
 
-	// How Many Points Will The Customer Gice - 0 = Automatic Pricing ( Normal Item = 50, Juice = 100 )
+	// How Many Points Will The Customer Gice - 0 = Automatic Pricing ( Normal Item = 2.5, Juice = 5 )
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float PointsToGive = 0.0f;
 
