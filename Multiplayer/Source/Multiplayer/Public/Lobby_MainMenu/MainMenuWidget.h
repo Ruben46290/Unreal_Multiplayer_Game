@@ -19,33 +19,5 @@ class MULTIPLAYER_API UMainMenuWidget : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 
-protected:
 
-	UPROPERTY(meta = (BindWidget))
-	UButton* HostLANButton;
-
-	UPROPERTY(meta = (BindWidget))
-	UButton* HostOnlineButton;
-
-	UPROPERTY(meta = (BindWidget))
-	UButton* JoinLANButton;
-
-	UPROPERTY(meta = (BindWidget))
-	UButton* JoinOnlineButton;
-
-	UFUNCTION()
-	void OnHostLANButtonClicked();
-
-	UFUNCTION()
-	void OnHostOnlineButtonClicked();
-
-	UFUNCTION()
-	void OnJoinLANButtonClicked();
-
-	UFUNCTION()
-	void OnJoinOnlineButtonClicked();
-
-private:
-
-	UMyGameInstance* GameInstanceRef;
 };

@@ -51,19 +51,8 @@ public:
 
 	virtual void Init() override;
 
-	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
-	void HostLANSession();
-
-	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
-	void HostOnlineSession();
-
-	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
-	void FindLANSessions();
-
-	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
-	void FindOnlineSessions();
-
 	void JoinSession();
+
 protected:
 	// Online session interface pointer
 	IOnlineSessionPtr OnlineSessionInterface;
