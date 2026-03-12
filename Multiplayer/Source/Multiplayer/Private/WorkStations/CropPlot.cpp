@@ -15,6 +15,15 @@ ACropPlot::ACropPlot()
 	ItemDropLocation = CreateDefaultSubobject<USceneComponent>(TEXT("ItemDropLocation"));
 	ItemDropLocation->SetupAttachment(MeshComponent);
 
+	ItemDropLocation2 = CreateDefaultSubobject<USceneComponent>(TEXT("ItemDropLocation2"));
+	ItemDropLocation2->SetupAttachment(MeshComponent);
+
+	ItemDropLocation3 = CreateDefaultSubobject<USceneComponent>(TEXT("ItemDropLocation3"));
+	ItemDropLocation3->SetupAttachment(MeshComponent);
+
+	// Set Up Item Drop Location Array
+	ItemDropLocations = { ItemDropLocation, ItemDropLocation2, ItemDropLocation3 };
+
 	IconWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("IconWidget"));
 	IconWidgetComponent->SetupAttachment(MeshComponent);
 	IconWidgetComponent->SetVisibility(false);
@@ -328,11 +337,7 @@ void ACropPlot::HarvestCrop()
 void ACropPlot::Server_SpawnItem_Implementation(FName ItemID, int32 Index)
 {
 	// Get Spawn Pos
-	FVector SpawnPos = ItemDropLocation->GetComponentLocation();
-
-	// Spawn Each Item Slightly Higher & Forward
-	SpawnPos.X += Index * 75;
-	SpawnPos.Z += Index * 50;
+	FVector SpawnPos = ItemDropLocations[Index]->GetComponentLocation();
 
 	// Start Spawning Item
 	AItem* NewItem = GetWorld()->SpawnActorDeferred<AItem>(ItemBlueprintClass, FTransform(FRotator::ZeroRotator, SpawnPos));

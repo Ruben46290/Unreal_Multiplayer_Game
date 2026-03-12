@@ -22,12 +22,20 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* CropMeshComponent;
 
-	// Item Drop Location
+	// Item Drop Locations
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USceneComponent* ItemDropLocation;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	USceneComponent* ItemDropLocation2;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	USceneComponent* ItemDropLocation3;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	UWidgetComponent* IconWidgetComponent;
+
+	TArray<USceneComponent*> ItemDropLocations;
 
 	// * * * * * * * * * * Variables * * * * * * * * * * 
 	
