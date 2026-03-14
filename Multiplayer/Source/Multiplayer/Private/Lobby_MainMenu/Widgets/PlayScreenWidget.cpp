@@ -11,18 +11,18 @@ void UPlayScreenWidget::NativeConstruct()
 	GameInstanceRef = Cast<UMyGameInstance>(GetGameInstance());
 
 	// Bind Button Click Events
-	if (HostButton)
-	{
-		HostButton->OnClicked.AddDynamic(this, &UPlayScreenWidget::OnHostButtonClicked);
-	}
-	if (RefreshButton)
-	{
-		RefreshButton->OnClicked.AddDynamic(this, &UPlayScreenWidget::OnRefreshButtonClicked);
-	}
-	if (BackButton)
-	{
-		BackButton->OnClicked.AddDynamic(this, &UPlayScreenWidget::OnBackButtonClicked);
-	}
+	//if (HostButton)
+	//{
+	//	HostButton->OnClicked.AddDynamic(this, &UPlayScreenWidget::OnHostButtonClicked);
+	//}
+	//if (RefreshButton)
+	//{
+	//	RefreshButton->OnClicked.AddDynamic(this, &UPlayScreenWidget::OnRefreshButtonClicked);
+	//}
+	//if (BackButton)
+	//{
+	//	BackButton->OnClicked.AddDynamic(this, &UPlayScreenWidget::OnBackButtonClicked);
+	//}
 
 
 	if (GameInstanceRef)
@@ -81,13 +81,16 @@ void UPlayScreenWidget::OnRefreshButtonClicked()
 
 void UPlayScreenWidget::OnBackButtonClicked()
 {
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Back Button Pressed"));
+
 	// Unbind From Event Dispatcher For Sessions Found
 	if (GameInstanceRef) {
 		GameInstanceRef->OnSessionsFound.RemoveDynamic(this, &UPlayScreenWidget::OnSessionsFound);
 	}
 
-	// Destroy Widget
-	RemoveFromParent();
+	// Boradcast Event Dispatcher To Tell Main Menu Widget To Switch Back To Main Menu Screen
+	OnBackPressed.Broadcast();
 }
 
 void UPlayScreenWidget::OnSessionsFound(const TArray<FServerInfo>& ServerList)

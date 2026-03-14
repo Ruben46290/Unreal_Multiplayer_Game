@@ -14,7 +14,7 @@
 #include "Lobby_MainMenu/Widgets/PasswordPrmoptWidget.h"
 #include "PlayScreenWidget.generated.h"
 
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBackPressed);
 
 UCLASS()
 class MULTIPLAYER_API UPlayScreenWidget : public UUserWidget
@@ -32,15 +32,9 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UScrollBox* ServerListScrollBox;
 
-	// Buttons
-	UPROPERTY(meta = (BindWidget))
-	UButton* HostButton;
-
-	UPROPERTY(meta = (BindWidget))
-	UButton* RefreshButton;
-
-	UPROPERTY(meta = (BindWidget))
-	UButton* BackButton;
+	// Event Dispatcher For When Back Button Is Pressed - Bound In Main Menu Widget To Return To Main Menu Screen
+	UPROPERTY(BlueprintAssignable, Category = "Game")
+	FOnBackPressed OnBackPressed;
 
 	// LAN / Online toggle
 	UPROPERTY(meta = (BindWidget))
@@ -61,13 +55,13 @@ protected:
 	TSubclassOf<UPasswordPrmoptWidget> PasswordPromptWidgetClass;
 
 	// Button click handlers
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Button")
 	void OnHostButtonClicked();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Button")
 	void OnRefreshButtonClicked();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Button")
 	void OnBackButtonClicked();
 
 	// Called when sessions are found
