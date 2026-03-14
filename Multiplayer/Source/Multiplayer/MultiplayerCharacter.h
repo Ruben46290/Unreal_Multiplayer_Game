@@ -73,6 +73,17 @@ class AMultiplayerCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* Sprint;
 
+	// * * * * * Mouse Settings * * * * *
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mouse")
+	float MouseSensitivity = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mouse")
+	bool bInvertX = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mouse")
+	bool bInvertY = false;
+
 protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")

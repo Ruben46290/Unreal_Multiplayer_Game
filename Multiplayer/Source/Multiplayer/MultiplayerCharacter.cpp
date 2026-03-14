@@ -211,9 +211,14 @@ void AMultiplayerCharacter::Look(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
-		// add yaw and pitch input to controller
-		AddControllerYawInput(LookAxisVector.X);
-		AddControllerPitchInput(LookAxisVector.Y);
+		float YawInput = LookAxisVector.X * MouseSensitivity;
+		float PitchInput = LookAxisVector.Y * MouseSensitivity;
+
+		if (bInvertX) YawInput *= -1.0f;
+		if (bInvertY) PitchInput *= -1.0f;
+
+		AddControllerYawInput(YawInput);
+		AddControllerPitchInput(PitchInput);
 	}
 }
 
