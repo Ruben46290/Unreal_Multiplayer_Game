@@ -75,6 +75,8 @@ protected:
 	UFUNCTION()
 	void UpdateSkinText();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void MoveSkinSelectionBox(bool bIsServer);
 
 public:
 

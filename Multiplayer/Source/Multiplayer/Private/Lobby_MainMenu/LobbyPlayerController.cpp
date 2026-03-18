@@ -24,6 +24,10 @@ void ALobbyPlayerController::BeginPlay()
 
 	// Make The Lobby UI
 	CreateLobbyUI();
+
+	// Connect To Camera On The Level & Teleport Player Mesh To Proper Spot
+	FTimerHandle UpdateTimer;
+	GetWorldTimerManager().SetTimer(UpdateTimer, this, &ALobbyPlayerController::SetupLobbyCamera, 1.0f, false);
 }
 
 

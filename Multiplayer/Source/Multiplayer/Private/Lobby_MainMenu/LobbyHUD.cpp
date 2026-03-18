@@ -61,6 +61,8 @@ void ULobbyHUD::NativeConstruct()
 	// Set Inital Level Display - Shows Level 1 For Now
 	UpdateLevelDisplay(1);
 
+	// Move The Skin Selection Box - Blueprint Event
+	MoveSkinSelectionBox(PC && PC->HasAuthority());
 }
 
 void ULobbyHUD::OnBackButtonClicked()
