@@ -6,6 +6,7 @@
 #include "Lobby_MainMenu/LobbyCharacter.h"
 #include "Net/UnrealNetwork.h"
 #include "MyPlayerState.h"
+#include "EngineUtils.h" 
 
 ALobbyGameMode::ALobbyGameMode()
 {
@@ -41,10 +42,25 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
+	UE_LOG(LogTemp, Warning, TEXT("PostLogin fired - looping player states"));
+
+	// Loop Through All PlayerStates And Load Their Skins - This Is To Ensure That When A New Player Joins, All The Skins Are Loaded In For Them
+	for (TActorIterator<AMyPlayerState> It(GetWorld()); It; ++It)
+	{
+		AMyPlayerState* PS = *It;
+		if (PS)
+		{
+			PS->OnRep_SelectedSkinIndex();
+
+			UE_LOG(LogTemp, Warning, TEXT("Found PlayerState: %s with SkinIndex: %d"),
+				*PS->GetPlayerName(), PS->SelectedSkinIndex);
+		}
+	}
+
+	// Make A Timer And Setup The Ready Button After Loading In - This Is To Ensure The Player Count Is Updated Before We Check It
 	FTimerHandle UpdateTimer;
 	GetWorldTimerManager().SetTimer(UpdateTimer, this, &ALobbyGameMode::UpdateReadyButtonAvailability, 0.5f, false);
 
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("GameMode PostLogin()"));
 }
 
 
@@ -59,13 +75,6 @@ void ALobbyGameMode::UpdateReadyButtonAvailability()
 	
 	// Broadcast Ready Button Status To All Clients & Server
 	Multicast_UpdateReadyButtonState(bCanReady);
-
-	//if (bCanReady) {
-	//	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("GameMode There Is 2 Players"));
-	//}
-	//else {
-	//	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("GameMode There Is 1 Player"));
-	//}
 }
 
 void ALobbyGameMode::Multicast_UpdateReadyButtonState_Implementation(bool bCanReady)

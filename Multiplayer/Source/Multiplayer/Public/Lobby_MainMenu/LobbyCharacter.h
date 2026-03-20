@@ -73,7 +73,7 @@ public:
 	// Called by PlayerState's OnRep to visually update the mesh
 	void ApplySkin(int32 SkinIndex);
 
-
+	virtual void OnRep_PlayerState() override;
 
 protected:
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;

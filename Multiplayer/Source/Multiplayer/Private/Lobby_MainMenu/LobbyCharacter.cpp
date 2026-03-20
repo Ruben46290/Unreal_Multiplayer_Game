@@ -92,7 +92,7 @@ void ALobbyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 // * * * * * * * * * * Skin Customization * * * * * * * * * *
 
-// Delete
+
 void ALobbyCharacter::LocalSelectSkin(int32 SkinIndex)
 {
 	// Tell the server
@@ -111,7 +111,16 @@ void ALobbyCharacter::ApplySkin(int32 SkinIndex)
 }
 
 
+void ALobbyCharacter::OnRep_PlayerState()
+{
+	// This Fires On The Client When The PlayerState Replicates (e.g. When The Client Joins The Lobby) - We Use It To Update The Skin Based On What Is Stored In The PlayerState
+	Super::OnRep_PlayerState();
 
+	if (AMyPlayerState* PS = GetPlayerState<AMyPlayerState>())
+	{
+		ApplySkin(PS->SelectedSkinIndex);
+	}
+}
 
 
 
