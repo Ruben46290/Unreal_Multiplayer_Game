@@ -105,15 +105,15 @@ void AMultiplayerCharacter::BeginPlay()
 	}
 
 	// Load Player Skin From Game Instance
-	if (UMyGameInstance* GI = GetWorld()->GetGameInstance<UMyGameInstance>())
-	{
-		if (APlayerState* PS = GetPlayerState())
-		{
-			int32 SkinIndex = GI->GetPlayerSkin(PS->GetPlayerName());
-			UE_LOG(LogTemp, Warning, TEXT("GameCharacter BeginPlay - applying skin %d"), SkinIndex);
-			ApplySkin(SkinIndex);
-		}
-	}
+	//if (UMyGameInstance* GI = GetWorld()->GetGameInstance<UMyGameInstance>())
+	//{
+	//	if (APlayerState* PS = GetPlayerState())
+	//	{
+	//		int32 SkinIndex = GI->GetPlayerSkin(PS->GetPlayerName());
+	//		UE_LOG(LogTemp, Warning, TEXT("GameCharacter BeginPlay - applying skin %d"), SkinIndex);
+	//		ApplySkin(SkinIndex);
+	//	}
+	//}
 }
 
 void AMultiplayerCharacter::Tick(float DeltaTime)

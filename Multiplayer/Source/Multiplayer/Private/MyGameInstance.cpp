@@ -166,6 +166,9 @@ void UMyGameInstance::HostSessionWithSettings(FString ServerName, bool IsLAN, FS
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	OnlineSessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *SessionSettings);
 
+	// Set To A Multiplayer Game
+	bIsSingleplayer = false;
+
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Creating session: %s"), *ServerName));
 }
 

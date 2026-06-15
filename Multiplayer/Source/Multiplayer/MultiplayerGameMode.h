@@ -28,6 +28,11 @@ public:
 
 	void StartGameplay();
 
+
+	void StartSingleplayer();
+
+	void StartSingleplayerGameplay();
+
 protected:
 	// Override Login Event
 	virtual void PostLogin(APlayerController* NewPlayer) override;

@@ -105,9 +105,15 @@ private:
 	// * * * * * Skin Customiaztion * * * * *
 public:
 	// Maps player name to their selected skin index
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TMap<FString, int32> PlayerSkinSelections;
 
 	void SavePlayerSkin(const FString& PlayerName, int32 SkinIndex);
 	int32 GetPlayerSkin(const FString& PlayerName);
+
+// * * * * * Singeplayer * * * * *
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsSingleplayer;
+
 };

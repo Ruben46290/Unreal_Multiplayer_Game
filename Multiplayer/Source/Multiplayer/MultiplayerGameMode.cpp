@@ -79,6 +79,18 @@ void AMultiplayerGameMode::LoadLevelSettings()
 
 void AMultiplayerGameMode::CheckAllPlayersLoaded()
 {
+	// Get Game Instance
+	if (UMyGameInstance* GI = GetGameInstance<UMyGameInstance>())
+	{
+		// Is The Game Singleplayer?
+		if (GI->bIsSingleplayer)
+		{
+			// Yes - Skip Multiplayer Logic
+			StartSingleplayer();
+			return;
+		}
+	}
+
 	// If All Players Are Loaded In & The Countdown Isn't Active
 	if (LoadedPlayers.Num() >= ExpectedPlayerCount && !bCountdownStarted)
 	{
@@ -122,6 +134,18 @@ void AMultiplayerGameMode::CheckAllPlayersLoaded()
 
 void AMultiplayerGameMode::StartGameplay()
 {
+	// Get Game Instance
+	if (UMyGameInstance* GI = GetGameInstance<UMyGameInstance>())
+	{
+		// Is The Game Singleplayer?
+		if (GI->bIsSingleplayer)
+		{
+			// Yes - Skip Multiplayer Logic
+			StartSingleplayerGameplay();
+			return;
+		}
+	}
+
 	ReadyPlayerCount++;
 
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow,
@@ -170,6 +194,62 @@ void AMultiplayerGameMode::StartGameplay()
 			{
 				GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("MultiplayerGameMoode - StartGameplay() - ! No Order Manager Found !"));
 			}
+		}
+	}
+}
+
+void AMultiplayerGameMode::StartSingleplayer()
+{
+	// Check Player Controller Is Valid
+	AMyPlayerController* PC = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (!PC) return;
+
+	// Apply Skin 
+	if (AMultiplayerCharacter* GameChar = Cast<AMultiplayerCharacter>(PC->GetPawn()))
+	{
+		if (UMyGameInstance* GI = GetGameInstance<UMyGameInstance>())
+		{
+			int32 SkinIndex = GI->GetPlayerSkin("Local");
+			UE_LOG(LogTemp, Warning, TEXT("Singleplayer skin index: %d"), SkinIndex);
+			GameChar->ApplySkin(SkinIndex);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("StartSingleplayer - Character cast failed"));
+	}
+
+	// Start Countdown
+	PC->Client_StartGameCountdown();
+}
+
+void AMultiplayerGameMode::StartSingleplayerGameplay()
+{
+	// Get GameState
+	AMyGameState* GS = GetGameState<AMyGameState>();
+	if (!GS) { return; }
+
+	// If Level Settings Are Valid
+	if (LevelSettings)
+	{
+		// Load Level Time + 50% More Time
+		GS->StartLevelTimer(LevelSettings->GameLength + (LevelSettings->GameLength / 2));
+	}
+
+	// No Settings Loaded
+	else {
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("MultiplayerGameMoode - StartGameplay() - No Settings Loaded!"));
+		GS->StartLevelTimer(120.f); // Fall Back To 2 Minute Timer
+	}
+
+	// Enable OrderManager
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AOrderManager::StaticClass(), FoundActors);
+	if (FoundActors.Num() > 0)
+	{
+		if (AOrderManager* OrderMgr = Cast<AOrderManager>(FoundActors[0]))
+		{
+			OrderMgr->SetActorTickEnabled(true);
 		}
 	}
 }

@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "../MultiplayerGameMode.h"
+#include <MyGameInstance.h>
 
 AMyPlayerController::AMyPlayerController()
 {
@@ -25,8 +26,6 @@ void AMyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ShowGameStartWidget();
-
 	// Set Input Mode
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
@@ -36,16 +35,38 @@ void AMyPlayerController::BeginPlay()
 	FTimerHandle BindTimer;
 	GetWorldTimerManager().SetTimer(BindTimer, this, &AMyPlayerController::BindToGameState, 0.25f, false);
 
-	// Connect To The Gamemode To Connect To The Server & Start The Game After A Small Delay
-	FTimerHandle NotifyTimer;
-	GetWorld()->GetTimerManager().SetTimer(NotifyTimer, [this]()
+	// Get GameInstance
+	if (UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance()))
+	{
+		// Is The Game SinglePlayer?
+		// Singleplayer
+		if (GI->bIsSingleplayer)
 		{
+			
+			ShowGameStartWidget();
+
+			// Get GameMode
 			AMultiplayerGameMode* GM = Cast<AMultiplayerGameMode>(GetWorld()->GetAuthGameMode());
-			if (GM)
-			{
-				GM->CheckAllPlayersLoaded();
-			}
-		}, 2.0f, false);
+
+			GM->CheckAllPlayersLoaded();
+		}
+
+		// Multiplayer
+		else {
+			ShowGameStartWidget();
+
+			// Connect To The Gamemode To Connect To The Server & Start The Game After A Small Delay
+			FTimerHandle NotifyTimer;
+			GetWorld()->GetTimerManager().SetTimer(NotifyTimer, [this]()
+				{
+					AMultiplayerGameMode* GM = Cast<AMultiplayerGameMode>(GetWorld()->GetAuthGameMode());
+					if (GM)
+					{
+						GM->CheckAllPlayersLoaded();
+					}
+				}, 2.0f, false);
+		}
+	}
 }
 
 
