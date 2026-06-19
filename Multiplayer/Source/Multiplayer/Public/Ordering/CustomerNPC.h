@@ -122,6 +122,10 @@ public:
     UPROPERTY()
     float PatienceTickSpeed = 0.1f;
 
+	// Multiplier For How Fast Patience Ticks - Used For Singleplayer To Make It Slower
+    UPROPERTY()
+	float PatienceMultiplier = 1.0f;
+
     // Patience Tiemer Tick
     UFUNCTION()
     void PatienceTimerTick();

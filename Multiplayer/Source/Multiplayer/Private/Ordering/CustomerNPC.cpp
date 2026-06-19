@@ -4,6 +4,7 @@
 #include "Ordering/CustomerNPC.h"
 #include "Net/UnrealNetwork.h"
 #include "Ordering/OrderStation.h"
+#include <MyGameInstance.h>
 
 // Sets default values
 ACustomerNPC::ACustomerNPC()
@@ -54,6 +55,17 @@ void ACustomerNPC::BeginPlay()
         // Set Chosen Mesh Variable - Used For Replicating
         ChosenMesh = MeshOptions[ChosenIndex];
 
+    }
+
+    // Get Game Instance
+    if (UMyGameInstance* GI = GetGameInstance<UMyGameInstance>())
+    {
+        // Is The Game Singleplayer?
+        if (GI->bIsSingleplayer)
+        {
+            // Yes - Set Boost For Wait Time
+			PatienceMultiplier = 0.5f; // Patience Lasts Twice As Long In Singleplayer
+        }
     }
 
     // Start Patience Timer
@@ -177,8 +189,8 @@ void ACustomerNPC::PatienceTimerTick()
     if (bIsMoving) { return; }
 
     // Tick Current Waiting Time Up By Timer Speed
-    // e.g Tick Speed = 0.25, Function Is Called Every 0.25 Seconds & Adds 0.25
-    CurrentWaitTime += PatienceTickSpeed;
+	// e.g Tick Speed = 0.25, Function Is Called Every 0.25 Seconds & Adds 0.25 - * Multiplier For Singleplayer *
+    CurrentWaitTime += PatienceTickSpeed * PatienceMultiplier;
 
     // Update UI On The Server
     // Only The Server Starts The Timer
