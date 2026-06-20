@@ -168,6 +168,9 @@ void AMyGameState::CheckScoreMilestones()
 
 				// Broadcast Level Complete Dispatcher
 				OnLevelComplete.Broadcast();
+
+				// Pause The Game
+				UGameplayStatics::SetGamePaused(GetWorld(), true);
 			}
 		}
 	}

@@ -85,4 +85,8 @@ protected:
 	// Called From On JuiceStart();
 	UFUNCTION(BlueprintCallable, Category = "Juicer")
 	void OnJuiceComplete();
+
+	// Blueprint Event For When The Juice Is Collected - Used For Hiding The Bucket Fluid Animation
+	UFUNCTION(BlueprintImplementableEvent, Category = "Juicer")
+	void JuiceCollected();
 };

@@ -252,6 +252,9 @@ void AJuicer::OnInteract_Implementation(AActor* Interactor)
 
 				// Hide Bucket Mesh
 				BucketMeshComponent->SetVisibility(false);
+
+				// Call Blueprint Event For Clearing The Buckets Juice Mesh From The Animation
+				JuiceCollected();
 			}
 		}
 	}

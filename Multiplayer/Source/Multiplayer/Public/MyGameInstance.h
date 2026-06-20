@@ -114,6 +114,6 @@ public:
 // * * * * * Singeplayer * * * * *
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsSingleplayer;
-
+	bool bIsSingleplayer = true;
+	// Set To True For Quick Testing
 };
