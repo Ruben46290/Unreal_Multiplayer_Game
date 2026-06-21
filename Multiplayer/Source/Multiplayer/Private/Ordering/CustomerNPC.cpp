@@ -57,17 +57,6 @@ void ACustomerNPC::BeginPlay()
 
     }
 
-    // Get Game Instance
-    if (UMyGameInstance* GI = GetGameInstance<UMyGameInstance>())
-    {
-        // Is The Game Singleplayer?
-        if (GI->bIsSingleplayer)
-        {
-            // Yes - Set Boost For Wait Time
-			PatienceMultiplier = 0.5f; // Patience Lasts Twice As Long In Singleplayer
-        }
-    }
-
     // Start Patience Timer
     GetWorldTimerManager().SetTimer(PatienceTimer, this,
         &ACustomerNPC::PatienceTimerTick, PatienceTickSpeed, true);
@@ -189,10 +178,9 @@ void ACustomerNPC::PatienceTimerTick()
     if (bIsMoving) { return; }
 
     // Tick Current Waiting Time Up By Timer Speed
-	// e.g Tick Speed = 0.25, Function Is Called Every 0.25 Seconds & Adds 0.25 - * Multiplier For Singleplayer *
-    CurrentWaitTime += PatienceTickSpeed * PatienceMultiplier;
+	// e.g Tick Speed = 0.25, Function Is Called Every 0.25 Seconds & Adds 0.25 
+    CurrentWaitTime += PatienceTickSpeed;
 
-    // Update UI On The Server
     // Only The Server Starts The Timer
     UpdatePatienceUI();
 

@@ -5,6 +5,9 @@
 #include "Net/UnrealNetwork.h"
 #include "MyGameState.h"
 #include "Item.h"
+#include <Kismet/GameplayStatics.h>
+#include "LevelSettings.h"
+#include "MyGameInstance.h"
 ;
 
 AOrderStation::AOrderStation()
@@ -26,6 +29,30 @@ void AOrderStation::BeginPlay()
 
 	if (!OrderWidget) {
 		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 100, FColor::Red, TEXT("Order UI NOT LOADED!!!")); return; }
+	}
+
+	// Get Game Instance
+	if (UMyGameInstance* GI = GetGameInstance<UMyGameInstance>())
+	{
+		// Is The Game Singleplayer?
+		if (GI->bIsSingleplayer)
+		{
+			// Find the LevelSettings actor in the level
+			TArray<AActor*> FoundActors;
+			UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALevelSettings::StaticClass(), FoundActors);
+
+			if (FoundActors.Num() > 0)
+			{
+				ALevelSettings* LevelSettings = Cast<ALevelSettings>(FoundActors[0]);
+
+				// Level Settings Found
+				if (LevelSettings)
+				{
+					// Store The Patience Boost
+					StoredCustomerPatienceBoost = LevelSettings->TimePatienceBoost;
+				}
+			}
+		}
 	}
 }
 
@@ -189,6 +216,9 @@ void AOrderStation::SpawnCustomer(FCustomer CustomerData)
 
 			// Finishing Spawning Customer
 			NewCustomer->FinishSpawning(SpawnTransform);
+
+			// Apply Patience Boost From Level Settings To Customer, Will Always Be 1 In Multiplayer But Can Be Changed In Singleplayer
+			NewCustomer->StoredCustomerData.TotalPatience *= StoredCustomerPatienceBoost;
 
 			// Add New Customer To Customer Array
 			Customers.Add(NewCustomer);

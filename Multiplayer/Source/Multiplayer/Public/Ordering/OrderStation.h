@@ -93,4 +93,7 @@ public:
 
 	UFUNCTION()
 	void OnRep_CurrentCustomerData();
+
+	// Store A Refrence To The Patience Boost From The Level Settings So We Can Apply It To Customers When They Spawn - Instead Of Finding The Level Settings Actor Every Time A Customer Spawns
+	float StoredCustomerPatienceBoost = 1.0f;
 };
