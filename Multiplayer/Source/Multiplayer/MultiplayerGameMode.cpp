@@ -232,8 +232,8 @@ void AMultiplayerGameMode::StartSingleplayerGameplay()
 	// If Level Settings Are Valid
 	if (LevelSettings)
 	{
-		// Load Level Time + 50% More Time
-		GS->StartLevelTimer(LevelSettings->GameLength + (LevelSettings->GameLength / 2));
+		// Load Level Time + Singleplayer % Boost
+		GS->StartLevelTimer(LevelSettings->GameLength + (LevelSettings->GameLength * LevelSettings->TimePatienceBoost));
 	}
 
 	// No Settings Loaded
