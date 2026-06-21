@@ -218,7 +218,7 @@ void AOrderStation::SpawnCustomer(FCustomer CustomerData)
 			NewCustomer->FinishSpawning(SpawnTransform);
 
 			// Apply Patience Boost From Level Settings To Customer, Will Always Be 1 In Multiplayer But Can Be Changed In Singleplayer
-			NewCustomer->StoredCustomerData.TotalPatience += (NewCustomer->StoredCustomerData.TotalPatience * StoredCustomerPatienceBoost);
+			NewCustomer->StoredCustomerData.TotalPatience *= StoredCustomerPatienceBoost;
 
 			// Add New Customer To Customer Array
 			Customers.Add(NewCustomer);
