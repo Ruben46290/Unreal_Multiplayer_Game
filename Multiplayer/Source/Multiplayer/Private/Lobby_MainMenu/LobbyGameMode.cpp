@@ -7,6 +7,7 @@
 #include "Net/UnrealNetwork.h"
 #include "MyPlayerState.h"
 #include "EngineUtils.h" 
+#include <MyGameInstance.h>
 
 ALobbyGameMode::ALobbyGameMode()
 {
@@ -147,10 +148,20 @@ bool ALobbyGameMode::AreAllPlayersReady()
 void ALobbyGameMode::StartGame()
 {
 
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Starting game!"));
+	//if (GEngine)
+	//{
+	//	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Starting game!"));
+	//}
+
+	// Get GameInstance
+	UMyGameInstance* GI = GetGameInstance<UMyGameInstance>();
+
+	// If Game Instance Valid
+	if (GI) {
+
+		GI->bIsSingleplayer = false; // Set To False For Multiplayer
 	}
+
 
 	FString SelectedLevelPath = GameMapPath;
 
