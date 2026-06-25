@@ -148,8 +148,11 @@ void UMyGameInstance::HostSessionWithSettings(FString ServerName, bool IsLAN, FS
 	SessionSettings->bShouldAdvertise = true;
 	SessionSettings->bAllowJoinInProgress = true;
 	SessionSettings->bUseLobbiesIfAvailable = !IsLAN;
-	SessionSettings->bUsesPresence = !IsLAN;
-	SessionSettings->bAllowJoinViaPresence = !IsLAN;
+	SessionSettings->bUsesPresence = false;
+	SessionSettings->bAllowJoinViaPresence = false;
+
+	// Setup Bucket Name For Searching To Work
+	SessionSettings->Set(FName(TEXT("GameLobbyTag")), FString(TEXT("MyGameLobbies")), EOnlineDataAdvertisementType::ViaOnlineService);
 
 	// Store server name in session settings
 	SessionSettings->Set(SERVER_NAME_KEY, ServerName, EOnlineDataAdvertisementType::ViaOnlineService);
@@ -185,7 +188,16 @@ void UMyGameInstance::RefreshServerList(bool bSearchLAN)
 	SessionSearch = MakeShareable(new FOnlineSessionSearch());
 	SessionSearch->bIsLanQuery = bSearchLAN;
 	SessionSearch->MaxSearchResults = 50;
-	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, !bSearchLAN, EOnlineComparisonOp::Equals);
+
+	//SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, false, EOnlineComparisonOp::Equals);
+	//SessionSearch->QuerySettings.Set(SEARCH_LOBBIES, !bSearchLAN, EOnlineComparisonOp::Equals);
+	// Temporarily set both to true to ensure we find sessions regardless of type
+	SessionSearch->QuerySettings.Set(SEARCH_LOBBIES, true, EOnlineComparisonOp::Equals);
+	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
+
+
+	SessionSearch->QuerySettings.Set(FName(TEXT("GameLobbyTag")), FString(TEXT("MyGameLobbies")), EOnlineComparisonOp::Equals);
+
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	OnlineSessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), SessionSearch.ToSharedRef());
