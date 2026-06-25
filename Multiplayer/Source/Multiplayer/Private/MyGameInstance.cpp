@@ -5,6 +5,8 @@
 #include <OnlineSessionSettings.h>
 #include <Online/OnlineSessionNames.h>
 #include <Kismet/GameplayStatics.h>
+#include "OnlineSubsystem.h"
+#include "Interfaces/OnlineIdentityInterface.h"
 
 const FName UMyGameInstance::SERVER_NAME_KEY = FName("ServerName");
 const FName UMyGameInstance::PASSWORD_KEY = FName("Password");
@@ -49,14 +51,14 @@ void UMyGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucces
 {
 	if (bWasSuccessful)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Session created successfully!"));
+		GEngine->AddOnScreenDebugMessage(-1, 8.f, FColor::Green, TEXT("Session created successfully!"));
 
 		// Travel to the game map (server travel)
 		GetWorld()->ServerTravel("/Game/Lobby_MainMenu/Maps/LobbyMap?listen"); // Change to your game map path
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to create session!"));
+		GEngine->AddOnScreenDebugMessage(-1, 8.f, FColor::Red, TEXT("Failed to create session!"));
 	}
 }
 
@@ -195,9 +197,11 @@ void UMyGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 {
 	TArray<FServerInfo> ServerList;
 
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Cyan, TEXT("OnFindSessionsComplete called"));
+
 	if (bWasSuccessful)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green,
 			FString::Printf(TEXT("Found %d sessions"), SessionSearch->SearchResults.Num()));
 
 		// Loop through all found sessions and build server info
@@ -232,7 +236,7 @@ void UMyGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Session search failed!"));
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("Session search failed!"));
 	}
 
 	// Fire delegate so UI can update (even if empty - will show "No servers found")
@@ -300,4 +304,43 @@ int32 UMyGameInstance::GetPlayerSkin(const FString& PlayerName)
 	}
 	//UE_LOG(LogTemp, Warning, TEXT("GameInstance found no skin for player %s, defaulting to 0"), *PlayerName);
 	return 0;
+}
+
+
+// Online Servies
+void UMyGameInstance::LoginToEOS()
+{
+	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+	if (!Subsystem)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 8.f, FColor::Red, TEXT("Online subsystem invalid!"));
+		return;
+	}
+
+	IOnlineIdentityPtr IdentityInterface = Subsystem->GetIdentityInterface();
+	if (!IdentityInterface.IsValid())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 8.f, FColor::Red, TEXT("Identity interface invalid!"));
+		return;
+	}
+
+	FOnlineAccountCredentials Credentials;
+	Credentials.Type = TEXT("AccountPortal");
+	Credentials.Id = TEXT("");
+	Credentials.Token = TEXT("");
+
+	IdentityInterface->OnLoginCompleteDelegates[0].AddUObject(this, &UMyGameInstance::OnLoginComplete);
+	IdentityInterface->Login(0, Credentials);
+}
+
+void UMyGameInstance::OnLoginComplete(int32 LocalUserNum, bool bWasSuccessful, const FUniqueNetId& UserId, const FString& Error)
+{
+	if (bWasSuccessful)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 8.f, FColor::Green, TEXT("EOS login successful!"));
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 8.f, FColor::Red, FString::Printf(TEXT("EOS login failed: %s"), *Error));
+	}
 }

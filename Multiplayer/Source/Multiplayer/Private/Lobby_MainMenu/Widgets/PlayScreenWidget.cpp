@@ -30,15 +30,15 @@ void UPlayScreenWidget::NativeConstruct()
 		// Bind To Event Dispatcher For Sessions Found
 		GameInstanceRef->OnSessionsFound.AddDynamic(this, &UPlayScreenWidget::OnSessionsFound);
 
-		// Auto Refresh Server List
-		bool bIsLan = LANCheckBox ? LANCheckBox->IsChecked() : false;
-		GameInstanceRef->RefreshServerList(bIsLan);
+		//// Auto Refresh Server List
+		//bool bIsLan = LANCheckBox ? LANCheckBox->IsChecked() : false;
+		//GameInstanceRef->RefreshServerList(bIsLan);
 
-		// Hide No Servers Found Text Until We Know If There Are Servers Or Not
-		if (NoServersText)
-		{
-			NoServersText->SetVisibility(ESlateVisibility::Hidden);
-		}
+		//// Hide No Servers Found Text Until We Know If There Are Servers Or Not
+		//if (NoServersText)
+		//{
+		//	NoServersText->SetVisibility(ESlateVisibility::Hidden);
+		//}
 	}
 }
 

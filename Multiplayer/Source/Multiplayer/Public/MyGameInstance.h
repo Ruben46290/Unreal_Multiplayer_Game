@@ -111,6 +111,11 @@ public:
 	void SavePlayerSkin(const FString& PlayerName, int32 SkinIndex);
 	int32 GetPlayerSkin(const FString& PlayerName);
 
+	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
+	void LoginToEOS();
+
+	void OnLoginComplete(int32 LocalUserNum, bool bWasSuccessful, const FUniqueNetId& UserId, const FString& Error);
+
 // * * * * * Singeplayer * * * * *
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
