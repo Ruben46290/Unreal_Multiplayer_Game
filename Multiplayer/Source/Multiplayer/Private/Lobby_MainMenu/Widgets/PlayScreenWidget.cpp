@@ -81,9 +81,6 @@ void UPlayScreenWidget::OnRefreshButtonClicked()
 
 void UPlayScreenWidget::OnBackButtonClicked()
 {
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Back Button Pressed"));
-
 	// Unbind From Event Dispatcher For Sessions Found
 	if (GameInstanceRef) {
 		GameInstanceRef->OnSessionsFound.RemoveDynamic(this, &UPlayScreenWidget::OnSessionsFound);

@@ -39,6 +39,9 @@ struct FServerInfo
 // Event Dispatcher For Sessions Found
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSessionsFound, const TArray<FServerInfo>&, ServerList);
 
+// Event For EOS Login Complete
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEOSLoginComplete, const bool, bWasSuccessful);
+
 UCLASS()
 class MULTIPLAYER_API UMyGameInstance : public UGameInstance
 {
@@ -81,6 +84,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Multiplayer")
 	FOnSessionsFound OnSessionsFound;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnEOSLoginComplete OnEOSLoginComplete;
+
 	// Updated host function that takes parameters
 	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
 	void HostSessionWithSettings(FString ServerName, bool bIsLAN, FString Password);
@@ -111,10 +117,16 @@ public:
 	void SavePlayerSkin(const FString& PlayerName, int32 SkinIndex);
 	int32 GetPlayerSkin(const FString& PlayerName);
 
+
+	// * * * * * EOS * * * * *
+
 	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
 	void LoginToEOS();
 
 	void OnLoginComplete(int32 LocalUserNum, bool bWasSuccessful, const FUniqueNetId& UserId, const FString& Error);
+
+	UFUNCTION(BlueprintCallable)
+	bool IsLoggedInToEOS();
 
 // * * * * * Singeplayer * * * * *
 public:

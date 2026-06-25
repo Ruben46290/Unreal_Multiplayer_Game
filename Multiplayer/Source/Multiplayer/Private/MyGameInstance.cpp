@@ -335,6 +335,9 @@ void UMyGameInstance::LoginToEOS()
 
 void UMyGameInstance::OnLoginComplete(int32 LocalUserNum, bool bWasSuccessful, const FUniqueNetId& UserId, const FString& Error)
 {
+	// Call Login Complete Event Dispatcher 
+	OnEOSLoginComplete.Broadcast(bWasSuccessful);
+
 	if (bWasSuccessful)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 8.f, FColor::Green, TEXT("EOS login successful!"));
@@ -343,4 +346,15 @@ void UMyGameInstance::OnLoginComplete(int32 LocalUserNum, bool bWasSuccessful, c
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 8.f, FColor::Red, FString::Printf(TEXT("EOS login failed: %s"), *Error));
 	}
+}
+
+bool UMyGameInstance::IsLoggedInToEOS()
+{
+	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+	if (!Subsystem) return false;
+
+	IOnlineIdentityPtr IdentityInterface = Subsystem->GetIdentityInterface();
+	if (!IdentityInterface.IsValid()) return false;
+
+	return IdentityInterface->GetLoginStatus(0) == ELoginStatus::LoggedIn;
 }
