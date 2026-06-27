@@ -47,7 +47,7 @@ void ASawBench::OnInteract_Implementation(AActor* Interactor)
 	else if (PlayerItem == NAME_None && CurrentState == "HasBucket") {
 
 		// If No DataTable Was Set In Editor, Print & Return
-		if (!ItemDataTable) { GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Red, TEXT("No Data Table Assigned")); return; }
+		if (!ItemDataTable) { GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Red, TEXT("SawBench.cpp No Data Table Assigned")); return; }
 
 		// Load From Data Table, Second Paramater Is For Debugging Context
 		FItemData* RowData = ItemDataTable->FindRow<FItemData>("Bucket", TEXT("LoadItemData"));

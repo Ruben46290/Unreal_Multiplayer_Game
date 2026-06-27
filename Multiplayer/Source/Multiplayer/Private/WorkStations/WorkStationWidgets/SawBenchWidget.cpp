@@ -6,7 +6,8 @@
 void USawBenchWidget::UpdateLogCount(int32 LogCount)
 {
 	if (GEngine) {
-		GEngine->AddOnScreenDebugMessage(-1, 4, FColor::Green, FString::Printf(TEXT("Update Log Count: %d"), LogCount));
+
+		//GEngine->AddOnScreenDebugMessage(-1, 4, FColor::Green, FString::Printf(TEXT("Update Log Count: %d"), LogCount));
 
 		// If There Are Logs
 		if (LogCount != -1) {
