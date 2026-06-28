@@ -4,6 +4,7 @@
 #include "Widgets/GameOverWidget.h"
 #include <MyGameState.h>
 #include <Kismet/GameplayStatics.h>
+#include <MyGameInstance.h>
 
 
 void UGameOverWidget::NativeConstruct()
@@ -20,8 +21,10 @@ void UGameOverWidget::NativeConstruct()
 
 		// Bind Replay Level Button Pressed Event
 		if (ReplayLevelButton) { ReplayLevelButton->OnClicked.AddDynamic(this, &UGameOverWidget::OnReplayLevelButtonPressed); }
-	}
 
+		// Bind Lobby Button Pressed Event
+		if (LobbyButton) { LobbyButton->OnClicked.AddDynamic(this, &UGameOverWidget::OnLobbyButtonPressed); }
+	}
 }
 
 void UGameOverWidget::SetupUI(float TotalScore, int32 Stars)
@@ -37,6 +40,17 @@ void UGameOverWidget::SetupUI(float TotalScore, int32 Stars)
 
 	// Call Blueprint Event To Update Star UI
 	UpdateStarUI(Stars);
+
+	// Get Game Instance
+	if (UMyGameInstance* GI = GetGameInstance<UMyGameInstance>())
+	{
+		// Is The Game Singleplayer?
+		if (GI->bIsSingleplayer)
+		{
+			// Disable The Lobby Button
+			LobbyButton->bIsEnabled = false;
+		}
+	}
 }
 
 void UGameOverWidget::OnNextLevelButtonPressed()
@@ -60,6 +74,18 @@ void UGameOverWidget::OnReplayLevelButtonPressed()
 
 		// Call Function To Change Level
 		GS->ReplayLevel();
+	}
+}
+
+void UGameOverWidget::OnLobbyButtonPressed()
+{
+	// Get Game State
+	AMyGameState* GS = Cast<AMyGameState>(UGameplayStatics::GetGameState(this));
+
+	if (GS) {
+
+		// Call Function To Change Level
+		GS->GoToLobby();
 	}
 }
 

@@ -27,6 +27,8 @@ class MULTIPLAYER_API UGameOverWidget : public UUserWidget
 	UPROPERTY(meta = (BindWidget))
 	UButton* ReplayLevelButton;
 
+	UPROPERTY(meta = (BindWidget))
+	UButton* LobbyButton;
 public:
 
 	UFUNCTION()
@@ -39,6 +41,9 @@ protected:
 
 	UFUNCTION()
 	void OnReplayLevelButtonPressed();
+
+	UFUNCTION()
+	void OnLobbyButtonPressed();
 
 	// Blueprint Event To Show Star UI
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")

@@ -33,6 +33,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level Settings")
 	TSoftObjectPtr<UWorld> NextLevel;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level Settings")
+	TSoftObjectPtr<UWorld> LobbyLevel;
+
 	// Boost To Level Time & Customer Patience For Singleplayer 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level Settings Singleplayer")
 	float TimePatienceBoost = 0.5f;

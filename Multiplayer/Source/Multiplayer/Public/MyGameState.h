@@ -107,9 +107,15 @@ public:
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Level")
 	TSoftObjectPtr<UWorld> NextLevel;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Level")
+	TSoftObjectPtr<UWorld> LobbyLevel;
+
 	UFUNCTION(BlueprintCallable, Category = "Level")
 	void LoadNextLevel() const;
 
 	UFUNCTION()
 	void ReplayLevel() const;
+
+	UFUNCTION()
+	void GoToLobby() const;
 };

@@ -31,6 +31,9 @@ void AMyGameState::BeginPlay()
 
 			// Load & Save Next Level From Level Settings Actor
 			NextLevel = LoadedLevelSettings->NextLevel;
+
+			// Load & Save Lobby Level From Level Settings Actor
+			LobbyLevel = LoadedLevelSettings->LobbyLevel;
 		}
 		else {
 			UE_LOG(LogTemp, Warning, TEXT("GameState: No LevelSettings actor found in level!"));
@@ -203,6 +206,15 @@ void AMyGameState::ReplayLevel() const
 
 	// Travel Back To Current Level To Restart It
 	GetWorld()->ServerTravel(CurrentLevelName + "?listen");
+}
+
+void AMyGameState::GoToLobby() const
+{
+	// Get Level Path From Soft Object Ptr
+	FString LevelPath = LobbyLevel.GetLongPackageName();
+
+	// Travel To The Next Level
+	GetWorld()->ServerTravel(LevelPath + "?listen");
 }
 
 void AMyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
