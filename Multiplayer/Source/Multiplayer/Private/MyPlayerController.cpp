@@ -139,8 +139,18 @@ void AMyPlayerController::ShowLevelCompleteScreen()
 			LevelCompleteWidget->AddToViewport(10); // High Z-order to appear on top
 		}
 
+		// Unlock and show the mouse cursor
+		bShowMouseCursor = true;
+
+		// Switch input mode so UI can receive mouse/click input
+		FInputModeGameAndUI InputMode;
+		InputMode.SetWidgetToFocus(LevelCompleteWidget->TakeWidget());
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		InputMode.SetHideCursorDuringCapture(true);
+		SetInputMode(InputMode);
+
 		// Pause Game
-		//UGameplayStatics::SetGamePaused(GetWorld(), true);
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
 	}
 
 }

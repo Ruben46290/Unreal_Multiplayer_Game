@@ -196,6 +196,15 @@ void AMyGameState::LoadNextLevel() const
 	GetWorld()->ServerTravel(LevelPath + "?listen");
 }
 
+void AMyGameState::ReplayLevel() const
+{
+	// Get Current Level Name
+	FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(GetWorld(), true);
+
+	// Travel Back To Current Level To Restart It
+	GetWorld()->ServerTravel(CurrentLevelName + "?listen");
+}
+
 void AMyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

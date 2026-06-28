@@ -109,4 +109,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Level")
 	void LoadNextLevel() const;
+
+	UFUNCTION()
+	void ReplayLevel() const;
 };

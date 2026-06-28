@@ -17,6 +17,9 @@ void UGameOverWidget::NativeConstruct()
 
 		// Bind Next Level Button Pressed Event
 		if (NextLevelButton) { NextLevelButton->OnClicked.AddDynamic(this, &UGameOverWidget::OnNextLevelButtonPressed); }
+
+		// Bind Replay Level Button Pressed Event
+		if (ReplayLevelButton) { ReplayLevelButton->OnClicked.AddDynamic(this, &UGameOverWidget::OnReplayLevelButtonPressed); }
 	}
 
 }
@@ -47,3 +50,16 @@ void UGameOverWidget::OnNextLevelButtonPressed()
 		GS->LoadNextLevel();
 	}
 }
+
+void UGameOverWidget::OnReplayLevelButtonPressed()
+{
+	// Get Game State
+	AMyGameState* GS = Cast<AMyGameState>(UGameplayStatics::GetGameState(this));
+
+	if (GS) {
+
+		// Call Function To Change Level
+		GS->ReplayLevel();
+	}
+}
+
