@@ -23,8 +23,6 @@ protected:
 
 	void BeginPlay();
 
-	//void ReceivedPlayer();
-
 	// What Blueprint Class Is The Level Completed Widget
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UGameOverWidget> LevelCompleteWidgetClass;
@@ -58,4 +56,10 @@ public:
 	// Called when countdown finishes
 	UFUNCTION(Server, Reliable)
 	void Server_NotifyCountdownFinished();
+
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	void SetGameplayInputEnabled(bool bEnabled);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputMappingContext* DefaultMappingContext;
 };

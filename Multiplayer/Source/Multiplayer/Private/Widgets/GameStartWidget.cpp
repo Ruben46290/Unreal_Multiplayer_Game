@@ -8,9 +8,6 @@ void UGameStartWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// Play FadeIn Animation
-	PlayFadeInAnimation();
-
 	// Set Status Text
 	UpdateStatusText(TEXT("Waiting for other players to load..."));
 }
@@ -31,6 +28,9 @@ void UGameStartWidget::StartCountdown()
 
 	// Tick Every Second
 	GetWorld()->GetTimerManager().SetTimer(CountdownTimer, this, &UGameStartWidget::OnCountdownTick, 1.0f, true);
+
+	// Play FadeIn Animation
+	PlayFadeInAnimation();
 }
 
 void UGameStartWidget::OnCountdownTick()
@@ -58,6 +58,7 @@ void UGameStartWidget::OnCountdownTick()
 		AMyPlayerController* PC = Cast<AMyPlayerController>(GetOwningPlayer());
 		if (PC)
 		{
+			PC->SetGameplayInputEnabled(true);
 			PC->Server_NotifyCountdownFinished();
 		}
 		else {

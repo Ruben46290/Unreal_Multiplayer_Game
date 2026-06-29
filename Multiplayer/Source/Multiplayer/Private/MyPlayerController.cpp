@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "../MultiplayerGameMode.h"
 #include <MyGameInstance.h>
+#include <EnhancedInputSubsystems.h>
 
 AMyPlayerController::AMyPlayerController()
 {
@@ -69,6 +70,23 @@ void AMyPlayerController::BeginPlay()
 	}
 }
 
+void AMyPlayerController::SetGameplayInputEnabled(bool bEnabled)
+{
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+	if (!Subsystem || !DefaultMappingContext) return;
+
+	if (bEnabled)
+	{
+		if (!Subsystem->HasMappingContext(DefaultMappingContext))
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
+	else
+	{
+		Subsystem->RemoveMappingContext(DefaultMappingContext);
+	}
+}
 
 // * * * * * * * * * * Game Start / Loading * * * * * * * * * *
 
@@ -83,6 +101,9 @@ void AMyPlayerController::ShowGameStartWidget()
 			GameStartWidget->AddToViewport(999);
 		}
 	}
+
+	// Disable Input
+	SetGameplayInputEnabled(false);
 }
 
 void AMyPlayerController::Server_NotifyCountdownFinished_Implementation()
@@ -149,8 +170,8 @@ void AMyPlayerController::ShowLevelCompleteScreen()
 		InputMode.SetHideCursorDuringCapture(true);
 		SetInputMode(InputMode);
 
-		// Pause Game
-		UGameplayStatics::SetGamePaused(GetWorld(), true);
+		// Disable Input
+		SetGameplayInputEnabled(false);
 	}
 
 }
