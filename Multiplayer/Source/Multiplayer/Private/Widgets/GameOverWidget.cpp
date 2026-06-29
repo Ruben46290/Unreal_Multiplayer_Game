@@ -50,6 +50,22 @@ void UGameOverWidget::SetupUI(float TotalScore, int32 Stars)
 			// Disable The Lobby Button
 			LobbyButton->bIsEnabled = false;
 		}
+
+		// Game Is Multiplayer 
+		else {
+
+			// Get Owning Player Controller & Check If Its The Server Or A Client
+			APlayerController* PC = GetOwningPlayer();
+
+			// If Player 2
+			if (PC && !PC->HasAuthority()) {
+
+				// Disable All Buttons
+				NextLevelButton->bIsEnabled = false;
+				ReplayLevelButton->bIsEnabled = false;
+				LobbyButton->bIsEnabled = false;
+			}
+		}
 	}
 }
 
