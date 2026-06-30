@@ -27,7 +27,7 @@ void UGameOverWidget::NativeConstruct()
 	}
 }
 
-void UGameOverWidget::SetupUI(float TotalScore, int32 Stars)
+void UGameOverWidget::SetupUI(float TotalScore, int32 Stars, float TimeRemaining)
 {
 
 	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("GameOverWidget Total Score %.2f")); }
@@ -38,8 +38,8 @@ void UGameOverWidget::SetupUI(float TotalScore, int32 Stars)
 	// Set Toal Score Text To The String That Was Just Made
 	TotalScoreText->SetText(FText::FromString(TotalScoreString));
 
-	// Call Blueprint Event To Update Star UI
-	UpdateStarUI(Stars);
+	// Call Blueprint Event To Update UI
+	UpdateUI(Stars, TimeRemaining);
 
 	// Get Game Instance
 	if (UMyGameInstance* GI = GetGameInstance<UMyGameInstance>())

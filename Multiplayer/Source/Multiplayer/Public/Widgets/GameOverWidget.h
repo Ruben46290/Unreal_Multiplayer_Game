@@ -32,7 +32,7 @@ class MULTIPLAYER_API UGameOverWidget : public UUserWidget
 public:
 
 	UFUNCTION()
-	void SetupUI(float TotalScore, int32 Stars);
+	void SetupUI(float TotalScore, int32 Stars, float TimeRemaining);
 
 protected:
 
@@ -47,5 +47,5 @@ protected:
 
 	// Blueprint Event To Show Star UI
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
-	void UpdateStarUI(int32 Stars);
+	void UpdateUI(int32 Stars, float TimeRemaining);
 };
