@@ -128,6 +128,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool IsLoggedInToEOS();
 
+
 // * * * * * Singeplayer * * * * *
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

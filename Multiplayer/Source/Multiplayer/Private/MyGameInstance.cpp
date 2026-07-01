@@ -7,6 +7,7 @@
 #include <Kismet/GameplayStatics.h>
 #include "OnlineSubsystem.h"
 #include "Interfaces/OnlineIdentityInterface.h"
+#include "Blueprint/UserWidget.h"
 
 const FName UMyGameInstance::SERVER_NAME_KEY = FName("ServerName");
 const FName UMyGameInstance::PASSWORD_KEY = FName("Password");
@@ -319,7 +320,7 @@ int32 UMyGameInstance::GetPlayerSkin(const FString& PlayerName)
 }
 
 
-// Online Servies
+// * * * * * * * * * * * Online Servies * * * * * * * * * * *
 void UMyGameInstance::LoginToEOS()
 {
 	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
