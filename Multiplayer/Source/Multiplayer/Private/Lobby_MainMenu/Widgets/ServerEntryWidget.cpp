@@ -35,6 +35,8 @@ void UServerEntryWidget::OnButtonClicked()
 	if (PlayScreenRef)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("ServerEntryWidget Button Pressed With Valid Refrence"));
+
+
 		PlayScreenRef->OnServerEntryClicked(ServerInfo);
 	}
 	else {

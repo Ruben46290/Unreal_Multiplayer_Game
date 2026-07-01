@@ -2,6 +2,7 @@
 
 
 #include "Lobby_MainMenu/Widgets/PlayScreenWidget.h"
+#include <MyPlayerController.h>
 
 void UPlayScreenWidget::NativeConstruct()
 {
@@ -158,7 +159,13 @@ void UPlayScreenWidget::OnServerEntryClicked(FServerInfo ServerInfo)
 		// Join directly
 		if (GameInstanceRef)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("PlayScreenWidget Join Session Called"));
+			// Get Player Controller & Show Loading Screen
+			AMyPlayerController* PC = Cast<AMyPlayerController>(GetOwningPlayer());
+			if (PC)
+			{
+				PC->Client_ShowLoadingScreen();
+			}
+
 			GameInstanceRef->JoinSessionByIndex(ServerInfo.SearchResultIndex, TEXT(""));
 		}
 	}

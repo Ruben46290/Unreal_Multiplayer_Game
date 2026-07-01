@@ -2,6 +2,7 @@
 
 
 #include "Lobby_MainMenu/Widgets/PasswordPrmoptWidget.h"
+#include <MyPlayerController.h>
 
 // Spelling Mistake - Should Be PasswordPromptWidget 
 
@@ -35,12 +36,20 @@ void UPasswordPrmoptWidget::OnConfirmClicked()
 	// Get Entered Password
 	FString EnteredPassword = PasswordInput ? PasswordInput->GetText().ToString() : TEXT("");
 
-	// Join The Server
-	GameInstanceRef->JoinSessionByIndex(TargetServer.SearchResultIndex, EnteredPassword);
-
 	// Dismiss The Prompt (If Password Is Wrong, ShowWrongPassword() Will Be Called From GameInstance And This Widget Will Stay Open)
 	RemoveFromParent();
+
+	// Get Player Controller & Show Loading Screen
+	AMyPlayerController* PC = Cast<AMyPlayerController>(GetOwningPlayer());
+	if (PC)
+	{
+		PC->Client_ShowLoadingScreen();
+	}
+
+	// Join The Server
+	GameInstanceRef->JoinSessionByIndex(TargetServer.SearchResultIndex, EnteredPassword);
 }
+
 
 void UPasswordPrmoptWidget::OnCancelClicked()
 {

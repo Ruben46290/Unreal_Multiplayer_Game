@@ -2,6 +2,7 @@
 
 
 #include "Lobby_MainMenu/Widgets/HostPopupWidget.h"
+#include <MyPlayerController.h>
 
 
 
@@ -42,6 +43,13 @@ void UHostPopupWidget::OnCreateClicked()
 	
 	// Host The Server
 	GameInstanceRef->HostSessionWithSettings(ServerName, bIsLAN, Password);
+
+	// Get Player Controller & Show Loading Screen
+	AMyPlayerController* PC = Cast<AMyPlayerController>(GetOwningPlayer());
+	if (PC)
+	{
+		PC->Client_ShowLoadingScreen();
+	}
 
 	// Close The Popup
 	RemoveFromParent();
