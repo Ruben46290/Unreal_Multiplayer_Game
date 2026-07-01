@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Widgets/GameOverWidget.h"
 #include "Widgets/GameStartWidget.h"
+#include "LoadingScreenWidget.h"
 #include "MyPlayerController.generated.h"
 
 /**
@@ -62,4 +63,16 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputMappingContext* DefaultMappingContext;
+
+	// * * * * * * * * * * Loading Screen * * * * * * * * * * 
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<ULoadingScreenWidget> LoadingScreenClass;
+
+	UPROPERTY()
+	ULoadingScreenWidget* LoadingScreen;
+
+public:
+	UFUNCTION(Client, Reliable)
+	void Client_ShowLoadingScreen();
 };

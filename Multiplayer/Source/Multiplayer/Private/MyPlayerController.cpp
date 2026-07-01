@@ -175,3 +175,15 @@ void AMyPlayerController::ShowLevelCompleteScreen()
 	}
 
 }
+
+void AMyPlayerController::Client_ShowLoadingScreen_Implementation()
+{
+	// Create loading screen
+	LoadingScreen = CreateWidget<ULoadingScreenWidget>(this, LoadingScreenClass);
+	if (LoadingScreen)
+	{
+		LoadingScreen->AddToViewport(999); // High Z-order to be on top
+
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("Loading screen shown"));
+	}
+}

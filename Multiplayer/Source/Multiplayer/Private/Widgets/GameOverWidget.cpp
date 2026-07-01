@@ -5,6 +5,7 @@
 #include <MyGameState.h>
 #include <Kismet/GameplayStatics.h>
 #include <MyGameInstance.h>
+#include <MyPlayerController.h>
 
 
 void UGameOverWidget::NativeConstruct()
@@ -79,6 +80,7 @@ void UGameOverWidget::OnNextLevelButtonPressed()
 		// Call Function To Change Level
 		GS->LoadNextLevel();
 	}
+	ShowLoadingScreens();
 }
 
 void UGameOverWidget::OnReplayLevelButtonPressed()
@@ -91,6 +93,7 @@ void UGameOverWidget::OnReplayLevelButtonPressed()
 		// Call Function To Change Level
 		GS->ReplayLevel();
 	}
+	ShowLoadingScreens();
 }
 
 void UGameOverWidget::OnLobbyButtonPressed()
@@ -102,6 +105,23 @@ void UGameOverWidget::OnLobbyButtonPressed()
 
 		// Call Function To Change Level
 		GS->GoToLobby();
+	}
+	ShowLoadingScreens();
+}
+
+// Show Loading Screen On All PLayers (Only Called By Server)
+void UGameOverWidget::ShowLoadingScreens()
+{
+	// Loop Through All PLayer Controllers
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		// Cast To MyPlayerController
+		AMyPlayerController* PC = Cast<AMyPlayerController>(It->Get());
+		if (PC)
+		{
+			// Show Loading Screen
+			PC->Client_ShowLoadingScreen();
+		}
 	}
 }
 

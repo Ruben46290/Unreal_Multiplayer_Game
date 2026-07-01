@@ -48,4 +48,7 @@ protected:
 	// Blueprint Event To Show Star UI
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void UpdateUI(int32 Stars, float TimeRemaining);
+
+	UFUNCTION()
+	void ShowLoadingScreens();
 };
