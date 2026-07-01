@@ -153,15 +153,20 @@ void ALobbyGameMode::StartGame()
 	//	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Starting game!"));
 	//}
 
-	// Get GameInstance
-	UMyGameInstance* GI = GetGameInstance<UMyGameInstance>();
+		// Get all player controllers
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		APlayerController* PC = It->Get();
+		if (PC)
+		{
 
-	// If Game Instance Valid
-	if (GI) {
+			ALobbyPlayerController* LobbyPC = Cast<ALobbyPlayerController>(PC);
 
-		GI->bIsSingleplayer = false; // Set To False For Multiplayer
+			if (LobbyPC) {
+				LobbyPC->Client_ShowLoadingScreen();
+			}
+		}
 	}
-
 
 	FString SelectedLevelPath = GameMapPath;
 
