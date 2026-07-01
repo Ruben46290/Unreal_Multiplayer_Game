@@ -254,7 +254,7 @@ void AJuicer::OnInteract_Implementation(AActor* Interactor)
 				BucketMeshComponent->SetVisibility(false);
 
 				// Call Blueprint Event For Clearing The Buckets Juice Mesh From The Animation
-				JuiceCollected();
+				Multicast_JuiceCollected();
 			}
 		}
 	}
@@ -284,6 +284,12 @@ void AJuicer::OnJuiceComplete()
 	bHasJuice = true;
 
 }
+
+void AJuicer::Multicast_JuiceCollected_Implementation()
+{
+	JuiceCollected(); // Calls Blueprint Event On All Clients
+}
+
 
 // * * * * * * * * * * Replication Events * * * * * * * * * * 
 

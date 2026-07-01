@@ -89,4 +89,9 @@ protected:
 	// Blueprint Event For When The Juice Is Collected - Used For Hiding The Bucket Fluid Animation
 	UFUNCTION(BlueprintImplementableEvent, Category = "Juicer")
 	void JuiceCollected();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_JuiceCollected();
+	void Multicast_JuiceCollected_Implementation();
+
 };
