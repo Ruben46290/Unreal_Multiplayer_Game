@@ -153,15 +153,16 @@ void ALobbyGameMode::StartGame()
 	//	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Starting game!"));
 	//}
 
-		// Get all player controllers
+		// Get All Player Controllers
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
 		APlayerController* PC = It->Get();
 		if (PC)
 		{
-
+			// Cast To Lobby Player Controller
 			ALobbyPlayerController* LobbyPC = Cast<ALobbyPlayerController>(PC);
 
+			// Show Loading Screen
 			if (LobbyPC) {
 				LobbyPC->Client_ShowLoadingScreen();
 			}
