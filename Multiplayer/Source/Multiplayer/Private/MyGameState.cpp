@@ -195,8 +195,16 @@ void AMyGameState::LoadNextLevel() const
 	// Get Level Path From Soft Object Ptr
 	FString LevelPath = NextLevel.GetLongPackageName();
 
-	// Travel To The Next Level
-	GetWorld()->ServerTravel(LevelPath + "?listen");
+	if (GetNetMode() == NM_Standalone)
+	{
+		// Singleplayer — no need to open a listen socket
+		UGameplayStatics::OpenLevel(this, FName(*LevelPath));
+	}
+	else
+	{
+		// Multiplayer — travel and keep listening for connections
+		GetWorld()->ServerTravel(LevelPath + "?listen");
+	}
 }
 
 // Is There A Next Level Assigned - Used For Disabling The Next Level Button On Game Over UI
