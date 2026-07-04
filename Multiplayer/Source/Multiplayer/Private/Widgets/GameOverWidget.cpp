@@ -68,6 +68,16 @@ void UGameOverWidget::SetupUI(float TotalScore, int32 Stars, float TimeRemaining
 			}
 		}
 	}
+
+	// Get Game State
+	AMyGameState* GS = Cast<AMyGameState>(UGameplayStatics::GetGameState(this));
+	if (GS) {
+
+		// If There Isn't A Next Level Assigned - Disable The Next Level Button
+		if (!GS->HasNextLevel()) {
+			NextLevelButton->bIsEnabled = false;
+		}
+	}
 }
 
 void UGameOverWidget::OnNextLevelButtonPressed()

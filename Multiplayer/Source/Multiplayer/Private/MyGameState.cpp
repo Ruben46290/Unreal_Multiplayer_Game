@@ -124,11 +124,11 @@ void AMyGameState::AddScore(float ScoreToAdd)
 	// Add New Score To Total Score
 	CurrentScore += ScoreToAdd;
 
-	// Check If Any Milestones Have Been Hit
-	CheckScoreMilestones();
-
 	// Call Event Dispatcher For Updating Score UI
 	OnScoreChanged.Broadcast(CurrentScore);
+
+	// Check If Any Milestones Have Been Hit
+	CheckScoreMilestones();
 }
 
 
@@ -173,7 +173,7 @@ void AMyGameState::CheckScoreMilestones()
 				OnLevelComplete.Broadcast();
 
 				// Pause The Game
-				UGameplayStatics::SetGamePaused(GetWorld(), true);
+				//UGameplayStatics::SetGamePaused(GetWorld(), true);
 			}
 		}
 	}
@@ -197,6 +197,18 @@ void AMyGameState::LoadNextLevel() const
 
 	// Travel To The Next Level
 	GetWorld()->ServerTravel(LevelPath + "?listen");
+}
+
+// Is There A Next Level Assigned - Used For Disabling The Next Level Button On Game Over UI
+bool AMyGameState::HasNextLevel()
+{
+
+	if (!NextLevel.IsNull())
+	{
+		return true;
+	}
+
+	return false;
 }
 
 void AMyGameState::ReplayLevel() const

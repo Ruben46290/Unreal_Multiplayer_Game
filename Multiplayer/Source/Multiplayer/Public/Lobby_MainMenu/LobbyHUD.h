@@ -108,7 +108,7 @@ private:
 		TEXT("Knight"),
 		TEXT("Mage"),
 		TEXT("Ranger"),
-		TEXT("Rouge")
+		TEXT("Rogue")
 	};
 
 };

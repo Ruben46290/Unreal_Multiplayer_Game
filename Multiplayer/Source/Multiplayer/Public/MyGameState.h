@@ -113,6 +113,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Level")
 	void LoadNextLevel() const;
 
+	// Check If There Is A Next Level Assigned
+	UFUNCTION()
+	bool HasNextLevel();
+
 	UFUNCTION()
 	void ReplayLevel() const;
 
